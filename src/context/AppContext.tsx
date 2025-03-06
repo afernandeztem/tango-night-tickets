@@ -2,86 +2,114 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { City, CartItem, AppContextState } from '../types';
 
-interface AppContextProps {
+// Create context with default values
+const AppContext = createContext<{
   state: AppContextState;
   setSelectedCity: (city: City) => void;
   addToCart: (item: CartItem) => void;
   removeFromCart: (eventId: string) => void;
+  updateCartItemQuantity: (eventId: string, quantity: number) => void;
   clearCart: () => void;
-  setLanguage: (lang: 'en' | 'es') => void;
-}
+  setLanguage: (language: 'en' | 'es') => void;
+}>({
+  state: {
+    selectedCity: null,
+    cart: [],
+    language: 'en'
+  },
+  setSelectedCity: () => {},
+  addToCart: () => {},
+  removeFromCart: () => {},
+  updateCartItemQuantity: () => {},
+  clearCart: () => {},
+  setLanguage: () => {}
+});
 
-const defaultState: AppContextState = {
-  selectedCity: null,
-  cart: [],
-  language: 'en'
-};
+// Custom hook to use app context
+export const useApp = () => useContext(AppContext);
 
-const AppContext = createContext<AppContextProps | undefined>(undefined);
-
+// Provider component
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppContextState>(() => {
-    // Load state from localStorage if available
+    // Load initial state from localStorage if available
     const savedCity = localStorage.getItem('selectedCity');
     const savedCart = localStorage.getItem('cart');
-    const savedLanguage = localStorage.getItem('language');
+    const savedLanguage = localStorage.getItem('language') as 'en' | 'es';
     
     return {
       selectedCity: savedCity ? JSON.parse(savedCity) : null,
       cart: savedCart ? JSON.parse(savedCart) : [],
-      language: (savedLanguage as 'en' | 'es') || 'en'
+      language: savedLanguage || 'en'
     };
   });
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('selectedCity', JSON.stringify(state.selectedCity));
+    if (state.selectedCity) {
+      localStorage.setItem('selectedCity', JSON.stringify(state.selectedCity));
+    }
     localStorage.setItem('cart', JSON.stringify(state.cart));
     localStorage.setItem('language', state.language);
   }, [state]);
 
-  // Function to set the selected city
+  // Actions for modifying state
   const setSelectedCity = (city: City) => {
-    setState(prev => ({ ...prev, selectedCity: city }));
+    setState(prevState => ({
+      ...prevState,
+      selectedCity: city
+    }));
   };
 
-  // Function to add an item to the cart
   const addToCart = (item: CartItem) => {
-    setState(prev => {
-      // Check if the item is already in the cart
-      const existingItemIndex = prev.cart.findIndex(cartItem => cartItem.eventId === item.eventId);
-      
-      if (existingItemIndex > -1) {
-        // If it exists, update the quantity
-        const updatedCart = [...prev.cart];
+    setState(prevState => {
+      // Check if item is already in cart
+      const existingItemIndex = prevState.cart.findIndex(
+        cartItem => cartItem.eventId === item.eventId
+      );
+
+      if (existingItemIndex >= 0) {
+        // Update existing item
+        const updatedCart = [...prevState.cart];
         updatedCart[existingItemIndex] = {
           ...updatedCart[existingItemIndex],
           quantity: updatedCart[existingItemIndex].quantity + item.quantity
         };
-        return { ...prev, cart: updatedCart };
+        return { ...prevState, cart: updatedCart };
       } else {
-        // If it doesn't exist, add it to the cart
-        return { ...prev, cart: [...prev.cart, item] };
+        // Add new item
+        return { ...prevState, cart: [...prevState.cart, item] };
       }
     });
   };
 
-  // Function to remove an item from the cart
   const removeFromCart = (eventId: string) => {
-    setState(prev => ({
-      ...prev,
-      cart: prev.cart.filter(item => item.eventId !== eventId)
+    setState(prevState => ({
+      ...prevState,
+      cart: prevState.cart.filter(item => item.eventId !== eventId)
     }));
   };
 
-  // Function to clear the cart
-  const clearCart = () => {
-    setState(prev => ({ ...prev, cart: [] }));
+  const updateCartItemQuantity = (eventId: string, quantity: number) => {
+    setState(prevState => ({
+      ...prevState,
+      cart: prevState.cart.map(item => 
+        item.eventId === eventId ? { ...item, quantity } : item
+      )
+    }));
   };
 
-  // Function to set the language
-  const setLanguage = (lang: 'en' | 'es') => {
-    setState(prev => ({ ...prev, language: lang }));
+  const clearCart = () => {
+    setState(prevState => ({
+      ...prevState,
+      cart: []
+    }));
+  };
+
+  const setLanguage = (language: 'en' | 'es') => {
+    setState(prevState => ({
+      ...prevState,
+      language
+    }));
   };
 
   return (
@@ -91,19 +119,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setSelectedCity,
         addToCart,
         removeFromCart,
+        updateCartItemQuantity,
         clearCart,
-        setLanguage,
+        setLanguage
       }}
     >
       {children}
     </AppContext.Provider>
   );
-};
-
-export const useApp = () => {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
 };

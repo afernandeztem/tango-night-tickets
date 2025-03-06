@@ -1,205 +1,251 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Heart, Menu, ShoppingCart, User, X, Globe } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
+import { ShoppingCart, Heart, User, Menu, X, LogIn, LogOut, Globe } from 'lucide-react';
 
 const Header: React.FC = () => {
-  const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const { state: authState, logout } = useAuth();
+  const { state: appState, setLanguage } = useApp();
   const navigate = useNavigate();
-  const { auth, logout } = useAuth();
-  const { state } = useApp();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  const cartItemCount = state.cart.reduce((total, item) => total + item.quantity, 0);
-
-  // Track scrolling for transparent/solid header transition
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Locals', path: '/locals' },
-    { name: 'Events', path: '/events' }
-  ];
-
-  const toggleLanguage = () => {
-    // This would trigger language change in a real app
-    alert('Language toggle functionality would go here');
+  
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
-
+  
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+    navigate('/');
+  };
+  
+  const cartItemCount = appState.cart.reduce((total, item) => total + item.quantity, 0);
+  
+  const languageOptions = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' }
+  ];
+  
+  const translations = {
+    en: {
+      home: 'Home',
+      locals: 'Locals',
+      events: 'Events',
+      favorites: 'Favorites',
+      profile: 'Profile',
+      login: 'Login',
+      register: 'Register',
+      logout: 'Logout'
+    },
+    es: {
+      home: 'Inicio',
+      locals: 'Locales',
+      events: 'Eventos',
+      favorites: 'Favoritos',
+      profile: 'Perfil',
+      login: 'Iniciar Sesión',
+      register: 'Registrarse',
+      logout: 'Cerrar Sesión'
+    }
+  };
+  
+  const t = translations[appState.language];
+  
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md py-2' : 'bg-white/80 backdrop-blur-md py-4'
-      }`}
-    >
+    <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
+          <Link to="/home" className="flex items-center">
             <div className="h-10 w-10 rounded-full bg-tango-primary flex items-center justify-center">
-              <span className="text-white font-bold">T</span>
+              <span className="text-white font-bold text-lg">T</span>
             </div>
-            <span className="ml-2 text-xl font-medium">TangoApp</span>
+            <span className="ml-2 text-lg font-semibold">TangoApp</span>
           </Link>
-
+          
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`nav-link ${location.pathname === link.path ? 'nav-link-active' : ''}`}
-              >
-                {link.name}
-              </Link>
-            ))}
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link to="/home" className="nav-link">{t.home}</Link>
+            <Link to="/locals" className="nav-link">{t.locals}</Link>
+            <Link to="/events" className="nav-link">{t.events}</Link>
           </nav>
-
-          {/* Right Section - Icons */}
+          
+          {/* User Actions */}
           <div className="flex items-center space-x-4">
-            {/* Language Switcher */}
-            <button 
-              onClick={toggleLanguage}
-              className="flex items-center text-gray-700 hover:text-tango-primary focus:outline-none"
+            {/* Language Selector */}
+            <div className="relative">
+              <button 
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+              >
+                <Globe size={20} />
+              </button>
+              
+              {isLanguageOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 py-1">
+                  {languageOptions.map(lang => (
+                    <button
+                      key={lang.code}
+                      className={`block w-full text-left px-4 py-2 text-sm ${appState.language === lang.code ? 'bg-tango-secondary text-tango-primary' : 'hover:bg-gray-100'}`}
+                      onClick={() => {
+                        setLanguage(lang.code as 'en' | 'es');
+                        setIsLanguageOpen(false);
+                      }}
+                    >
+                      {lang.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Cart Link */}
+            <Link 
+              to="/checkout" 
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
             >
-              <Globe className="h-5 w-5" />
-            </button>
-
-            {/* Favorites - only show if logged in */}
-            {auth.isAuthenticated && (
-              <Link to="/favorites" className="text-gray-700 hover:text-tango-primary">
-                <Heart className="h-5 w-5" />
-              </Link>
-            )}
-
-            {/* Cart */}
-            <Link to="/checkout" className="text-gray-700 hover:text-tango-primary relative">
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart size={20} />
               {cartItemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-tango-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-tango-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {cartItemCount}
                 </span>
               )}
             </Link>
-
-            {/* Auth Buttons */}
-            {auth.isAuthenticated ? (
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center text-gray-700 hover:text-tango-primary focus:outline-none"
+            
+            {/* Favorites Link (only for authenticated users) */}
+            {authState.isAuthenticated && (
+              <Link 
+                to="/favorites" 
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <Heart size={20} />
+              </Link>
+            )}
+            
+            {/* Auth Links */}
+            {authState.isAuthenticated ? (
+              <div className="hidden md:flex items-center">
+                <Link 
+                  to="/profile" 
+                  className="flex items-center text-sm font-medium text-gray-700 hover:text-tango-primary"
                 >
-                  <User className="h-5 w-5" />
-                  <span className="ml-2 hidden md:block">{auth.user?.name || 'User'}</span>
+                  <User size={18} className="mr-1" />
+                  <span>{authState.user?.name.split(' ')[0]}</span>
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="ml-4 text-sm text-gray-600 hover:text-tango-primary flex items-center"
+                >
+                  <LogOut size={18} className="mr-1" />
+                  {t.logout}
                 </button>
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    <Link 
-                      to="/profile" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-tango-secondary"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    <Link 
-                      to="/favorites" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-tango-secondary"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      Favorites
-                    </Link>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setUserMenuOpen(false);
-                        navigate('/');
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-tango-secondary"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
               </div>
             ) : (
-              <div className="hidden md:flex items-center space-x-3">
+              <div className="hidden md:flex items-center space-x-4">
                 <Link 
-                  to="/auth/login" 
-                  className="text-tango-primary hover:underline"
+                  to="/auth?mode=login" 
+                  className="text-sm font-medium text-gray-700 hover:text-tango-primary flex items-center"
                 >
-                  Login
+                  <LogIn size={18} className="mr-1" />
+                  {t.login}
                 </Link>
                 <Link 
-                  to="/auth/register" 
-                  className="tango-button"
+                  to="/auth?mode=register" 
+                  className="tango-button text-sm"
                 >
-                  Register
+                  {t.register}
                 </Link>
               </div>
             )}
-
-            {/* Mobile Menu Button */}
+            
+            {/* Mobile menu button */}
             <button 
-              className="md:hidden text-gray-700 focus:outline-none"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={toggleMenu}
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg">
-          <div className="px-4 py-3 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`block py-2 px-3 rounded-md ${
-                  location.pathname === link.path 
-                    ? 'bg-tango-secondary text-tango-primary' 
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
+        
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-100">
+            <nav className="flex flex-col space-y-3">
+              <Link 
+                to="/home" 
+                className="px-4 py-2 hover:bg-gray-50 rounded"
+                onClick={() => setIsMenuOpen(false)}
               >
-                {link.name}
+                {t.home}
               </Link>
-            ))}
-            {!auth.isAuthenticated && (
-              <>
-                <Link
-                  to="/auth/login"
-                  className="block py-2 px-3 text-gray-700 hover:bg-gray-100 rounded-md"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/auth/register"
-                  className="block py-2 px-3 bg-tango-primary text-white rounded-md"
-                >
-                  Register
-                </Link>
-              </>
-            )}
+              <Link 
+                to="/locals" 
+                className="px-4 py-2 hover:bg-gray-50 rounded"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t.locals}
+              </Link>
+              <Link 
+                to="/events" 
+                className="px-4 py-2 hover:bg-gray-50 rounded"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t.events}
+              </Link>
+              
+              {authState.isAuthenticated ? (
+                <>
+                  <Link 
+                    to="/favorites" 
+                    className="px-4 py-2 hover:bg-gray-50 rounded flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Heart size={18} className="mr-2" />
+                    {t.favorites}
+                  </Link>
+                  <Link 
+                    to="/profile" 
+                    className="px-4 py-2 hover:bg-gray-50 rounded flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User size={18} className="mr-2" />
+                    {t.profile}
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-left hover:bg-gray-50 rounded flex items-center text-gray-700"
+                  >
+                    <LogOut size={18} className="mr-2" />
+                    {t.logout}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/auth?mode=login" 
+                    className="px-4 py-2 hover:bg-gray-50 rounded flex items-center"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn size={18} className="mr-2" />
+                    {t.login}
+                  </Link>
+                  <Link 
+                    to="/auth?mode=register" 
+                    className="tango-button mx-4"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t.register}
+                  </Link>
+                </>
+              )}
+            </nav>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 };

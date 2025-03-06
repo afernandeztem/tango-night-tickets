@@ -1,182 +1,207 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthState, User } from '../types';
-import { login as apiLogin, register as apiRegister, getUserProfile } from '../services/api';
-import { toast } from '@/hooks/use-toast';
+import { User, AuthState } from '../types';
+import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
+import { useToast } from '@/hooks/use-toast';
 
-interface AuthContextProps {
-  auth: AuthState;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
+// Create context with default values
+const AuthContext = createContext<{
+  state: AuthState;
+  login: (email: string, password: string) => Promise<void>;
+  register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
   logout: () => void;
-  addFavorite: (type: 'events' | 'locals', id: string) => void;
-  removeFavorite: (type: 'events' | 'locals', id: string) => void;
-}
+  toggleFavorite: (type: 'local' | 'event', id: string) => Promise<void>;
+}>({
+  state: {
+    isAuthenticated: false,
+    user: null,
+    token: null
+  },
+  login: async () => {},
+  register: async () => {},
+  logout: () => {},
+  toggleFavorite: async () => {}
+});
 
-const defaultAuthState: AuthState = {
-  isAuthenticated: false,
-  user: null,
-  token: null
-};
+// Custom hook to use auth context
+export const useAuth = () => useContext(AuthContext);
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-
+// Provider component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [auth, setAuth] = useState<AuthState>(() => {
-    // Check if token exists in local storage
+  const { toast } = useToast();
+  const [state, setState] = useState<AuthState>(() => {
+    // Load initial state from localStorage
     const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
     return {
       isAuthenticated: !!token,
-      user: null,
+      user: savedUser ? JSON.parse(savedUser) : null,
       token
     };
   });
 
-  // Fetch user profile if authenticated
+  // Check if user is authenticated on mount
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (auth.isAuthenticated && auth.token && !auth.user) {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      
+      if (token) {
         try {
-          const user = await getUserProfile();
-          setAuth(prev => ({ ...prev, user }));
+          const user = await getCurrentUser();
+          setState({
+            isAuthenticated: true,
+            user,
+            token
+          });
         } catch (error) {
-          console.error('Failed to fetch user profile:', error);
-          // If unable to fetch profile, log the user out
-          logout();
+          console.error('Error verifying authentication:', error);
+          // Clear invalid auth data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setState({
+            isAuthenticated: false,
+            user: null,
+            token: null
+          });
         }
       }
     };
+    
+    checkAuth();
+  }, []);
 
-    fetchUserProfile();
-  }, [auth.isAuthenticated, auth.token]);
+  // Save user to localStorage whenever it changes
+  useEffect(() => {
+    if (state.user) {
+      localStorage.setItem('user', JSON.stringify(state.user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [state.user]);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  // Auth actions
+  const login = async (email: string, password: string) => {
     try {
-      const { token } = await apiLogin(email, password);
-      localStorage.setItem('token', token);
-      setAuth({
+      const { token, user } = await apiLogin(email, password);
+      
+      setState({
         isAuthenticated: true,
-        user: null, // Will be fetched by the effect
+        user,
         token
       });
+      
       toast({
         title: "Login successful",
-        description: "Welcome back to TangoApp!",
+        description: `Welcome back, ${user.name}!`,
       });
-      return true;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: "Invalid email or password. Please try again.",
         variant: "destructive"
       });
-      return false;
+      throw error;
     }
   };
 
-  const register = async (
-    name: string, 
-    email: string, 
-    password: string, 
-    phone?: string
-  ): Promise<boolean> => {
+  const register = async (data: { name: string; email: string; password: string; phone?: string }) => {
     try {
-      await apiRegister({ name, email, password, phone });
+      const user = await apiRegister(data);
+      
+      // After registration, automatically log in
+      const { token } = await apiLogin(data.email, data.password);
+      
+      setState({
+        isAuthenticated: true,
+        user,
+        token
+      });
+      
       toast({
         title: "Registration successful",
-        description: "Your account has been created!",
+        description: `Welcome to TangoApp, ${user.name}!`,
       });
-      // Automatically log the user in after successful registration
-      return await login(email, password);
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('Registration error:', error);
       toast({
         title: "Registration failed",
-        description: "Please check your information and try again.",
+        description: "Could not create your account. Please try again.",
         variant: "destructive"
       });
-      return false;
+      throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    setAuth({
+    localStorage.removeItem('user');
+    
+    setState({
       isAuthenticated: false,
       user: null,
       token: null
     });
+    
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
   };
 
-  // Add to favorites
-  const addFavorite = (type: 'events' | 'locals', id: string) => {
-    setAuth(prev => {
-      if (!prev.user) return prev;
-      
-      const updatedFavorites = { 
-        ...prev.user.favorites || { locals: [], events: [] }
-      };
-      
-      if (!updatedFavorites[type].includes(id)) {
-        updatedFavorites[type] = [...updatedFavorites[type], id];
-      }
-      
-      return {
-        ...prev,
-        user: {
-          ...prev.user,
-          favorites: updatedFavorites
-        }
-      };
-    });
-  };
+  const toggleFavorite = async (type: 'local' | 'event', id: string) => {
+    if (!state.isAuthenticated || !state.user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to add favorites.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  // Remove from favorites
-  const removeFavorite = (type: 'events' | 'locals', id: string) => {
-    setAuth(prev => {
-      if (!prev.user) return prev;
+    try {
+      // Make API call to toggle favorite
+      const updatedUser = await import('../services/api').then(api => 
+        api.toggleFavorite(type, id)
+      );
       
-      const updatedFavorites = { 
-        ...prev.user.favorites || { locals: [], events: [] }
-      };
+      setState(prevState => ({
+        ...prevState,
+        user: updatedUser
+      }));
       
-      updatedFavorites[type] = updatedFavorites[type].filter(itemId => itemId !== id);
+      const isFavorite = type === 'local' 
+        ? updatedUser.favorites?.locals.includes(id)
+        : updatedUser.favorites?.events.includes(id);
       
-      return {
-        ...prev,
-        user: {
-          ...prev.user,
-          favorites: updatedFavorites
-        }
-      };
-    });
+      toast({
+        title: isFavorite ? "Added to favorites" : "Removed from favorites",
+        description: isFavorite 
+          ? `This ${type} has been added to your favorites.`
+          : `This ${type} has been removed from your favorites.`,
+      });
+    } catch (error) {
+      console.error(`Error toggling ${type} favorite:`, error);
+      toast({
+        title: "Error",
+        description: `Could not update your favorites. Please try again.`,
+        variant: "destructive"
+      });
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
-        auth,
+        state,
         login,
         register,
         logout,
-        addFavorite,
-        removeFavorite,
+        toggleFavorite
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

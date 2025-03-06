@@ -13,7 +13,24 @@ const LandingPage: React.FC = () => {
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { setSelectedCity } = useApp();
+  const { setSelectedCity, state } = useApp();
+
+  const translations = {
+    en: {
+      title: 'Welcome to TangoApp',
+      subtitle: 'Discover nightlife, buy tickets, and enjoy the night!',
+      selectCity: 'Select Your City',
+      availableWorldwide: 'Available in multiple cities worldwide'
+    },
+    es: {
+      title: 'Bienvenido a TangoApp',
+      subtitle: 'Descubre la vida nocturna, compra entradas y disfruta la noche!',
+      selectCity: 'Elige Tu Ciudad',
+      availableWorldwide: 'Disponible en múltiples ciudades en todo el mundo'
+    }
+  };
+
+  const t = translations[state.language];
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -61,10 +78,10 @@ const LandingPage: React.FC = () => {
             <span className="text-4xl font-bold text-tango-primary">T</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient">
-            Welcome to TangoApp
+            {t.title}
           </h1>
           <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
-            Discover nightlife, buy tickets, and enjoy the night!
+            {t.subtitle}
           </p>
         </motion.div>
 
@@ -74,7 +91,7 @@ const LandingPage: React.FC = () => {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-medium text-center mb-8">Select Your City</h2>
+          <h2 className="text-2xl font-medium text-center mb-8">{t.selectCity}</h2>
           
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -107,7 +124,7 @@ const LandingPage: React.FC = () => {
         >
           <p className="flex items-center justify-center">
             <Globe className="h-4 w-4 mr-2" />
-            Available in multiple cities worldwide
+            {t.availableWorldwide}
           </p>
         </motion.div>
       </div>

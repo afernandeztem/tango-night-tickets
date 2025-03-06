@@ -1,57 +1,98 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Event } from '../types';
-import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar, MapPin, Users } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Heart } from 'lucide-react';
 import { formatDate } from '../utils/formatters';
+import { useApp } from '../context/AppContext';
 
 interface EventCardProps {
   event: Event;
+  isFavorite?: boolean;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
+const EventCard: React.FC<EventCardProps> = ({ event, isFavorite = false }) => {
+  const navigate = useNavigate();
+  const { state: authState, toggleFavorite } = useAuth();
+  const { state } = useApp();
+  
+  const translations = {
+    en: {
+      capacity: 'Capacity',
+      age: 'Age',
+      viewDetails: 'View Details',
+      price: 'Price',
+    },
+    es: {
+      capacity: 'Capacidad',
+      age: 'Edad',
+      viewDetails: 'Ver Detalles',
+      price: 'Precio',
+    }
+  };
+  
+  const t = translations[state.language];
+  
+  const handleClick = () => {
+    navigate(`/events/${event.id}`);
+  };
+  
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (authState.isAuthenticated) {
+      toggleFavorite('event', event.id);
+    } else {
+      navigate('/auth?mode=login');
+    }
+  };
+  
   return (
-    <Link to={`/events/${event.id}`} className="block">
-      <div className="tango-card group h-full flex flex-col">
-        <div className="relative h-48 overflow-hidden">
-          {event.image ? (
-            <img 
-              src={event.image} 
-              alt={event.title} 
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full bg-tango-secondary animate-pulse"></div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-          <div className="absolute top-2 right-2 bg-tango-primary text-white text-xs font-medium px-2 py-1 rounded-full">
-            ${event.price}
-          </div>
-          <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded-full">
-            {event.ageRestriction}
-          </div>
+    <div 
+      className="tango-card cursor-pointer"
+      onClick={handleClick}
+    >
+      <div className="relative h-48 overflow-hidden rounded-t-lg">
+        <img 
+          src={event.image || 'https://source.unsplash.com/random/800x600/?event'} 
+          alt={event.title}
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+        <div className="absolute top-2 right-2">
+          <button 
+            onClick={handleFavoriteClick}
+            className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/40 transition-colors"
+          >
+            <Heart size={18} fill={isFavorite ? "#C5198F" : "none"} color={isFavorite ? "#C5198F" : "white"} />
+          </button>
         </div>
-        <div className="p-4 flex flex-col flex-grow">
-          <h3 className="text-lg font-medium mb-2 line-clamp-2">{event.title}</h3>
-          <div className="space-y-2 mb-3 flex-grow">
-            <div className="flex items-center text-sm text-gray-600">
-              <Calendar className="h-4 w-4 mr-2 text-tango-primary" />
-              <span>{formatDate(event.date)}</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <MapPin className="h-4 w-4 mr-2 text-tango-primary" />
-              <span>{event.localName || 'Unknown venue'}</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <Users className="h-4 w-4 mr-2 text-tango-primary" />
-              <span>Capacity: {event.capacity}</span>
-            </div>
-          </div>
-          <button className="tango-button w-full mt-auto">View Details</button>
+        <div className="absolute bottom-0 left-0 p-4 w-full">
+          <h3 className="text-lg font-semibold text-white line-clamp-1">{event.title}</h3>
+          <p className="text-white/80 text-sm">{event.localName}</p>
         </div>
       </div>
-    </Link>
+      <div className="p-4 bg-white">
+        <div className="flex items-center text-sm text-gray-600 mb-2">
+          <Calendar size={16} className="mr-1" />
+          <span>{formatDate(event.date, state.language)}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-600 mb-2">
+          <MapPin size={16} className="mr-1" />
+          <span>{event.city}</span>
+        </div>
+        <div className="flex justify-between items-center mt-3">
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">{t.price}</span>
+            <span className="font-semibold text-tango-primary">{event.price.toFixed(2)} €</span>
+          </div>
+          <button className="tango-button text-sm">
+            {t.viewDetails}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
