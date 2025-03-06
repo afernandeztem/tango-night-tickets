@@ -418,6 +418,7 @@ const mockLocals: Local[] = [
     tags: ['Commercial', 'EDM', 'Mainstream'],
     schedule: 'Open Thursday to Saturday from 00:00 to 06:00'
   },
+  // Add more to each city
   {
     id: '7',
     name: 'Teatro Kapital',
@@ -688,96 +689,4 @@ export const useMockApi = () => {
           const content = filteredLocals.slice(start, end);
           const totalPages = Math.ceil(filteredLocals.length / size);
           const totalElements = filteredLocals.length;
-          resolve({ content, totalPages, totalElements });
-        }, 300);
-      }),
-    getLocalById: (id: string) =>
-      new Promise<Local>((resolve, reject) => {
-        setTimeout(() => {
-          const local = mockLocals.find(l => l.id === id);
-          if (local) {
-            resolve(local);
-          } else {
-            reject({ message: 'Local not found' });
-          }
-        }, 300);
-      }),
-    getLocalsByCity: (city: string) =>
-      new Promise<Local[]>((resolve) => {
-        setTimeout(() => {
-          const locals = mockLocals.filter(l => l.city === city);
-          resolve(locals);
-        }, 300);
-      }),
-    getEvents: (params: GetEventsParams) =>
-      new Promise<EventsResponse>((resolve) => {
-        setTimeout(() => {
-          let filteredEvents = mockEvents;
-          if (params.city) {
-            filteredEvents = filteredEvents.filter((event) => 
-              event.location.includes(params.city!)
-            );
-          }
-          if (params.startDate) {
-            filteredEvents = filteredEvents.filter((event) => 
-              new Date(event.date) >= new Date(params.startDate!)
-            );
-          }
-          if (params.search) {
-            filteredEvents = filteredEvents.filter((event) =>
-              event.title.toLowerCase().includes(params.search!.toLowerCase()) ||
-              event.description.toLowerCase().includes(params.search!.toLowerCase())
-            );
-          }
-          const page = params.page || 0;
-          const size = params.size || 10;
-          const start = page * size;
-          const end = start + size;
-          const content = filteredEvents.slice(start, end);
-          const totalPages = Math.ceil(filteredEvents.length / size);
-          const totalElements = filteredEvents.length;
-          resolve({ content, totalPages, totalElements });
-        }, 300);
-      }),
-    getEventById: (id: string) =>
-      new Promise<Event>((resolve, reject) => {
-        setTimeout(() => {
-          const event = mockEvents.find(e => e.id === id);
-          if (event) {
-            resolve(event);
-          } else {
-            reject({ message: 'Event not found' });
-          }
-        }, 300);
-      }),
-    getEventsByLocalId: (localId: string) =>
-      new Promise<Event[]>((resolve) => {
-        setTimeout(() => {
-          const events = mockEvents.filter(e => e.localId === localId);
-          resolve(events);
-        }, 300);
-      }),
-    getDrinksByLocalId: (localId: string) =>
-      new Promise<Drink[]>((resolve) => {
-        setTimeout(() => {
-          // This is just mock data so we're returning all drinks
-          // In a real app, this would filter by localId
-          resolve(mockDrinks);
-        }, 300);
-      }),
-    toggleFavorite: (type: 'event' | 'local', id: string, token: string) =>
-      new Promise<FavoritesResponse>((resolve) => {
-        setTimeout(() => {
-          // Just mock the response
-          resolve({
-            success: true,
-            message: `${type} with id ${id} toggled successfully`,
-            favorites: {
-              events: type === 'event' ? [id] : [],
-              locals: type === 'local' ? [id] : []
-            }
-          });
-        }, 300);
-      })
-  };
-};
+          resolve({ content, totalPages,
