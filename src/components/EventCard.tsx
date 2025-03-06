@@ -8,9 +8,10 @@ import { useApp } from '../context/AppContext';
 
 interface EventCardProps {
   event: Event;
+  isFavorite?: boolean;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
+const EventCard: React.FC<EventCardProps> = ({ event, isFavorite }) => {
   const { state } = useApp();
   
   return (
@@ -36,7 +37,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           
           <div className="flex items-center text-gray-600 text-sm mb-2">
             <Calendar size={14} className="mr-1" />
-            <span>{formatDate(event.date, state.language)}</span>
+            <span>{formatDate(event.date)}</span>
           </div>
           
           <div className="flex items-center text-gray-600 text-sm">

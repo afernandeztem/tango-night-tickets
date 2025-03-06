@@ -146,7 +146,7 @@ const EventDetailPage: React.FC = () => {
                 <div className="flex items-center text-white text-sm md:text-base">
                   <span>{event.localName}</span>
                   <span className="mx-2">•</span>
-                  <span>{formatDate(event.date, state.language)}</span>
+                  <span>{formatDate(event.date)}</span>
                 </div>
               </div>
             </div>
@@ -159,7 +159,7 @@ const EventDetailPage: React.FC = () => {
                       <Calendar size={18} className="mr-2 text-tango-primary" />
                       <h3 className="font-semibold">{t.date}</h3>
                     </div>
-                    <p>{formatDate(event.date, state.language)}</p>
+                    <p>{formatDate(event.date)}</p>
                   </div>
                   
                   <div className="p-4 border rounded-lg bg-gray-50">
@@ -167,7 +167,7 @@ const EventDetailPage: React.FC = () => {
                       <Clock size={18} className="mr-2 text-tango-primary" />
                       <h3 className="font-semibold">{t.time}</h3>
                     </div>
-                    <p>{event.time || '20:00'}</p>
+                    <p>20:00</p>
                   </div>
                   
                   <div className="p-4 border rounded-lg bg-gray-50">

@@ -16,9 +16,9 @@ const EventsPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('');
   
   const { data: events, isLoading } = useQuery({
-    queryKey: ['events', state.selectedCity, searchTerm, dateFilter],
+    queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateFilter],
     queryFn: () => getEvents({ 
-      city: state.selectedCity,
+      city: state.selectedCity?.name || '',
       search: searchTerm || undefined,
       startDate: dateFilter || undefined
     })
@@ -63,7 +63,7 @@ const EventsPage: React.FC = () => {
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">{t.title}</h1>
           <p className="text-xl text-gray-600 mb-8 text-center">
-            {t.subtitle} {state.selectedCity ? state.selectedCity : ''}
+            {t.subtitle} {state.selectedCity?.name ? state.selectedCity.name : ''}
           </p>
           
           <div className="flex flex-col md:flex-row gap-4 mb-8">

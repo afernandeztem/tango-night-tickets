@@ -6,9 +6,10 @@ import { useApp } from '../context/AppContext';
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutFormData) => void;
+  buttonText?: string;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Continue to Payment' }) => {
   const { state } = useApp();
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormData>();
   
@@ -158,7 +159,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit }) => {
       </div>
       
       <button type="submit" className="tango-button w-full py-3">
-        {t.continue}
+        {buttonText || t.continue}
       </button>
     </form>
   );

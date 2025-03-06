@@ -60,6 +60,23 @@ const LocalDetailPage: React.FC = () => {
   
   const t = translations[state.language];
   
+  const renderSchedule = (schedule: any) => {
+    if (typeof schedule === 'string') {
+      return schedule;
+    } else if (Array.isArray(schedule)) {
+      return (
+        <ul className="space-y-1">
+          {schedule.map((item, index) => (
+            <li key={index}>
+              {item.day}: {item.openTime} - {item.closeTime}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+    return "Schedule information not available";
+  };
+  
   if (loadingLocal) {
     return (
       <div className="min-h-screen bg-white">
@@ -134,7 +151,9 @@ const LocalDetailPage: React.FC = () => {
                     <h2 className="text-xl font-semibold mb-2">{t.schedule}</h2>
                     <div className="flex items-start">
                       <Clock size={18} className="mr-2 text-tango-primary mt-1" />
-                      <p className="text-gray-700">{local.schedule}</p>
+                      <div className="text-gray-700">
+                        {renderSchedule(local.schedule)}
+                      </div>
                     </div>
                   </div>
                 )}

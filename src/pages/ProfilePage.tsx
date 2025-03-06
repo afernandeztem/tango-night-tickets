@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { User, Mail, Bell, BellOff, Ticket, LogOut } from 'lucide-react';
+import { User, Settings, Ticket, LogOut, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { getUserTickets } from '../services/api';
@@ -12,64 +13,67 @@ import TicketCard from '../components/TicketCard';
 
 const ProfilePage: React.FC = () => {
   const { state: authState, logout } = useAuth();
-  const { state } = useApp();
+  const { state: appState, setLanguage } = useApp();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState(true);
   
-  // Redirect if not authenticated
-  if (!authState.isAuthenticated) {
-    navigate('/auth');
-    return null;
-  }
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authState.isAuthenticated) {
+      navigate('/auth?mode=login');
+    }
+  }, [authState.isAuthenticated, navigate]);
   
-  const { data: tickets, isLoading: loadingTickets } = useQuery({
+  const { data: tickets, isLoading: ticketsLoading } = useQuery({
     queryKey: ['userTickets'],
-    queryFn: getUserTickets
+    queryFn: () => getUserTickets(),
+    enabled: authState.isAuthenticated
   });
   
   const translations = {
     en: {
       profile: 'Profile',
-      personalInfo: 'Personal Information',
-      name: 'Name',
-      email: 'Email',
-      preferences: 'Preferences',
-      notifications: 'Notifications',
-      enableNotifications: 'Enable notifications',
-      disableNotifications: 'Disable notifications',
-      upcomingEvents: 'Your Tickets',
+      welcome: 'Welcome back',
+      myTickets: 'My Tickets',
       noTickets: 'You have no tickets yet',
+      settings: 'Settings',
+      language: 'Language',
+      english: 'English',
+      spanish: 'Spanish',
       logout: 'Logout',
-      eventsRecommendation: 'Check out upcoming events in your city!',
-      browseEvents: 'Browse Events'
+      ticketsSection: 'Your Tickets',
+      viewTicket: 'View Ticket',
+      loading: 'Loading...'
     },
     es: {
       profile: 'Perfil',
-      personalInfo: 'Información Personal',
-      name: 'Nombre',
-      email: 'Correo',
-      preferences: 'Preferencias',
-      notifications: 'Notificaciones',
-      enableNotifications: 'Activar notificaciones',
-      disableNotifications: 'Desactivar notificaciones',
-      upcomingEvents: 'Tus Entradas',
+      welcome: 'Bienvenido/a',
+      myTickets: 'Mis Entradas',
       noTickets: 'Aún no tienes entradas',
-      logout: 'Cerrar sesión',
-      eventsRecommendation: '¡Consulta los próximos eventos en tu ciudad!',
-      browseEvents: 'Explorar Eventos'
+      settings: 'Configuración',
+      language: 'Idioma',
+      english: 'Inglés',
+      spanish: 'Español',
+      logout: 'Cerrar Sesión',
+      ticketsSection: 'Tus Entradas',
+      viewTicket: 'Ver Entrada',
+      loading: 'Cargando...'
     }
   };
   
-  const t = translations[state.language];
+  const t = translations[appState.language];
+  
+  const handleLanguageChange = (language: 'en' | 'es') => {
+    setLanguage(language);
+  };
   
   const handleLogout = () => {
     logout();
     navigate('/');
   };
   
-  const toggleNotifications = () => {
-    setNotifications(!notifications);
-  };
+  if (!authState.isAuthenticated) {
+    return null; // Will redirect due to useEffect
+  }
   
   return (
     <div className="min-h-screen bg-white">
@@ -80,105 +84,93 @@ const ProfilePage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold mb-8 text-center">{t.profile}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">{t.profile}</h1>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="md:col-span-1">
-              <div className="border rounded-lg overflow-hidden">
-                <div className="p-6 border-b bg-gray-50">
-                  <div className="flex flex-col items-center">
-                    <div className="w-20 h-20 bg-tango-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">
-                      {authState.user?.name ? authState.user.name.charAt(0).toUpperCase() : 'U'}
+          <div className="max-w-4xl mx-auto mt-8">
+            <div className="bg-gray-50 border rounded-xl p-6 mb-8">
+              <div className="flex items-center">
+                <div className="w-16 h-16 bg-tango-secondary rounded-full flex items-center justify-center text-tango-primary">
+                  <User size={32} />
+                </div>
+                <div className="ml-4">
+                  <p className="text-gray-600">{t.welcome}</p>
+                  <h2 className="text-xl font-semibold">{authState.user?.name}</h2>
+                  <p className="text-gray-600">{authState.user?.email}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Settings Section */}
+            <div className="bg-white border rounded-xl mb-8">
+              <h2 className="text-xl font-semibold p-6 border-b">{t.settings}</h2>
+              
+              <div className="divide-y">
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Settings size={20} className="text-gray-500 mr-3" />
+                      <span>{t.language}</span>
                     </div>
-                    <h2 className="text-xl font-semibold">{authState.user?.name || 'User'}</h2>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleLanguageChange('en')}
+                        className={`px-3 py-1 rounded ${appState.language === 'en' ? 'bg-tango-secondary text-tango-primary' : 'text-gray-600 hover:bg-gray-100'}`}
+                      >
+                        {t.english}
+                      </button>
+                      <button
+                        onClick={() => handleLanguageChange('es')}
+                        className={`px-3 py-1 rounded ${appState.language === 'es' ? 'bg-tango-secondary text-tango-primary' : 'text-gray-600 hover:bg-gray-100'}`}
+                      >
+                        {t.spanish}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
                 <div className="p-6">
-                  <h3 className="font-semibold text-gray-700 mb-4">{t.personalInfo}</h3>
-                  
-                  <div className="space-y-4">
-                    <div className="flex items-start">
-                      <User size={20} className="mr-3 text-tango-primary mt-0.5" />
-                      <div>
-                        <div className="text-sm text-gray-500">{t.name}</div>
-                        <div>{authState.user?.name || 'User'}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <Mail size={20} className="mr-3 text-tango-primary mt-0.5" />
-                      <div>
-                        <div className="text-sm text-gray-500">{t.email}</div>
-                        <div>{authState.user?.email || 'user@example.com'}</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8">
-                    <h3 className="font-semibold text-gray-700 mb-4">{t.preferences}</h3>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        {notifications ? (
-                          <Bell size={20} className="mr-3 text-tango-primary" />
-                        ) : (
-                          <BellOff size={20} className="mr-3 text-gray-400" />
-                        )}
-                        <span>{t.notifications}</span>
-                      </div>
-                      <button
-                        onClick={toggleNotifications}
-                        className="text-sm text-tango-primary hover:underline"
-                      >
-                        {notifications ? t.disableNotifications : t.enableNotifications}
-                      </button>
-                    </div>
-                  </div>
-                  
                   <button
                     onClick={handleLogout}
-                    className="mt-8 flex items-center text-red-500 hover:text-red-700"
+                    className="flex items-center text-red-500 hover:text-red-600"
                   >
-                    <LogOut size={18} className="mr-2" />
-                    {t.logout}
+                    <LogOut size={20} className="mr-3" />
+                    <span>{t.logout}</span>
                   </button>
                 </div>
               </div>
             </div>
             
-            <div className="md:col-span-2">
-              <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <Ticket size={20} className="mr-2 text-tango-primary" />
-                {t.upcomingEvents}
-              </h2>
+            {/* Tickets Section */}
+            <div className="bg-white border rounded-xl">
+              <h2 className="text-xl font-semibold p-6 border-b">{t.ticketsSection}</h2>
               
-              {loadingTickets ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 2 }).map((_, index) => (
-                    <div key={index} className="border rounded-lg p-4 animate-pulse">
-                      <div className="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              {ticketsLoading ? (
+                <div className="p-6 text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-tango-primary mb-4"></div>
+                  <p>{t.loading}</p>
+                </div>
+              ) : tickets && Array.isArray(tickets) && tickets.length > 0 ? (
+                <div className="divide-y">
+                  {tickets.map((ticket: any) => (
+                    <div key={ticket.id} className="p-6">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-semibold">{ticket.eventTitle}</h3>
+                          <p className="text-sm text-gray-600">{ticket.date}</p>
+                          <p className="text-sm text-gray-600">x{ticket.quantity}</p>
+                        </div>
+                        <button className="flex items-center text-tango-primary hover:underline">
+                          {t.viewTicket}
+                          <ChevronRight size={16} className="ml-1" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
-              ) : tickets && tickets.length > 0 ? (
-                <div className="space-y-4">
-                  {tickets.map((ticket) => (
-                    <TicketCard key={ticket.id} event={ticket} />
-                  ))}
-                </div>
               ) : (
-                <div className="border rounded-lg p-8 text-center">
-                  <div className="text-gray-500 mb-4">{t.noTickets}</div>
-                  <p className="text-tango-primary mb-4">{t.eventsRecommendation}</p>
-                  <button
-                    onClick={() => navigate('/events')}
-                    className="px-4 py-2 bg-tango-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
-                  >
-                    {t.browseEvents}
-                  </button>
+                <div className="p-12 text-center text-gray-500">
+                  <Ticket size={32} className="mx-auto mb-3 text-gray-300" />
+                  <p>{t.noTickets}</p>
                 </div>
               )}
             </div>

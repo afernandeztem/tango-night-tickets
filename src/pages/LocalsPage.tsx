@@ -15,9 +15,9 @@ const LocalsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   
   const { data: locals, isLoading } = useQuery({
-    queryKey: ['locals', state.selectedCity, searchTerm],
+    queryKey: ['locals', state.selectedCity?.name || '', searchTerm],
     queryFn: () => getLocals({ 
-      city: state.selectedCity, 
+      city: state.selectedCity?.name || '', 
       search: searchTerm || undefined 
     })
   });
@@ -52,7 +52,7 @@ const LocalsPage: React.FC = () => {
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">{t.title}</h1>
           <p className="text-xl text-gray-600 mb-8 text-center">
-            {t.subtitle} {state.selectedCity}
+            {t.subtitle} {state.selectedCity?.name || ''}
           </p>
           
           <div className="max-w-md mx-auto mb-8">

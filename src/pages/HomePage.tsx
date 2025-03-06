@@ -228,7 +228,7 @@ const HomePage: React.FC = () => {
                 {highlightedEvents.map(event => (
                   <motion.div key={event.id} variants={itemVariants}>
                     <EventCard 
-                      event={event} 
+                      event={event}
                       isFavorite={
                         authState.isAuthenticated &&
                         authState.user?.favorites?.events.includes(event.id)
