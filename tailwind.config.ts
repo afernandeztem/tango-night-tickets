@@ -23,6 +23,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Darker Grotesque', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

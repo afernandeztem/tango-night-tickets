@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { ShoppingCart, Heart, User, Menu, X, LogIn, LogOut, Globe } from 'lucide-react';
+import { ShoppingCart, Heart, User, Menu, X, LogIn, LogOut, Globe, ChevronDown } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isCityMenuOpen, setIsCityMenuOpen] = useState(false);
   const { state: authState, logout } = useAuth();
-  const { state: appState, setLanguage } = useApp();
+  const { state: appState, setLanguage, setSelectedCity } = useApp();
   const navigate = useNavigate();
   
   const toggleMenu = () => {
@@ -19,6 +20,10 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
+    navigate('/');
+  };
+  
+  const handleChangeCity = () => {
     navigate('/');
   };
   
@@ -38,7 +43,8 @@ const Header: React.FC = () => {
       profile: 'Profile',
       login: 'Login',
       register: 'Register',
-      logout: 'Logout'
+      logout: 'Logout',
+      changeCity: 'Change City'
     },
     es: {
       home: 'Inicio',
@@ -48,7 +54,8 @@ const Header: React.FC = () => {
       profile: 'Perfil',
       login: 'Iniciar Sesión',
       register: 'Registrarse',
-      logout: 'Cerrar Sesión'
+      logout: 'Cerrar Sesión',
+      changeCity: 'Cambiar Ciudad'
     }
   };
   
@@ -59,12 +66,34 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/home" className="flex items-center">
-            <div className="h-10 w-10 rounded-full bg-tango-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">T</span>
-            </div>
-            <span className="ml-2 text-lg font-semibold">TangoApp</span>
-          </Link>
+          <div className="flex items-center">
+            <Link to="/home" className="flex items-center">
+              <span className="text-lg font-semibold text-[#C5198F]">TangoApp</span>
+            </Link>
+            
+            {appState.selectedCity && (
+              <div className="relative ml-4">
+                <button 
+                  className="flex items-center text-sm text-gray-700 hover:text-[#C5198F]"
+                  onClick={() => setIsCityMenuOpen(!isCityMenuOpen)}
+                >
+                  <span>{appState.selectedCity.name}</span>
+                  <ChevronDown size={16} className="ml-1" />
+                </button>
+                
+                {isCityMenuOpen && (
+                  <div className="absolute left-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 py-1">
+                    <button
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={handleChangeCity}
+                    >
+                      {t.changeCity}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
@@ -242,6 +271,14 @@ const Header: React.FC = () => {
                   </Link>
                 </>
               )}
+              
+              <button 
+                onClick={handleChangeCity}
+                className="px-4 py-2 hover:bg-gray-50 rounded flex items-center text-gray-700"
+              >
+                <Globe size={18} className="mr-2" />
+                {t.changeCity}
+              </button>
             </nav>
           </div>
         )}
