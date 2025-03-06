@@ -19,8 +19,8 @@ const EventsPage: React.FC = () => {
     queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateFilter],
     queryFn: () => getEvents({ 
       city: state.selectedCity?.name || '',
-      search: searchTerm || undefined,
-      startDate: dateFilter || undefined
+      startDate: dateFilter || undefined,
+      search: searchTerm || undefined
     })
   });
   

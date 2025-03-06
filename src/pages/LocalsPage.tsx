@@ -17,8 +17,8 @@ const LocalsPage: React.FC = () => {
   const { data: locals, isLoading } = useQuery({
     queryKey: ['locals', state.selectedCity?.name || '', searchTerm],
     queryFn: () => getLocals({ 
-      city: state.selectedCity?.name || '', 
-      search: searchTerm || undefined 
+      city: state.selectedCity?.name || '',
+      search: searchTerm || undefined
     })
   });
   

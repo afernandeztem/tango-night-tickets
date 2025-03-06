@@ -45,7 +45,7 @@ export const getCities = async (): Promise<City[]> => {
 };
 
 export const getLocals = async (
-  params: { city?: string; page?: number; size?: number; relevant?: boolean } = {}
+  params: { city?: string; page?: number; size?: number; relevant?: boolean; search?: string } = {}
 ): Promise<PaginatedResponse<Local>> => {
   try {
     // For development/testing, return mock data
@@ -119,6 +119,15 @@ export const getLocals = async (
       filteredLocals = mockLocals.filter(local => local.city.toLowerCase() === params.city?.toLowerCase());
     }
 
+    // Filter by search term if provided
+    if (params.search) {
+      const searchTerm = params.search.toLowerCase();
+      filteredLocals = filteredLocals.filter(local => 
+        local.name.toLowerCase().includes(searchTerm) || 
+        local.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+      );
+    }
+
     return {
       content: filteredLocals,
       pageable: {
@@ -163,7 +172,7 @@ export const getEventsByLocalId = async (localId: string): Promise<Event[]> => {
 };
 
 export const getEvents = async (
-  params: { city?: string; localId?: string; startDate?: string; endDate?: string; page?: number; size?: number; relevant?: boolean } = {}
+  params: { city?: string; localId?: string; startDate?: string; endDate?: string; page?: number; size?: number; relevant?: boolean; search?: string } = {}
 ): Promise<PaginatedResponse<Event>> => {
   try {
     // For development/testing, return mock data
@@ -239,7 +248,24 @@ export const getEvents = async (
       filteredEvents = filteredEvents.filter(event => event.localId === params.localId);
     }
 
-    // TODO: Add date filtering logic if needed
+    // Filter by search term if provided
+    if (params.search) {
+      const searchTerm = params.search.toLowerCase();
+      filteredEvents = filteredEvents.filter(event => 
+        event.title.toLowerCase().includes(searchTerm) || 
+        event.description.toLowerCase().includes(searchTerm) ||
+        (event.tags && event.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+      );
+    }
+
+    // Filter by start date if provided
+    if (params.startDate) {
+      const startDate = new Date(params.startDate);
+      filteredEvents = filteredEvents.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate >= startDate;
+      });
+    }
 
     return {
       content: filteredEvents,
