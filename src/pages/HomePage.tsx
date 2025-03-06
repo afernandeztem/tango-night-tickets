@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Event, Local } from '../types';
@@ -9,6 +8,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import EventCard from '../components/EventCard';
 import LocalCard from '../components/LocalCard';
+import CitySelector from '../components/CitySelector';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, MapPin, Star } from 'lucide-react';
 
@@ -62,14 +62,12 @@ const HomePage: React.FC = () => {
   
   const t = translations[state.language];
   
-  // Redirect to landing page if no city is selected
   useEffect(() => {
     if (!state.selectedCity) {
       navigate('/');
     }
   }, [state.selectedCity, navigate]);
   
-  // Fetch highlighted events and locals for the selected city
   useEffect(() => {
     const fetchHighlightedContent = async () => {
       if (!state.selectedCity) return;
@@ -77,14 +75,12 @@ const HomePage: React.FC = () => {
       setLoading({ ...loading, events: true, locals: true });
       
       try {
-        // Fetch highlighted events
         const eventsResponse = await getEvents({
           city: state.selectedCity.name,
           relevant: true,
         });
         setHighlightedEvents(eventsResponse.content.slice(0, 3));
         
-        // Fetch highlighted locals
         const localsResponse = await getLocals({
           city: state.selectedCity.name,
           relevant: true,
@@ -100,7 +96,6 @@ const HomePage: React.FC = () => {
     fetchHighlightedContent();
   }, [state.selectedCity]);
   
-  // Fetch favorites if user is authenticated
   useEffect(() => {
     const fetchFavorites = async () => {
       if (!authState.isAuthenticated) return;
@@ -108,11 +103,9 @@ const HomePage: React.FC = () => {
       setLoading({ ...loading, favorites: true });
       
       try {
-        // Fetch favorite events
         const favoriteEvents = await getFavoriteEvents();
         setFavoriteEvents(favoriteEvents);
         
-        // Fetch favorite locals
         const favoriteLocals = await getFavoriteLocals();
         setFavoriteLocals(favoriteLocals);
       } catch (error) {
@@ -127,7 +120,6 @@ const HomePage: React.FC = () => {
     }
   }, [authState.isAuthenticated]);
   
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -162,7 +154,6 @@ const HomePage: React.FC = () => {
       <Header />
       
       <main className="flex-grow">
-        {/* Hero Section */}
         <section className="bg-gradient-to-r from-tango-primary/10 to-tango-secondary/30 py-16">
           <div className="container mx-auto px-4">
             <motion.div
@@ -171,11 +162,14 @@ const HomePage: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="text-center"
             >
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 font-darker">
                 {t.welcome} <span className="text-tango-primary">TangoApp</span>
               </h1>
-              <p className="text-lg text-gray-700 mb-6">
-                {t.discoverCity} <span className="font-semibold">{state.selectedCity.name}</span>
+              <p className="text-lg text-gray-700 mb-6 flex items-center justify-center gap-2">
+                {t.discoverCity} 
+                <span className="font-semibold flex items-center">
+                  <CitySelector className="font-semibold underline decoration-dotted underline-offset-4 ml-1" />
+                </span>
               </p>
               
               <div className="flex flex-wrap justify-center gap-4 mt-8">
@@ -198,11 +192,10 @@ const HomePage: React.FC = () => {
           </div>
         </section>
         
-        {/* Highlighted Events Section */}
         <section className="py-12">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">{t.highlightedEvents}</h2>
+              <h2 className="text-2xl font-semibold font-darker">{t.highlightedEvents}</h2>
               <button 
                 className="text-tango-primary font-medium flex items-center text-sm hover:underline"
                 onClick={() => navigate('/events')}
@@ -241,11 +234,10 @@ const HomePage: React.FC = () => {
           </div>
         </section>
         
-        {/* Highlighted Locals Section */}
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">{t.highlightedLocals}</h2>
+              <h2 className="text-2xl font-semibold font-darker">{t.highlightedLocals}</h2>
               <button 
                 className="text-tango-primary font-medium flex items-center text-sm hover:underline"
                 onClick={() => navigate('/locals')}
@@ -284,7 +276,6 @@ const HomePage: React.FC = () => {
           </div>
         </section>
         
-        {/* Favorites Section (only for authenticated users) */}
         {authState.isAuthenticated && (
           <section className="py-12">
             <div className="container mx-auto px-4">

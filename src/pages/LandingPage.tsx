@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuroraBackground } from '../components/ui/aurora-background';
@@ -74,13 +73,10 @@ const LandingPage: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="mx-auto w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mb-6">
-            <span className="text-4xl font-bold text-tango-primary">T</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
             {t.title}
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker">
             {t.subtitle}
           </p>
         </motion.div>
@@ -91,7 +87,7 @@ const LandingPage: React.FC = () => {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-medium text-center mb-8">{t.selectCity}</h2>
+          <h2 className="text-2xl font-medium text-center mb-8 font-darker">{t.selectCity}</h2>
           
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
