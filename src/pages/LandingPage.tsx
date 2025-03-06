@@ -67,14 +67,17 @@ const LandingPage: React.FC = () => {
 
   return (
     <AuroraBackground>
-      <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col justify-center items-center">
+      <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col justify-center">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12 max-w-3xl"
+          className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-[#C5198F]">
+          <div className="mx-auto w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mb-6">
+            <span className="text-4xl font-bold text-tango-primary">T</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient">
             {t.title}
           </h1>
           <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
@@ -86,7 +89,7 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-12 w-full max-w-5xl"
+          className="mb-12"
         >
           <h2 className="text-2xl font-medium text-center mb-8">{t.selectCity}</h2>
           
