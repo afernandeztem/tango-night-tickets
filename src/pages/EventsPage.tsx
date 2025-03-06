@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Search, Filter } from 'lucide-react';
 import { Event } from '../types';
-import { fetchEvents } from '../services/api';
+import { getEvents } from '../services/api';
 import { useApp } from '../context/AppContext';
 import EventCard from '../components/EventCard';
 import Header from '../components/Header';
@@ -17,7 +17,7 @@ const EventsPage: React.FC = () => {
   
   const { data: events, isLoading } = useQuery({
     queryKey: ['events', state.selectedCity, searchTerm, dateFilter],
-    queryFn: () => fetchEvents({ 
+    queryFn: () => getEvents({ 
       city: state.selectedCity,
       search: searchTerm || undefined,
       startDate: dateFilter || undefined
@@ -63,7 +63,7 @@ const EventsPage: React.FC = () => {
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">{t.title}</h1>
           <p className="text-xl text-gray-600 mb-8 text-center">
-            {t.subtitle} {state.selectedCity}
+            {t.subtitle} {state.selectedCity ? state.selectedCity : ''}
           </p>
           
           <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -103,9 +103,9 @@ const EventsPage: React.FC = () => {
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-tango-primary mb-4"></div>
               <p>{t.loading}</p>
             </div>
-          ) : events && events.length > 0 ? (
+          ) : events && events.content.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map(event => (
+              {events.content.map((event: Event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>

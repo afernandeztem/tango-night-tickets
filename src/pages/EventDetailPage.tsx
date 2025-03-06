@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, Calendar, Clock, Users, Info, Ticket, Heart } from 'lucide-react';
 import { Event } from '../types';
-import { fetchEventById } from '../services/api';
+import { getEventById } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { formatDate } from '../utils/formatters';
@@ -21,7 +20,7 @@ const EventDetailPage: React.FC = () => {
   
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', eventId],
-    queryFn: () => fetchEventById(eventId!),
+    queryFn: () => getEventById(eventId!),
     enabled: !!eventId
   });
   
@@ -67,7 +66,6 @@ const EventDetailPage: React.FC = () => {
   const t = translations[state.language];
   
   const handleBuyTickets = () => {
-    // Add event to cart in app context
     navigate('/checkout', { 
       state: { 
         eventId: event?.id,
@@ -79,7 +77,7 @@ const EventDetailPage: React.FC = () => {
     });
   };
   
-  const isFavorite = authState.favorites.events.includes(eventId || '');
+  const isFavorite = authState.user?.favorites?.events.includes(eventId || '') || false;
   
   const handleToggleFavorite = () => {
     if (authState.isAuthenticated) {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -6,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { User, Mail, Bell, BellOff, Ticket, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { fetchUserTickets } from '../services/api';
+import { getUserTickets } from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import TicketCard from '../components/TicketCard';
@@ -25,7 +24,7 @@ const ProfilePage: React.FC = () => {
   
   const { data: tickets, isLoading: loadingTickets } = useQuery({
     queryKey: ['userTickets'],
-    queryFn: fetchUserTickets
+    queryFn: getUserTickets
   });
   
   const translations = {
@@ -166,7 +165,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               ) : tickets && tickets.length > 0 ? (
                 <div className="space-y-4">
-                  {tickets.map(ticket => (
+                  {tickets.map((ticket) => (
                     <TicketCard key={ticket.id} event={ticket} />
                   ))}
                 </div>

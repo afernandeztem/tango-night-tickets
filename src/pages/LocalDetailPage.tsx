@@ -1,11 +1,10 @@
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, Calendar, Users, Clock, Tag, Star } from 'lucide-react';
 import { Local, Event, Drink } from '../types';
-import { fetchLocalById, fetchEventsByLocalId, fetchDrinksByLocalId } from '../services/api';
+import { getLocalById, getEventsByLocalId, getDrinksByLocalId } from '../services/api';
 import { useApp } from '../context/AppContext';
 import EventCard from '../components/EventCard';
 import Header from '../components/Header';
@@ -18,19 +17,19 @@ const LocalDetailPage: React.FC = () => {
   
   const { data: local, isLoading: loadingLocal } = useQuery({
     queryKey: ['local', localId],
-    queryFn: () => fetchLocalById(localId!),
+    queryFn: () => getLocalById(localId!),
     enabled: !!localId
   });
   
   const { data: events, isLoading: loadingEvents } = useQuery({
     queryKey: ['events', localId],
-    queryFn: () => fetchEventsByLocalId(localId!),
+    queryFn: () => getEventsByLocalId(localId!),
     enabled: !!localId
   });
   
   const { data: drinks, isLoading: loadingDrinks } = useQuery({
     queryKey: ['drinks', localId],
-    queryFn: () => fetchDrinksByLocalId(localId!),
+    queryFn: () => getDrinksByLocalId(localId!),
     enabled: !!localId
   });
   

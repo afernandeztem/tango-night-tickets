@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Store, MapPin } from 'lucide-react';
 import { Local } from '../types';
-import { fetchLocals } from '../services/api';
+import { getLocals } from '../services/api';
 import { useApp } from '../context/AppContext';
 import LocalCard from '../components/LocalCard';
 import Header from '../components/Header';
@@ -16,7 +16,7 @@ const LocalsPage: React.FC = () => {
   
   const { data: locals, isLoading } = useQuery({
     queryKey: ['locals', state.selectedCity, searchTerm],
-    queryFn: () => fetchLocals({ 
+    queryFn: () => getLocals({ 
       city: state.selectedCity, 
       search: searchTerm || undefined 
     })
@@ -73,9 +73,9 @@ const LocalsPage: React.FC = () => {
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-tango-primary mb-4"></div>
               <p>{t.loading}</p>
             </div>
-          ) : locals && locals.length > 0 ? (
+          ) : locals && locals.content.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {locals.map(local => (
+              {locals.content.map((local: Local) => (
                 <LocalCard key={local.id} local={local} />
               ))}
             </div>

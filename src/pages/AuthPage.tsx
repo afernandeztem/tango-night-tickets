@@ -105,7 +105,6 @@ const AuthPage: React.FC = () => {
       await login(data.email, data.password);
       toast({
         title: t.loginSuccess,
-        variant: "default",
       });
       navigate('/home');
     } catch (error) {
@@ -119,10 +118,13 @@ const AuthPage: React.FC = () => {
   
   const onRegisterSubmit = async (data: any) => {
     try {
-      await registerUser(data.name, data.email, data.password);
+      await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password
+      });
       toast({
         title: t.registerSuccess,
-        variant: "default",
       });
       navigate('/home');
     } catch (error) {
@@ -169,7 +171,7 @@ const AuthPage: React.FC = () => {
                     />
                   </div>
                   {loginErrors.email && (
-                    <p className="mt-1 text-sm text-red-600">{loginErrors.email.message}</p>
+                    <p className="mt-1 text-sm text-red-600">{loginErrors.email.message?.toString()}</p>
                   )}
                 </div>
                 
@@ -200,7 +202,7 @@ const AuthPage: React.FC = () => {
                     </button>
                   </div>
                   {loginErrors.password && (
-                    <p className="mt-1 text-sm text-red-600">{loginErrors.password.message}</p>
+                    <p className="mt-1 text-sm text-red-600">{loginErrors.password.message?.toString()}</p>
                   )}
                 </div>
                 
@@ -240,7 +242,7 @@ const AuthPage: React.FC = () => {
                     />
                   </div>
                   {registerErrors.name && (
-                    <p className="mt-1 text-sm text-red-600">{registerErrors.name.message}</p>
+                    <p className="mt-1 text-sm text-red-600">{registerErrors.name.message?.toString()}</p>
                   )}
                 </div>
                 
@@ -260,7 +262,7 @@ const AuthPage: React.FC = () => {
                     />
                   </div>
                   {registerErrors.email && (
-                    <p className="mt-1 text-sm text-red-600">{registerErrors.email.message}</p>
+                    <p className="mt-1 text-sm text-red-600">{registerErrors.email.message?.toString()}</p>
                   )}
                 </div>
                 
@@ -291,7 +293,7 @@ const AuthPage: React.FC = () => {
                     </button>
                   </div>
                   {registerErrors.password && (
-                    <p className="mt-1 text-sm text-red-600">{registerErrors.password.message}</p>
+                    <p className="mt-1 text-sm text-red-600">{registerErrors.password.message?.toString()}</p>
                   )}
                 </div>
                 
@@ -311,7 +313,7 @@ const AuthPage: React.FC = () => {
                     />
                   </div>
                   {registerErrors.confirmPassword && (
-                    <p className="mt-1 text-sm text-red-600">{registerErrors.confirmPassword.message}</p>
+                    <p className="mt-1 text-sm text-red-600">{registerErrors.confirmPassword.message?.toString()}</p>
                   )}
                 </div>
                 
