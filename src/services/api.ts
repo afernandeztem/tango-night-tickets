@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { City, Event, Local, Drink, User, PaginatedResponse, Ticket } from '../types';
 
@@ -325,6 +324,13 @@ export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
 };
 
 // Authentication & User endpoints
+
+export interface CheckoutFormData {
+  name: string;
+  email: string;
+  phone: string;
+  gender?: string;
+}
 
 export const login = async (email: string, password: string): Promise<{ token: string; user: User }> => {
   try {
