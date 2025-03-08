@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuroraBackground } from '../components/ui/aurora-background';
@@ -31,11 +32,26 @@ const LandingPage: React.FC = () => {
 
   const t = translations[state.language];
 
+  // Add Mallorca to the cities data
+  const mallorcaCity: City = {
+    id: 'mallorca',
+    name: 'Mallorca',
+    country: 'Spain',
+    description: 'Beautiful island with vibrant nightlife',
+    image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+    active: true
+  };
+
   useEffect(() => {
     const fetchCities = async () => {
       try {
         const citiesData = await getCities();
-        setCities(citiesData.filter(city => city.active));
+        // Filter to only include Madrid, Málaga, and add Mallorca
+        const filteredCities = citiesData
+          .filter(city => city.name === 'Madrid' || city.name === 'Málaga')
+          .concat(mallorcaCity);
+        
+        setCities(filteredCities);
       } catch (error) {
         console.error('Error fetching cities:', error);
       } finally {
@@ -66,12 +82,12 @@ const LandingPage: React.FC = () => {
 
   return (
     <AuroraBackground>
-      <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col justify-center">
+      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
             {t.title}
@@ -85,18 +101,18 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-12"
+          className="mb-16"
         >
           <h2 className="text-2xl font-medium text-center mb-8 font-darker">{t.selectCity}</h2>
           
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
-                <div key={index} className="h-64 bg-gray-100 rounded-lg animate-pulse"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="h-48 bg-gray-100 rounded-lg animate-pulse"></div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {cities.map((city, index) => (
                 <motion.div
                   key={city.id}
@@ -116,7 +132,7 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="text-center text-gray-600 text-sm"
+          className="text-center text-gray-600 text-sm mt-auto"
         >
           <p className="flex items-center justify-center">
             <Globe className="h-4 w-4 mr-2" />

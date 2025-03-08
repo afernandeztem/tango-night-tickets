@@ -13,7 +13,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, onClick }) => {
       className="tango-card cursor-pointer transition-transform duration-300 hover:scale-105"
       onClick={() => onClick(city)}
     >
-      <div className="relative h-48 overflow-hidden rounded-t-lg">
+      <div className="relative h-48 overflow-hidden rounded-lg">
         <img 
           src={city.image || 'https://source.unsplash.com/random/800x600/?city'} 
           alt={city.name}
@@ -25,16 +25,6 @@ const CityCard: React.FC<CityCardProps> = ({ city, onClick }) => {
           {city.country && (
             <p className="text-white/80 text-sm">{city.country}</p>
           )}
-        </div>
-      </div>
-      <div className="p-4 bg-white border-t border-gray-100">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">
-            {city.active ? 'Available now' : 'Coming soon'}
-          </span>
-          <button className="tango-button text-sm py-1 px-3">
-            Select
-          </button>
         </div>
       </div>
     </div>
