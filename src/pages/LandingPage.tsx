@@ -92,38 +92,30 @@ const LandingPage: React.FC = () => {
 
   return (
     <AuroraBackground>
-      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col">
-        {/* Center the welcome section in the middle of the screen */}
+      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center items-center">
+        {/* Center the welcome section vertically */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center my-auto pt-16"
+          className="text-center mb-10"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
             {t.title}
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker">
+          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker mb-12">
             {t.subtitle}
           </p>
           
-          {/* Moved the city selection title closer to the welcome section */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="mt-16"
-          >
-            <h2 className="text-2xl font-medium mb-8 font-darker">{t.selectCity}</h2>
-          </motion.div>
+          <h2 className="text-2xl font-medium mb-6 font-darker">{t.selectCity}</h2>
         </motion.div>
 
-        {/* Push the city cards section more to the bottom but still connected to the title */}
+        {/* City cards directly below the heading */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.6 }}
-          className="mb-16 mt-4"
+          className="mb-16 w-full"
         >
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -152,7 +144,7 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="text-center text-gray-600 text-sm mb-8"
+          className="text-center text-gray-600 text-sm mt-auto"
         >
           <p className="flex items-center justify-center">
             <Globe className="h-4 w-4 mr-2" />

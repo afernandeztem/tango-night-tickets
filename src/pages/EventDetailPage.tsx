@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Calendar, Clock, Users, Info, Ticket, Heart } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, Info, Ticket, Heart, ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Event } from '../types';
 import { getEventById } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -10,13 +11,49 @@ import { useAuth } from '../context/AuthContext';
 import { formatDate } from '../utils/formatters';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import TicketOption from '../components/TicketOption';
+
+// Sample ticket types
+const ticketTypes = [
+  {
+    id: 'super-early',
+    name: 'SÚPER OFERTA ENTRADA INDIVIDUAL',
+    description: 'Incluye acceso para 1 persona + 2 consumiciones. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
+    price: 16.00,
+    available: false,
+    soldOut: true
+  },
+  {
+    id: 'early',
+    name: 'OFERTA ENTRADA INDIVIDUAL',
+    description: 'Incluye acceso para 1 persona + 2 consumiciones. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
+    price: 18.00,
+    available: false,
+    soldOut: true
+  },
+  {
+    id: 'regular',
+    name: 'ENTRADA INDIVIDUAL',
+    description: 'Incluye acceso para 1 persona + 2 consumiciones. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
+    price: 20.00,
+    available: true,
+    timeLeft: '06:51:55'
+  },
+  {
+    id: 'vip',
+    name: 'VIP ENTRADA + BOTELLA',
+    description: 'Incluye acceso para 4 personas + 1 botella + mesa reservada. Se asegura el acceso en caso de aforo completo.',
+    price: 120.00,
+    available: true
+  }
+];
 
 const EventDetailPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const { state } = useApp();
   const { state: authState, toggleFavorite } = useAuth();
   const navigate = useNavigate();
-  const [ticketCount, setTicketCount] = useState(1);
+  const [selectedTickets, setSelectedTickets] = useState<{[key: string]: number}>({});
   
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', eventId],
@@ -37,11 +74,18 @@ const EventDetailPage: React.FC = () => {
       ticketsAvailable: 'Tickets Available',
       quantity: 'Quantity',
       price: 'Price',
+      subtotal: 'Subtotal',
+      serviceFee: 'Service Fee',
       total: 'Total',
       buyTickets: 'Buy Tickets',
       loading: 'Loading event details...',
       addToFavorites: 'Add to favorites',
-      removeFromFavorites: 'Remove from favorites'
+      removeFromFavorites: 'Remove from favorites',
+      addToCart: 'Add to Cart',
+      checkout: 'Proceed to Checkout',
+      noTicketsSelected: 'Please select at least one ticket to continue',
+      soldOut: 'Sold out',
+      salesEndIn: 'Sales end in'
     },
     es: {
       backToEvents: 'Volver a Eventos',
@@ -55,24 +99,75 @@ const EventDetailPage: React.FC = () => {
       ticketsAvailable: 'Entradas Disponibles',
       quantity: 'Cantidad',
       price: 'Precio',
+      subtotal: 'Subtotal',
+      serviceFee: 'Cargo por servicio',
       total: 'Total',
       buyTickets: 'Comprar Entradas',
       loading: 'Cargando detalles del evento...',
       addToFavorites: 'Añadir a favoritos',
-      removeFromFavorites: 'Eliminar de favoritos'
+      removeFromFavorites: 'Eliminar de favoritos',
+      addToCart: 'Añadir al Carrito',
+      checkout: 'Proceder al Pago',
+      noTicketsSelected: 'Por favor selecciona al menos una entrada para continuar',
+      soldOut: 'Agotado',
+      salesEndIn: 'Las ventas terminan en'
     }
   };
   
   const t = translations[state.language];
   
-  const handleBuyTickets = () => {
+  const handleTicketChange = (ticketId: string, quantity: number) => {
+    setSelectedTickets(prev => {
+      const updated = { ...prev };
+      if (quantity > 0) {
+        updated[ticketId] = quantity;
+      } else {
+        delete updated[ticketId];
+      }
+      return updated;
+    });
+  };
+  
+  const calculateSubtotal = () => {
+    return Object.entries(selectedTickets).reduce((total, [ticketId, quantity]) => {
+      const ticket = ticketTypes.find(t => t.id === ticketId);
+      return total + (ticket?.price || 0) * quantity;
+    }, 0);
+  };
+  
+  const calculateServiceFee = () => {
+    // Example: 10% service fee
+    return calculateSubtotal() * 0.1;
+  };
+  
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateServiceFee();
+  };
+  
+  const handleCheckout = () => {
+    if (Object.keys(selectedTickets).length === 0) {
+      // Show a toast or alert that no tickets are selected
+      return;
+    }
+    
+    const ticketDetails = Object.entries(selectedTickets).map(([ticketId, quantity]) => {
+      const ticket = ticketTypes.find(t => t.id === ticketId);
+      return {
+        ticketId,
+        name: ticket?.name,
+        price: ticket?.price,
+        quantity
+      };
+    });
+    
     navigate('/checkout', { 
       state: { 
         eventId: event?.id,
         eventTitle: event?.title,
-        quantity: ticketCount,
-        price: event?.price,
-        total: (event?.price || 0) * ticketCount
+        ticketDetails,
+        subtotal: calculateSubtotal(),
+        serviceFee: calculateServiceFee(),
+        total: calculateTotal()
       } 
     });
   };
@@ -207,59 +302,82 @@ const EventDetailPage: React.FC = () => {
                     </div>
                   </div>
                 )}
+                
+                <div className="mb-8">
+                  <h2 className="text-2xl font-semibold mb-6 flex items-center">
+                    <Ticket size={24} className="mr-3 text-tango-primary" />
+                    {t.tickets}
+                  </h2>
+                  
+                  <div className="space-y-4">
+                    {ticketTypes.map(ticket => (
+                      <TicketOption
+                        key={ticket.id}
+                        ticket={ticket}
+                        quantity={selectedTickets[ticket.id] || 0}
+                        onQuantityChange={(quantity) => handleTicketChange(ticket.id, quantity)}
+                        translations={t}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
               
               <div>
                 <div className="border rounded-lg p-6 bg-gray-50 sticky top-4">
-                  <div className="flex items-center mb-4">
-                    <Ticket size={20} className="mr-2 text-tango-primary" />
-                    <h2 className="text-xl font-semibold">{t.tickets}</h2>
-                  </div>
+                  <h2 className="text-xl font-semibold mb-4 flex items-center">
+                    <ShoppingCart size={20} className="mr-2 text-tango-primary" />
+                    {t.checkout}
+                  </h2>
                   
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t.quantity}
-                    </label>
-                    <div className="flex border rounded-md">
-                      <button 
-                        className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border-r"
-                        onClick={() => setTicketCount(prev => Math.max(1, prev - 1))}
+                  {Object.keys(selectedTickets).length > 0 ? (
+                    <>
+                      <div className="divide-y">
+                        {Object.entries(selectedTickets).map(([ticketId, quantity]) => {
+                          const ticket = ticketTypes.find(t => t.id === ticketId);
+                          return (
+                            <div key={ticketId} className="py-2">
+                              <div className="flex justify-between">
+                                <span className="font-medium">{ticket?.name}</span>
+                                <span>{quantity}x</span>
+                              </div>
+                              <div className="flex justify-between text-gray-600">
+                                <span>{t.price}</span>
+                                <span>{ticket?.price.toFixed(2)} €</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="border-t pt-4 mt-4">
+                        <div className="flex justify-between mb-2">
+                          <span>{t.subtotal}</span>
+                          <span>{calculateSubtotal().toFixed(2)} €</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span>{t.serviceFee}</span>
+                          <span>{calculateServiceFee().toFixed(2)} €</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg mt-3">
+                          <span>{t.total}</span>
+                          <span className="text-tango-primary">{calculateTotal().toFixed(2)} €</span>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={handleCheckout}
+                        className="w-full py-3 mt-6 bg-tango-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
                       >
-                        -
+                        {t.checkout}
                       </button>
-                      <input
-                        type="number"
-                        min="1"
-                        value={ticketCount}
-                        onChange={(e) => setTicketCount(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-16 text-center py-2 focus:outline-none"
-                      />
-                      <button 
-                        className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border-l"
-                        onClick={() => setTicketCount(prev => prev + 1)}
-                      >
-                        +
-                      </button>
+                    </>
+                  ) : (
+                    <div className="text-center text-gray-500 py-6">
+                      <p className="mb-4">{t.noTicketsSelected}</p>
+                      <Ticket size={32} className="mx-auto text-gray-300" />
                     </div>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">{t.price}</span>
-                      <span>{event.price.toFixed(2)} €</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>{t.total}</span>
-                      <span className="text-tango-primary">{(event.price * ticketCount).toFixed(2)} €</span>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={handleBuyTickets}
-                    className="w-full py-3 bg-tango-primary text-white rounded-lg hover:bg-opacity-90 transition-colors"
-                  >
-                    {t.buyTickets}
-                  </button>
+                  )}
                 </div>
               </div>
             </div>
