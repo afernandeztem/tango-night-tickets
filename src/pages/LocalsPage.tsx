@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Store, MapPin } from 'lucide-react';
+import { Search, Store, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Local } from '../types';
 import { getLocals } from '../services/api';
 import { useApp } from '../context/AppContext';
@@ -13,13 +13,17 @@ import Footer from '../components/Footer';
 const LocalsPage: React.FC = () => {
   const { state } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
   
-  const { data: locals, isLoading } = useQuery({
-    queryKey: ['locals', state.selectedCity?.name || '', searchTerm],
+  const { data: localsData, isLoading } = useQuery({
+    queryKey: ['locals', state.selectedCity?.name || '', searchTerm, currentPage],
     queryFn: () => getLocals({ 
       city: state.selectedCity?.name || '',
-      search: searchTerm || undefined
-    })
+      search: searchTerm || undefined,
+      page: currentPage,
+      size: 12
+    }),
+    keepPreviousData: true
   });
   
   const translations = {
@@ -28,18 +32,41 @@ const LocalsPage: React.FC = () => {
       subtitle: 'Discover venues in',
       search: 'Search locals...',
       noLocals: 'No locals found with the current filters',
-      loading: 'Loading locals...'
+      loading: 'Loading locals...',
+      page: 'Page',
+      of: 'of',
+      previous: 'Previous',
+      next: 'Next'
     },
     es: {
       title: 'Locales',
       subtitle: 'Descubre lugares en',
       search: 'Buscar locales...',
       noLocals: 'No se encontraron locales con los filtros actuales',
-      loading: 'Cargando locales...'
+      loading: 'Cargando locales...',
+      page: 'Página',
+      of: 'de',
+      previous: 'Anterior',
+      next: 'Siguiente'
     }
   };
   
   const t = translations[state.language];
+  
+  const locals = localsData?.content || [];
+  const totalPages = localsData?.pageable?.totalPages || 0;
+  
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(0, prev - 1));
+    window.scrollTo(0, 0);
+  };
+  
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(prev => prev + 1);
+      window.scrollTo(0, 0);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-white">
@@ -61,7 +88,10 @@ const LocalsPage: React.FC = () => {
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(0); // Reset to first page on search
+                }}
                 placeholder={t.search}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-tango-primary focus:border-tango-primary"
               />
@@ -73,12 +103,40 @@ const LocalsPage: React.FC = () => {
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-tango-primary mb-4"></div>
               <p>{t.loading}</p>
             </div>
-          ) : locals && locals.content.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {locals.content.map((local: Local) => (
-                <LocalCard key={local.id} local={local} />
-              ))}
-            </div>
+          ) : locals.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {locals.map((local: Local) => (
+                  <LocalCard key={local.id} local={local} />
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <div className="mt-10 flex justify-center">
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 0}
+                      className="p-2 rounded-full border flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    
+                    <span className="text-sm">
+                      {t.page} {currentPage + 1} {t.of} {totalPages}
+                    </span>
+                    
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage >= totalPages - 1}
+                      className="p-2 rounded-full border flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12 text-gray-500">
               <Store size={48} className="mx-auto mb-4 text-gray-300" />

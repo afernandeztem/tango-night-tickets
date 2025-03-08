@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { ShoppingCart, Heart, User, Menu, X, LogIn, LogOut, Globe } from 'lucide-react';
+import { Heart, User, Menu, X, LogIn, LogOut, Globe } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,8 +21,6 @@ const Header: React.FC = () => {
     setIsMenuOpen(false);
     navigate('/');
   };
-  
-  const cartItemCount = appState.cart.reduce((total, item) => total + item.quantity, 0);
   
   const languageOptions = [
     { code: 'en', name: 'English' },
@@ -101,19 +99,6 @@ const Header: React.FC = () => {
                 </div>
               )}
             </div>
-            
-            {/* Cart Link */}
-            <Link 
-              to="/checkout" 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
-            >
-              <ShoppingCart size={20} />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-tango-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
             
             {/* Favorites Link (only for authenticated users) */}
             {authState.isAuthenticated && (

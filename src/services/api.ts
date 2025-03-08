@@ -239,6 +239,27 @@ export const getEventById = async (eventId: string): Promise<Event> => {
   }
 };
 
+export const getEventTicketOffers = async (eventId: string): Promise<any[]> => {
+  try {
+    const response = await api.get(`/public/offers/event/${eventId}`);
+    
+    // Transform API response to match the format our app expects
+    return response.data.content.map((offer: any) => ({
+      id: offer.offerId.toString(),
+      name: offer.title,
+      description: offer.description || 'Incluye acceso para 1 persona. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
+      price: offer.price,
+      available: !offer.isSoldOut,
+      soldOut: offer.isSoldOut,
+      timeLeft: offer.remainingTime || undefined
+    }));
+  } catch (error) {
+    console.error(`Error fetching ticket offers for event ID ${eventId}:`, error);
+    // Return empty array to prevent UI breaking
+    return [];
+  }
+};
+
 export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
   try {
     const response = await api.get(`/public/local/${localId}`);

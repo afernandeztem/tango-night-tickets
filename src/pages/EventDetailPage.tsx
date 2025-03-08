@@ -3,50 +3,15 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Calendar, Clock, Users, Info, Ticket, Heart, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, Info, Ticket, Heart, Plus, Minus } from 'lucide-react';
 import { Event } from '../types';
-import { getEventById } from '../services/api';
+import { getEventById, getEventTicketOffers } from '../services/api';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { formatDate } from '../utils/formatters';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import TicketOption from '../components/TicketOption';
-
-// Sample ticket types
-const ticketTypes = [
-  {
-    id: 'super-early',
-    name: 'SÚPER OFERTA ENTRADA INDIVIDUAL',
-    description: 'Incluye acceso para 1 persona + 2 consumiciones. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
-    price: 16.00,
-    available: false,
-    soldOut: true
-  },
-  {
-    id: 'early',
-    name: 'OFERTA ENTRADA INDIVIDUAL',
-    description: 'Incluye acceso para 1 persona + 2 consumiciones. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
-    price: 18.00,
-    available: false,
-    soldOut: true
-  },
-  {
-    id: 'regular',
-    name: 'ENTRADA INDIVIDUAL',
-    description: 'Incluye acceso para 1 persona + 2 consumiciones. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
-    price: 20.00,
-    available: true,
-    timeLeft: '06:51:55'
-  },
-  {
-    id: 'vip',
-    name: 'VIP ENTRADA + BOTELLA',
-    description: 'Incluye acceso para 4 personas + 1 botella + mesa reservada. Se asegura el acceso en caso de aforo completo.',
-    price: 120.00,
-    available: true
-  }
-];
 
 const EventDetailPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
@@ -55,9 +20,15 @@ const EventDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedTickets, setSelectedTickets] = useState<{[key: string]: number}>({});
   
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading: isLoadingEvent } = useQuery({
     queryKey: ['event', eventId],
     queryFn: () => getEventById(eventId!),
+    enabled: !!eventId
+  });
+  
+  const { data: ticketTypes = [], isLoading: isLoadingTickets } = useQuery({
+    queryKey: ['eventTickets', eventId],
+    queryFn: () => getEventTicketOffers(eventId!),
     enabled: !!eventId
   });
   
@@ -81,11 +52,11 @@ const EventDetailPage: React.FC = () => {
       loading: 'Loading event details...',
       addToFavorites: 'Add to favorites',
       removeFromFavorites: 'Remove from favorites',
-      addToCart: 'Add to Cart',
       checkout: 'Proceed to Checkout',
       noTicketsSelected: 'Please select at least one ticket to continue',
       soldOut: 'Sold out',
-      salesEndIn: 'Sales end in'
+      salesEndIn: 'Sales end in',
+      noTickets: 'No tickets available for this event at the moment',
     },
     es: {
       backToEvents: 'Volver a Eventos',
@@ -106,11 +77,11 @@ const EventDetailPage: React.FC = () => {
       loading: 'Cargando detalles del evento...',
       addToFavorites: 'Añadir a favoritos',
       removeFromFavorites: 'Eliminar de favoritos',
-      addToCart: 'Añadir al Carrito',
       checkout: 'Proceder al Pago',
       noTicketsSelected: 'Por favor selecciona al menos una entrada para continuar',
       soldOut: 'Agotado',
-      salesEndIn: 'Las ventas terminan en'
+      salesEndIn: 'Las ventas terminan en',
+      noTickets: 'No hay entradas disponibles para este evento en este momento',
     }
   };
   
@@ -181,6 +152,8 @@ const EventDetailPage: React.FC = () => {
       navigate('/auth?mode=login');
     }
   };
+  
+  const isLoading = isLoadingEvent || isLoadingTickets;
   
   if (isLoading) {
     return (
@@ -289,7 +262,7 @@ const EventDetailPage: React.FC = () => {
                         <Info size={18} className="mr-2 text-tango-primary" />
                         <h3 className="font-semibold">{t.ageRestriction}</h3>
                       </div>
-                      <p>{event.ageRestriction}+</p>
+                      <p>{event.ageRestriction}</p>
                     </div>
                   )}
                 </div>
@@ -309,24 +282,31 @@ const EventDetailPage: React.FC = () => {
                     {t.tickets}
                   </h2>
                   
-                  <div className="space-y-4">
-                    {ticketTypes.map(ticket => (
-                      <TicketOption
-                        key={ticket.id}
-                        ticket={ticket}
-                        quantity={selectedTickets[ticket.id] || 0}
-                        onQuantityChange={(quantity) => handleTicketChange(ticket.id, quantity)}
-                        translations={t}
-                      />
-                    ))}
-                  </div>
+                  {ticketTypes.length > 0 ? (
+                    <div className="space-y-4">
+                      {ticketTypes.map(ticket => (
+                        <TicketOption
+                          key={ticket.id}
+                          ticket={ticket}
+                          quantity={selectedTickets[ticket.id] || 0}
+                          onQuantityChange={(quantity) => handleTicketChange(ticket.id, quantity)}
+                          translations={t}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500 py-6">
+                      <p className="mb-4">{t.noTickets}</p>
+                      <Ticket size={32} className="mx-auto text-gray-300" />
+                    </div>
+                  )}
                 </div>
               </div>
               
               <div>
                 <div className="border rounded-lg p-6 bg-gray-50 sticky top-4">
                   <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    <ShoppingCart size={20} className="mr-2 text-tango-primary" />
+                    <Ticket size={20} className="mr-2 text-tango-primary" />
                     {t.checkout}
                   </h2>
                   
