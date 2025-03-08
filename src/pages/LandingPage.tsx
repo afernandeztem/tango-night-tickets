@@ -37,8 +37,16 @@ const LandingPage: React.FC = () => {
     id: 'mallorca',
     name: 'Mallorca',
     country: 'Spain',
-    description: 'Beautiful island with vibrant nightlife',
     image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+    active: true
+  };
+
+  // Add Málaga manually to ensure it's included
+  const malagaCity: City = {
+    id: 'malaga',
+    name: 'Málaga',
+    country: 'Spain',
+    image: 'https://images.unsplash.com/photo-1591704066868-eb6f858db842?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
     active: true
   };
 
@@ -46,12 +54,14 @@ const LandingPage: React.FC = () => {
     const fetchCities = async () => {
       try {
         const citiesData = await getCities();
-        // Filter to only include Madrid, Málaga, and add Mallorca
-        const filteredCities = citiesData
-          .filter(city => city.name === 'Madrid' || city.name === 'Málaga')
-          .concat(mallorcaCity);
+        // Filter to only include Madrid, and add Málaga and Mallorca
+        const madridCity = citiesData.find(city => city.name === 'Madrid');
         
-        setCities(filteredCities);
+        const selectedCities = [];
+        if (madridCity) selectedCities.push(madridCity);
+        selectedCities.push(malagaCity, mallorcaCity);
+        
+        setCities(selectedCities);
       } catch (error) {
         console.error('Error fetching cities:', error);
       } finally {
@@ -82,12 +92,13 @@ const LandingPage: React.FC = () => {
 
   return (
     <AuroraBackground>
-      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col justify-center">
+      <div className="container mx-auto px-4 py-8 min-h-screen flex flex-col">
+        {/* Center the welcome section in the middle of the screen */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center my-auto pt-16"
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
             {t.title}
@@ -97,11 +108,12 @@ const LandingPage: React.FC = () => {
           </p>
         </motion.div>
 
+        {/* Push the city selection section more to the bottom */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-16"
+          className="mb-16 mt-auto"
         >
           <h2 className="text-2xl font-medium text-center mb-8 font-darker">{t.selectCity}</h2>
           
@@ -132,7 +144,7 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="text-center text-gray-600 text-sm mt-auto"
+          className="text-center text-gray-600 text-sm mb-8"
         >
           <p className="flex items-center justify-center">
             <Globe className="h-4 w-4 mr-2" />
