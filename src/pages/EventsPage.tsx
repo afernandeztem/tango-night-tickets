@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -13,11 +14,13 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import CalendarWithDropdowns from '@/components/CalendarWithDropdowns';
+import { toast } from '@/hooks/use-toast';
 
 const EventsPage: React.FC = () => {
   const { state } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   
   const { data: events, isLoading } = useQuery({
     queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateRange?.from, dateRange?.to],
@@ -63,6 +66,18 @@ const EventsPage: React.FC = () => {
     setDateRange(undefined);
   };
 
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from) {
+      toast({
+        title: "Date range selected",
+        description: range.to 
+          ? `From ${format(range.from, 'PPP')} to ${format(range.to, 'PPP')}` 
+          : `From ${format(range.from, 'PPP')}`,
+      });
+    }
+  };
+
   const formatDateRange = () => {
     if (!dateRange) return t.pickDate;
     
@@ -105,22 +120,31 @@ const EventsPage: React.FC = () => {
             </div>
             
             <div className="relative flex-1">
-              <Popover>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button 
                     variant="outline" 
                     className="w-full justify-start text-left font-normal pl-10"
                   >
                     <CalendarRange className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <span className="text-gray-500">{formatDateRange()}</span>
+                    <span className={dateRange ? "text-foreground" : "text-gray-500"}>
+                      {formatDateRange()}
+                    </span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-3" align="start">
-                  <CalendarWithDropdowns 
-                    dateRange={dateRange} 
-                    onSelect={setDateRange} 
-                    className="border rounded-lg p-3 bg-white"
-                  />
+                <PopoverContent className="w-auto p-0" align="start">
+                  <div className="p-3">
+                    <CalendarWithDropdowns 
+                      dateRange={dateRange} 
+                      onSelect={(range) => {
+                        handleDateRangeChange(range);
+                        if (range?.to) {
+                          setCalendarOpen(false);
+                        }
+                      }} 
+                      className="pointer-events-auto"
+                    />
+                  </div>
                 </PopoverContent>
               </Popover>
             </div>

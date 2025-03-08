@@ -10,8 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { DropdownNavProps, DropdownProps } from "react-day-picker";
-import { DateRange } from "react-day-picker";
+import { DayPickerRangeProps, DateRange } from "react-day-picker";
 
 interface CalendarWithDropdownsProps {
   dateRange?: DateRange;
@@ -45,10 +44,7 @@ const CalendarWithDropdowns: React.FC<CalendarWithDropdownsProps> = ({
       captionLayout="dropdown"
       defaultMonth={new Date()}
       components={{
-        DropdownNav: (props: DropdownNavProps) => {
-          return <div className="flex w-full items-center gap-2">{props.children}</div>;
-        },
-        Dropdown: (props: DropdownProps) => {
+        Dropdown: (props) => {
           return (
             <Select
               value={String(props.value)}
@@ -59,18 +55,10 @@ const CalendarWithDropdowns: React.FC<CalendarWithDropdownsProps> = ({
               }}
             >
               <SelectTrigger className="h-8 w-fit font-medium first:grow">
-                <SelectValue />
+                <SelectValue>{props.name}</SelectValue>
               </SelectTrigger>
               <SelectContent className="max-h-[min(26rem,var(--radix-select-content-available-height))]">
-                {props.options?.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={String(option.value)}
-                    disabled={option.disabled}
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {props.children}
               </SelectContent>
             </Select>
           );
