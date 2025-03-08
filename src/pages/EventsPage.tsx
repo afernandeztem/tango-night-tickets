@@ -9,11 +9,16 @@ import { useApp } from '../context/AppContext';
 import EventCard from '../components/EventCard';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
 
 const EventsPage: React.FC = () => {
   const { state } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [date, setDate] = useState<Date | undefined>(undefined);
   
   const { data: events, isLoading } = useQuery({
     queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateFilter],
@@ -30,6 +35,7 @@ const EventsPage: React.FC = () => {
       subtitle: 'Discover upcoming events in',
       search: 'Search events...',
       date: 'Filter by date',
+      pickDate: 'Pick a date',
       clearFilters: 'Clear filters',
       noEvents: 'No events found with the current filters',
       loading: 'Loading events...'
@@ -39,6 +45,7 @@ const EventsPage: React.FC = () => {
       subtitle: 'Descubre próximos eventos en',
       search: 'Buscar eventos...',
       date: 'Filtrar por fecha',
+      pickDate: 'Seleccionar fecha',
       clearFilters: 'Limpiar filtros',
       noEvents: 'No se encontraron eventos con los filtros actuales',
       loading: 'Cargando eventos...'
@@ -50,6 +57,16 @@ const EventsPage: React.FC = () => {
   const handleClearFilters = () => {
     setSearchTerm('');
     setDateFilter('');
+    setDate(undefined);
+  };
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    setDate(selectedDate);
+    if (selectedDate) {
+      setDateFilter(format(selectedDate, 'yyyy-MM-dd'));
+    } else {
+      setDateFilter('');
+    }
   };
   
   return (
@@ -79,13 +96,30 @@ const EventsPage: React.FC = () => {
             </div>
             
             <div className="relative flex-1">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-tango-primary focus:border-tango-primary"
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start text-left font-normal pl-10"
+                  >
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    {date ? (
+                      format(date, "PPP")
+                    ) : (
+                      <span className="text-gray-500">{t.pickDate}</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateSelect}
+                    initialFocus
+                    className="border rounded-lg p-3"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             
             {(searchTerm || dateFilter) && (
