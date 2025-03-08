@@ -29,7 +29,7 @@ const CheckoutPage: React.FC = () => {
   // Get event info from location state
   const eventInfo = location.state as LocationState;
   
-  if (!eventInfo?.eventId) {
+  if (!eventInfo || !eventInfo.eventId) {
     // Redirect if no event info
     navigate('/events');
     return null;
@@ -96,6 +96,19 @@ const CheckoutPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+  
+  // Loading state while waiting for eventInfo
+  if (!eventInfo) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center">Loading checkout...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
   
   if (isSuccess) {
     return (

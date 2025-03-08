@@ -32,38 +32,41 @@ const LandingPage: React.FC = () => {
 
   const t = translations[state.language];
 
-  // Add Mallorca to the cities data
-  const mallorcaCity: City = {
-    id: 'mallorca',
-    name: 'Mallorca',
-    country: 'Spain',
-    image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-    active: true
-  };
-
-  // Add Málaga manually to ensure it's included
-  const malagaCity: City = {
-    id: 'malaga',
-    name: 'Málaga',
-    country: 'Spain',
-    image: 'https://images.unsplash.com/photo-1591704066868-eb6f858db842?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-    active: true
-  };
-
   useEffect(() => {
     const fetchCities = async () => {
       try {
         const citiesData = await getCities();
-        // Filter to only include Madrid, and add Málaga and Mallorca
-        const madridCity = citiesData.find(city => city.name === 'Madrid');
-        
-        const selectedCities = [];
-        if (madridCity) selectedCities.push(madridCity);
-        selectedCities.push(malagaCity, mallorcaCity);
-        
-        setCities(selectedCities);
+        // Focus only on active cities that we care about
+        const activeCities = citiesData.filter(city => city.active);
+        setCities(activeCities);
       } catch (error) {
         console.error('Error fetching cities:', error);
+        
+        // Fallback to hardcoded cities if API fails
+        const fallbackCities: City[] = [
+          {
+            id: 'madrid',
+            name: 'Madrid',
+            country: 'Spain',
+            image: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+            active: true
+          },
+          {
+            id: 'malaga',
+            name: 'Málaga',
+            country: 'Spain',
+            image: 'https://images.unsplash.com/photo-1591704066868-eb6f858db842?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+            active: true
+          },
+          {
+            id: 'mallorca',
+            name: 'Mallorca',
+            country: 'Spain',
+            image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+            active: true
+          }
+        ];
+        setCities(fallbackCities);
       } finally {
         setLoading(false);
       }
@@ -98,19 +101,19 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-6" /* Reduced from mb-10 to mb-6 */
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
             {t.title}
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker mb-12">
+          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker mb-8">
             {t.subtitle}
           </p>
           
-          <h2 className="text-2xl font-medium mb-6 font-darker">{t.selectCity}</h2>
+          <h2 className="text-2xl font-medium mb-4 font-darker">{t.selectCity}</h2>
         </motion.div>
 
-        {/* City cards directly below the heading */}
+        {/* City cards directly below the heading with less space */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

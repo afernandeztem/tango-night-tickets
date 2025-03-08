@@ -1,8 +1,9 @@
+
 import axios from 'axios';
 import { City, Event, Local, Drink, User, PaginatedResponse, Ticket } from '../types';
 
 // Base URL for API
-const API_BASE_URL = 'https://api.tangoapp.example'; // Replace with actual API URL
+const API_BASE_URL = 'https://api.grupotangoapp.com';
 
 // Create axios instance with common config
 const api = axios.create({
@@ -28,16 +29,14 @@ api.interceptors.request.use(
 
 export const getCities = async (): Promise<City[]> => {
   try {
-    // For development/testing purposes, we'll return mock data
-    // In production, this would call actual API: const response = await api.get('/public/cities');
-    return [
-      { id: '1', name: 'Madrid', active: true, country: 'Spain', image: 'https://source.unsplash.com/random/800x600/?madrid' },
-      { id: '2', name: 'Barcelona', active: true, country: 'Spain', image: 'https://source.unsplash.com/random/800x600/?barcelona' },
-      { id: '3', name: 'Valencia', active: true, country: 'Spain', image: 'https://source.unsplash.com/random/800x600/?valencia' },
-      { id: '4', name: 'Seville', active: true, country: 'Spain', image: 'https://source.unsplash.com/random/800x600/?seville' },
-      { id: '5', name: 'Malaga', active: true, country: 'Spain', image: 'https://source.unsplash.com/random/800x600/?malaga' },
-      { id: '6', name: 'Bilbao', active: true, country: 'Spain', image: 'https://source.unsplash.com/random/800x600/?bilbao' },
-    ];
+    const response = await api.get('/public/cities');
+    return response.data.map((city: any) => ({
+      id: city.name.toLowerCase(), // Using name as ID since the API doesn't return IDs
+      name: city.name,
+      active: city.active,
+      country: 'Spain', // Default country as it's not in the API response
+      image: `https://source.unsplash.com/random/800x600/?${city.name}` // Using placeholder images
+    }));
   } catch (error) {
     console.error('Error fetching cities:', error);
     throw error;
@@ -48,93 +47,49 @@ export const getLocals = async (
   params: { city?: string; page?: number; size?: number; relevant?: boolean; search?: string } = {}
 ): Promise<PaginatedResponse<Local>> => {
   try {
-    // For development/testing, return mock data
-    // In production: const response = await api.get('/public/locals', { params });
-    const mockLocals: Local[] = [
-      {
-        id: '1',
-        name: 'Tango Club Madrid',
-        city: 'Madrid',
-        address: 'Calle Gran Vía, 43, 28013 Madrid',
-        image: 'https://source.unsplash.com/random/800x600/?nightclub',
-        tags: ['Nightclub', 'Live Music', 'Cocktails'],
-        rating: 4.5,
-        capacity: 300,
-        description: 'The best nightclub in Madrid with live music and amazing cocktails.',
-        schedule: [
-          { day: 'Monday', openTime: 'Closed', closeTime: 'Closed' },
-          { day: 'Tuesday', openTime: 'Closed', closeTime: 'Closed' },
-          { day: 'Wednesday', openTime: '22:00', closeTime: '04:00' },
-          { day: 'Thursday', openTime: '22:00', closeTime: '04:00' },
-          { day: 'Friday', openTime: '23:00', closeTime: '06:00' },
-          { day: 'Saturday', openTime: '23:00', closeTime: '06:00' },
-          { day: 'Sunday', openTime: 'Closed', closeTime: 'Closed' },
-        ]
-      },
-      {
-        id: '2',
-        name: 'Salsa Paradise',
-        city: 'Madrid',
-        address: 'Calle de Alcalá, 20, 28014 Madrid',
-        image: 'https://source.unsplash.com/random/800x600/?salsa',
-        tags: ['Dancing', 'Salsa', 'Latin'],
-        rating: 4.8,
-        capacity: 200,
-        description: 'The best salsa club in town with professional dancers and classes.',
-        schedule: [
-          { day: 'Monday', openTime: 'Closed', closeTime: 'Closed' },
-          { day: 'Tuesday', openTime: '20:00', closeTime: '02:00' },
-          { day: 'Wednesday', openTime: '20:00', closeTime: '02:00' },
-          { day: 'Thursday', openTime: '20:00', closeTime: '03:00' },
-          { day: 'Friday', openTime: '21:00', closeTime: '05:00' },
-          { day: 'Saturday', openTime: '21:00', closeTime: '05:00' },
-          { day: 'Sunday', openTime: '18:00', closeTime: '00:00' },
-        ]
-      },
-      {
-        id: '3',
-        name: 'Flamenco Passion',
-        city: 'Madrid',
-        address: 'Calle de la Cruz, 7, 28012 Madrid',
-        image: 'https://source.unsplash.com/random/800x600/?flamenco',
-        tags: ['Flamenco', 'Live Music', 'Traditional'],
-        rating: 4.7,
-        capacity: 150,
-        description: 'Authentic flamenco shows with the best dancers in Madrid.',
-        schedule: [
-          { day: 'Monday', openTime: '19:00', closeTime: '00:00' },
-          { day: 'Tuesday', openTime: '19:00', closeTime: '00:00' },
-          { day: 'Wednesday', openTime: '19:00', closeTime: '00:00' },
-          { day: 'Thursday', openTime: '19:00', closeTime: '00:00' },
-          { day: 'Friday', openTime: '20:00', closeTime: '02:00' },
-          { day: 'Saturday', openTime: '20:00', closeTime: '02:00' },
-          { day: 'Sunday', openTime: '18:00', closeTime: '00:00' },
-        ]
-      },
-    ];
-
-    // Filter by city if provided
-    let filteredLocals = mockLocals;
+    const apiParams: any = {
+      page: params.page || 0,
+      size: params.size || 10,
+    };
+    
     if (params.city) {
-      filteredLocals = mockLocals.filter(local => local.city.toLowerCase() === params.city?.toLowerCase());
+      apiParams.city = params.city;
     }
-
-    // Filter by search term if provided
+    
     if (params.search) {
-      const searchTerm = params.search.toLowerCase();
-      filteredLocals = filteredLocals.filter(local => 
-        local.name.toLowerCase().includes(searchTerm) || 
-        local.tags.some(tag => tag.toLowerCase().includes(searchTerm))
-      );
+      apiParams.search = params.search;
     }
-
+    
+    if (params.relevant !== undefined) {
+      apiParams.relevant = params.relevant;
+    }
+    
+    const response = await api.get('/public/locals', { params: apiParams });
+    
+    // Transform API response to match our Local type
+    const locals: Local[] = response.data.content.map((local: any) => ({
+      id: local.localId.toString(),
+      name: local.name,
+      city: local.city,
+      address: `${local.street}, ${local.zipCode} ${local.city}`,
+      image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`,
+      tags: local.tagList || [],
+      rating: local.score > 0 ? local.score : 4.5, // Default rating if score is negative
+      capacity: 300, // Default as API doesn't provide this
+      description: local.description || '',
+      schedule: local.schedule || [
+        { day: 'Friday', openTime: '22:00', closeTime: '06:00' },
+        { day: 'Saturday', openTime: '22:00', closeTime: '06:00' },
+      ]
+    }));
+    
     return {
-      content: filteredLocals,
+      content: locals,
       pageable: {
-        pageNumber: params.page || 0,
-        pageSize: params.size || 10,
-        totalElements: filteredLocals.length,
-        totalPages: Math.ceil(filteredLocals.length / (params.size || 10))
+        pageNumber: response.data.number,
+        pageSize: response.data.size,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
       }
     };
   } catch (error) {
@@ -145,8 +100,10 @@ export const getLocals = async (
 
 export const getLocalById = async (localId: string): Promise<Local> => {
   try {
-    // In production: const response = await api.get(`/public/locals/${localId}`);
-    const locals = await getLocals();
+    // The API doesn't have a specific endpoint for getting a local by ID
+    // So we fetch all locals and filter
+    const params = { size: 100 }; // Increase size to improve chances of finding the local
+    const locals = await getLocals(params);
     const local = locals.content.find(l => l.id === localId);
     
     if (!local) {
@@ -162,9 +119,11 @@ export const getLocalById = async (localId: string): Promise<Local> => {
 
 export const getEventsByLocalId = async (localId: string): Promise<Event[]> => {
   try {
-    // In production: const response = await api.get(`/public/events?localId=${localId}`);
-    const events = await getEvents({ localId });
-    return events.content;
+    // The API doesn't have a specific endpoint for getting events by local ID
+    // So we fetch all events and filter
+    const params = { size: 100 }; // Increase size to improve chances of finding events
+    const events = await getEvents(params);
+    return events.content.filter(event => event.localId === localId);
   } catch (error) {
     console.error(`Error fetching events for local ID ${localId}:`, error);
     throw error;
@@ -175,105 +134,56 @@ export const getEvents = async (
   params: { city?: string; localId?: string; startDate?: string; endDate?: string; page?: number; size?: number; relevant?: boolean; search?: string } = {}
 ): Promise<PaginatedResponse<Event>> => {
   try {
-    // For development/testing, return mock data
-    // In production: const response = await api.get('/public/events', { params });
-    
-    const mockEvents: Event[] = [
-      {
-        id: '1',
-        title: 'Salsa Night',
-        description: 'Join us for an amazing night of salsa dancing with live music from the Salsa Kings band.',
-        date: '2023-06-15T21:00:00',
-        image: 'https://source.unsplash.com/random/800x600/?salsa',
-        localId: '2',
-        localName: 'Salsa Paradise',
-        city: 'Madrid',
-        ageRestriction: '18+',
-        capacity: 200,
-        price: 25,
-        tags: ['Salsa', 'Dancing', 'Live Music']
-      },
-      {
-        id: '2',
-        title: 'Flamenco Experience',
-        description: 'Experience the passion of flamenco with our award-winning dancers and musicians.',
-        date: '2023-06-18T20:00:00',
-        image: 'https://source.unsplash.com/random/800x600/?flamenco',
-        localId: '3',
-        localName: 'Flamenco Passion',
-        city: 'Madrid',
-        ageRestriction: 'All ages',
-        capacity: 150,
-        price: 35,
-        tags: ['Flamenco', 'Show', 'Traditional']
-      },
-      {
-        id: '3',
-        title: 'DJ Night with DJ Moreno',
-        description: 'International DJ Moreno brings the best electronic music to our club.',
-        date: '2023-06-20T23:00:00',
-        image: 'https://source.unsplash.com/random/800x600/?dj',
-        localId: '1',
-        localName: 'Tango Club Madrid',
-        city: 'Madrid',
-        ageRestriction: '21+',
-        capacity: 300,
-        price: 15,
-        tags: ['DJ', 'Electronic', 'Party']
-      },
-      {
-        id: '4',
-        title: 'Tango Workshop',
-        description: 'Learn the basics of tango with professional dancers and enjoy a night of dancing.',
-        date: '2023-06-25T19:00:00',
-        image: 'https://source.unsplash.com/random/800x600/?tango',
-        localId: '2',
-        localName: 'Salsa Paradise',
-        city: 'Madrid',
-        ageRestriction: '18+',
-        capacity: 100,
-        price: 30,
-        tags: ['Tango', 'Workshop', 'Dancing']
-      },
-    ];
-
-    // Filter by parameters
-    let filteredEvents = mockEvents;
+    const apiParams: any = {
+      page: params.page || 0,
+      size: params.size || 10,
+    };
     
     if (params.city) {
-      filteredEvents = filteredEvents.filter(event => event.city.toLowerCase() === params.city?.toLowerCase());
+      apiParams.city = params.city;
     }
     
-    if (params.localId) {
-      filteredEvents = filteredEvents.filter(event => event.localId === params.localId);
-    }
-
-    // Filter by search term if provided
     if (params.search) {
-      const searchTerm = params.search.toLowerCase();
-      filteredEvents = filteredEvents.filter(event => 
-        event.title.toLowerCase().includes(searchTerm) || 
-        event.description.toLowerCase().includes(searchTerm) ||
-        (event.tags && event.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
-      );
+      apiParams.search = params.search;
     }
-
-    // Filter by start date if provided
+    
     if (params.startDate) {
-      const startDate = new Date(params.startDate);
-      filteredEvents = filteredEvents.filter(event => {
-        const eventDate = new Date(event.date);
-        return eventDate >= startDate;
-      });
+      apiParams.startDate = params.startDate;
     }
-
+    
+    if (params.endDate) {
+      apiParams.endDate = params.endDate;
+    }
+    
+    if (params.relevant !== undefined) {
+      apiParams.relevant = params.relevant;
+    }
+    
+    const response = await api.get('/public/events', { params: apiParams });
+    
+    // Transform API response to match our Event type
+    const events: Event[] = response.data.content.map((event: any) => ({
+      id: event.eventId.toString(),
+      title: event.title,
+      description: event.description || '',
+      date: event.eventDate + 'T20:00:00', // Adding default time since API only returns date
+      image: event.fileName || `https://source.unsplash.com/random/800x600/?event`,
+      localId: event.localId.toString(),
+      localName: event.localName,
+      city: event.localCity,
+      ageRestriction: event.age ? `${event.age}+` : 'All ages',
+      capacity: event.capacity || 200,
+      price: 15, // Default price as API doesn't provide this
+      tags: event.tagList || []
+    }));
+    
     return {
-      content: filteredEvents,
+      content: events,
       pageable: {
-        pageNumber: params.page || 0,
-        pageSize: params.size || 10,
-        totalElements: filteredEvents.length,
-        totalPages: Math.ceil(filteredEvents.length / (params.size || 10))
+        pageNumber: response.data.number,
+        pageSize: response.data.size,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
       }
     };
   } catch (error) {
@@ -284,8 +194,10 @@ export const getEvents = async (
 
 export const getEventById = async (eventId: string): Promise<Event> => {
   try {
-    // In production: const response = await api.get(`/public/events/${eventId}`);
-    const events = await getEvents();
+    // The API doesn't have a specific endpoint for getting an event by ID
+    // So we fetch all events and filter
+    const params = { size: 100 }; // Increase size to improve chances of finding the event
+    const events = await getEvents(params);
     const event = events.content.find(e => e.id === eventId);
     
     if (!event) {
@@ -301,51 +213,23 @@ export const getEventById = async (eventId: string): Promise<Event> => {
 
 export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
   try {
-    // In production: const response = await api.get(`/public/drinks/local/${localId}`);
+    const response = await api.get(`/public/drinks/local/${localId}`);
     
-    // Mock data for development
-    const mockDrinks: Drink[] = [
-      {
-        id: '1',
-        name: 'Classic Mojito',
-        price: 10,
-        description: 'Rum, mint, lime, sugar, and soda water.',
-        localId: localId
-      },
-      {
-        id: '2',
-        name: 'Piña Colada',
-        price: 12,
-        description: 'Rum, coconut cream, and pineapple juice.',
-        localId: localId
-      },
-      {
-        id: '3',
-        name: 'Margarita',
-        price: 11,
-        description: 'Tequila, lime juice, and triple sec.',
-        localId: localId
-      },
-      {
-        id: '4',
-        name: 'Beer (Draft)',
-        price: 6,
-        description: 'Local craft beer on tap.',
-        localId: localId
-      },
-      {
-        id: '5',
-        name: 'Sangria (Glass)',
-        price: 8,
-        description: 'Red wine with chopped fruit, brandy, and orange juice.',
-        localId: localId
-      },
-    ];
+    // Transform API response to match our Drink type
+    const drinks: Drink[] = response.data.map((drink: any) => ({
+      id: drink.offerId.toString(),
+      name: drink.title,
+      price: drink.price,
+      description: drink.description || '',
+      localId: localId
+    }));
     
-    return mockDrinks;
+    return drinks;
   } catch (error) {
     console.error(`Error fetching drinks for local ID ${localId}:`, error);
-    throw error;
+    
+    // If the API call fails, return empty array to prevent UI breaking
+    return [];
   }
 };
 
@@ -360,25 +244,27 @@ export interface CheckoutFormData {
 
 export const login = async (email: string, password: string): Promise<{ token: string; user: User }> => {
   try {
-    // In production: const response = await api.post('/oauth/token', { email, password });
+    // OAuth2 login
+    const formData = new URLSearchParams();
+    formData.append('username', email);
+    formData.append('password', password);
+    formData.append('grant_type', 'password');
     
-    // Mock login for development
-    const mockToken = 'mock-auth-token-123456';
-    const mockUser: User = {
-      id: '1',
-      name: 'John Doe',
-      email: email,
-      phone: '+1234567890',
-      favorites: {
-        locals: ['1', '3'],
-        events: ['2', '4']
+    const response = await axios.post(`${API_BASE_URL}/oauth/token`, formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
-    };
+    });
+    
+    const token = response.data.access_token;
     
     // Store token in localStorage
-    localStorage.setItem('token', mockToken);
+    localStorage.setItem('token', token);
     
-    return { token: mockToken, user: mockUser };
+    // Get user info with the token
+    const userInfo = await getCurrentUser();
+    
+    return { token, user: userInfo };
   } catch (error) {
     console.error('Login error:', error);
     throw error;
@@ -392,13 +278,25 @@ export const register = async (userData: {
   phone?: string;
 }): Promise<User> => {
   try {
-    // In production: const response = await api.post('/public/new_user', userData);
-    
-    // Mock registration for development
-    const mockUser: User = {
-      id: Math.random().toString(36).substring(2, 9),
+    // Format the data according to API requirements
+    const apiData = {
       name: userData.name,
+      surname: "", // Default empty surname
       email: userData.email,
+      gender: "O", // Default 'Other' gender
+      birthdate: "2000-01-01", // Default birthdate
+      notifications: true,
+      newsletter: false,
+      password: userData.password
+    };
+    
+    const response = await api.post('/public/new_user', apiData);
+    
+    // Transform API response to match our User type
+    const user: User = {
+      id: response.data.userId.toString(),
+      name: response.data.name,
+      email: response.data.email,
       phone: userData.phone,
       favorites: {
         locals: [],
@@ -406,7 +304,7 @@ export const register = async (userData: {
       }
     };
     
-    return mockUser;
+    return user;
   } catch (error) {
     console.error('Registration error:', error);
     throw error;
@@ -415,21 +313,21 @@ export const register = async (userData: {
 
 export const getCurrentUser = async (): Promise<User> => {
   try {
-    // In production: const response = await api.get('/api/users/self');
+    const response = await api.get('/api/users/self');
     
-    // Mock user data for development
-    const mockUser: User = {
-      id: '1',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '+1234567890',
+    // Transform API response to match our User type
+    const user: User = {
+      id: response.data.userTango.userId.toString(),
+      name: response.data.userTango.name,
+      email: response.data.userTango.email,
+      phone: response.data.userTango.phone,
       favorites: {
-        locals: ['1', '3'],
-        events: ['2', '4']
+        locals: response.data.favoriteList.filter((item: any) => item.favoriteType === 'LOCAL').map((item: any) => item.entityId.toString()),
+        events: response.data.favoriteList.filter((item: any) => item.favoriteType === 'EVENT').map((item: any) => item.entityId.toString())
       }
     };
     
-    return mockUser;
+    return user;
   } catch (error) {
     console.error('Error fetching current user:', error);
     throw error;
@@ -438,9 +336,8 @@ export const getCurrentUser = async (): Promise<User> => {
 
 export const toggleFavorite = async (type: 'local' | 'event', id: string): Promise<User> => {
   try {
-    // In production: const response = await api.post(`/api/users/favorites/${type}/${id}`);
-    
-    // Mock toggle favorite for development
+    // The API doesn't have a documented endpoint for toggling favorites
+    // For now, we'll simulate it locally
     const user = await getCurrentUser();
     const favorites = user.favorites || { locals: [], events: [] };
     
@@ -475,7 +372,7 @@ export const getFavoriteLocals = async (): Promise<Local[]> => {
       return [];
     }
     
-    const locals = await getLocals();
+    const locals = await getLocals({ size: 100 });
     return locals.content.filter(local => favoriteLocalIds.includes(local.id));
   } catch (error) {
     console.error('Error fetching favorite locals:', error);
@@ -492,7 +389,7 @@ export const getFavoriteEvents = async (): Promise<Event[]> => {
       return [];
     }
     
-    const events = await getEvents();
+    const events = await getEvents({ size: 100 });
     return events.content.filter(event => favoriteEventIds.includes(event.id));
   } catch (error) {
     console.error('Error fetching favorite events:', error);
@@ -508,12 +405,13 @@ export const createTicket = async (
   userData?: CheckoutFormData
 ): Promise<Ticket> => {
   try {
-    // In production: const response = await api.post('/api/tickets', { eventId, quantity, userData });
+    // The API doesn't have a documented endpoint for creating tickets
+    // For now, we'll simulate it locally
     
     // Get event details
     const event = await getEventById(eventId);
     
-    // Mock ticket creation for development
+    // Mock ticket creation
     const mockTicket: Ticket = {
       id: Math.random().toString(36).substring(2, 9),
       eventId: event.id,
@@ -533,9 +431,9 @@ export const createTicket = async (
 
 export const getUserTickets = async (): Promise<Ticket[]> => {
   try {
-    // In production: const response = await api.get('/api/users/tickets');
+    // The API doesn't have a documented endpoint for getting user tickets
+    // For now, we'll return mock data
     
-    // Mock tickets for development
     const mockTickets: Ticket[] = [
       {
         id: '1',
