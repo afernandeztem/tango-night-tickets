@@ -1,19 +1,18 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar as CalendarIcon, Search, Filter, CalendarRange } from 'lucide-react';
+import { Search, Filter, CalendarRange } from 'lucide-react';
 import { Event } from '../types';
 import { getEvents } from '../services/api';
 import { useApp } from '../context/AppContext';
 import EventCard from '../components/EventCard';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
+import CalendarWithDropdowns from '@/components/CalendarWithDropdowns';
 
 const EventsPage: React.FC = () => {
   const { state } = useApp();
@@ -116,13 +115,11 @@ const EventsPage: React.FC = () => {
                     <span className="text-gray-500">{formatDateRange()}</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    initialFocus
-                    className="border rounded-lg p-3"
+                <PopoverContent className="w-auto p-3" align="start">
+                  <CalendarWithDropdowns 
+                    dateRange={dateRange} 
+                    onSelect={setDateRange} 
+                    className="border rounded-lg p-3 bg-white"
                   />
                 </PopoverContent>
               </Popover>
