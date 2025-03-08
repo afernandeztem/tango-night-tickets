@@ -106,17 +106,25 @@ const LandingPage: React.FC = () => {
           <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker">
             {t.subtitle}
           </p>
+          
+          {/* Moved the city selection title closer to the welcome section */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="mt-16"
+          >
+            <h2 className="text-2xl font-medium mb-8 font-darker">{t.selectCity}</h2>
+          </motion.div>
         </motion.div>
 
-        {/* Push the city selection section more to the bottom */}
+        {/* Push the city cards section more to the bottom but still connected to the title */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-16 mt-auto"
+          transition={{ delay: 0.5, duration: 0.6 }}
+          className="mb-16 mt-4"
         >
-          <h2 className="text-2xl font-medium text-center mb-8 font-darker">{t.selectCity}</h2>
-          
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[...Array(3)].map((_, index) => (
