@@ -36,35 +36,37 @@ const CalendarWithDropdowns: React.FC<CalendarWithDropdownsProps> = ({
   };
 
   return (
-    <Calendar
-      mode="range"
-      selected={dateRange}
-      onSelect={onSelect}
-      className={className || "rounded-lg border border-border p-2 bg-background"}
-      captionLayout="dropdown"
-      defaultMonth={new Date()}
-      components={{
-        Dropdown: (props) => {
-          return (
-            <Select
-              value={String(props.value)}
-              onValueChange={(value) => {
-                if (props.onChange) {
-                  handleCalendarChange(value, props.onChange);
-                }
-              }}
-            >
-              <SelectTrigger className="h-8 w-fit font-medium first:grow">
-                <SelectValue>{props.name}</SelectValue>
-              </SelectTrigger>
-              <SelectContent className="max-h-[min(26rem,var(--radix-select-content-available-height))]">
-                {props.children}
-              </SelectContent>
-            </Select>
-          );
-        },
-      }}
-    />
+    <div className={className || "rounded-lg border border-border bg-background"}>
+      <Calendar
+        mode="range"
+        selected={dateRange}
+        onSelect={onSelect}
+        className="p-0"
+        captionLayout="dropdown"
+        defaultMonth={new Date()}
+        components={{
+          Dropdown: (props) => {
+            return (
+              <Select
+                value={String(props.value)}
+                onValueChange={(value) => {
+                  if (props.onChange) {
+                    handleCalendarChange(value, props.onChange);
+                  }
+                }}
+              >
+                <SelectTrigger className="h-8 w-fit font-medium first:grow">
+                  <SelectValue>{props.name}</SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-[min(26rem,var(--radix-select-content-available-height))]">
+                  {props.children}
+                </SelectContent>
+              </Select>
+            );
+          },
+        }}
+      />
+    </div>
   );
 };
 

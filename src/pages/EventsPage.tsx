@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -83,11 +82,9 @@ const EventsPage: React.FC = () => {
     
     if (dateRange.from) {
       if (dateRange.to) {
-        return t.dateSelected
-          .replace('{from}', format(dateRange.from, 'PPP'))
-          .replace('{to}', format(dateRange.to, 'PPP'));
+        return `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`;
       }
-      return t.onlyFromSelected.replace('{from}', format(dateRange.from, 'PPP'));
+      return format(dateRange.from, 'MMM d, yyyy');
     }
     
     return t.pickDate;
@@ -124,25 +121,26 @@ const EventsPage: React.FC = () => {
                 <PopoverTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start text-left font-normal pl-10"
+                    className="w-full justify-start text-left font-normal pl-10 border border-gray-300 rounded-lg hover:border-tango-primary"
                   >
                     <CalendarRange className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    <span className={dateRange ? "text-foreground" : "text-gray-500"}>
+                    <span className={dateRange ? "" : "text-gray-500"}>
                       {formatDateRange()}
                     </span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-auto p-0 shadow-lg rounded-lg" align="start">
                   <div className="p-3">
+                    <h3 className="text-sm mb-2 font-medium">Date range picker</h3>
                     <CalendarWithDropdowns 
                       dateRange={dateRange} 
                       onSelect={(range) => {
                         handleDateRangeChange(range);
                         if (range?.to) {
-                          setCalendarOpen(false);
+                          setTimeout(() => setCalendarOpen(false), 300);
                         }
-                      }} 
-                      className="pointer-events-auto"
+                      }}
+                      className="rounded-lg"
                     />
                   </div>
                 </PopoverContent>

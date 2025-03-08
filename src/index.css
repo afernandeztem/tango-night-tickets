@@ -96,6 +96,22 @@
   .nav-link {
     @apply text-sm font-medium text-gray-700 hover:text-tango-primary transition-colors;
   }
+  
+  /* Calendar styles to match the design */
+  .rdp-day_selected, 
+  .rdp-day_selected:focus,
+  .rdp-day_selected:hover {
+    @apply bg-tango-primary text-white font-medium;
+  }
+  
+  .rdp-day_range_middle,
+  .rdp-day_range_middle:hover {
+    @apply bg-opacity-20 text-foreground;
+  }
+  
+  .rdp-day_today {
+    @apply font-semibold;
+  }
 }
 
 :root {
