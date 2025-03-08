@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuroraBackground } from '../components/ui/aurora-background';
 import { getCities } from '../services/api';
@@ -17,8 +17,10 @@ const LandingPage: React.FC = () => {
   const { data: cities = [], isLoading } = useQuery({
     queryKey: ['cities'],
     queryFn: getCities,
-    onError: (error) => {
-      console.error('Error fetching cities:', error);
+    onSettled: (data, error) => {
+      if (error) {
+        console.error('Error fetching cities:', error);
+      }
     }
   });
 

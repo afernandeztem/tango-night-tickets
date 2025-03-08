@@ -5,13 +5,34 @@ import { CheckoutFormData } from '../types';
 import { useApp } from '../context/AppContext';
 
 interface CheckoutFormProps {
-  onSubmit: (data: CheckoutFormData) => void;
+  onSubmit?: (data: CheckoutFormData) => void;
+  onChange?: (data: Partial<CheckoutFormData>) => void;
+  data?: Partial<CheckoutFormData>;
+  disabled?: boolean;
   buttonText?: string;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Continue to Payment' }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
+  onSubmit, 
+  onChange,
+  data = {},
+  disabled = false,
+  buttonText = 'Continue to Payment' 
+}) => {
   const { state } = useApp();
-  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormData>();
+  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormData>({
+    defaultValues: data
+  });
+  
+  const handleFormSubmit = (formData: CheckoutFormData) => {
+    if (onSubmit) onSubmit(formData);
+  };
+
+  const handleInputChange = (field: keyof CheckoutFormData, value: any) => {
+    if (onChange) {
+      onChange({ [field]: value });
+    }
+  };
   
   const translations = {
     en: {
@@ -59,7 +80,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
   const t = translations[state.language];
   
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold mb-4">{t.personalDetails}</h2>
         
@@ -73,7 +94,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
               type="text"
               className={`w-full px-4 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-tango-primary`}
               placeholder={t.namePlaceholder}
+              disabled={disabled}
               {...register('name', { required: true })}
+              onChange={(e) => handleInputChange('name', e.target.value)}
             />
             {errors.name && (
               <span className="text-red-500 text-sm mt-1">{t.required}</span>
@@ -89,7 +112,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
               type="text"
               className={`w-full px-4 py-2 border ${errors.surname ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-tango-primary`}
               placeholder={t.surnamePlaceholder}
+              disabled={disabled}
               {...register('surname', { required: true })}
+              onChange={(e) => handleInputChange('surname', e.target.value)}
             />
             {errors.surname && (
               <span className="text-red-500 text-sm mt-1">{t.required}</span>
@@ -106,10 +131,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
             type="email"
             className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-tango-primary`}
             placeholder={t.emailPlaceholder}
+            disabled={disabled}
             {...register('email', { 
               required: true, 
               pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i 
             })}
+            onChange={(e) => handleInputChange('email', e.target.value)}
           />
           {errors.email?.type === 'required' && (
             <span className="text-red-500 text-sm mt-1">{t.required}</span>
@@ -128,10 +155,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
             type="tel"
             className={`w-full px-4 py-2 border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-1 focus:ring-tango-primary`}
             placeholder={t.phonePlaceholder}
+            disabled={disabled}
             {...register('phone', { 
               required: true,
               pattern: /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$/
             })}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
           />
           {errors.phone?.type === 'required' && (
             <span className="text-red-500 text-sm mt-1">{t.required}</span>
@@ -148,7 +177,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
           <select
             id="gender"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-tango-primary"
+            disabled={disabled}
             {...register('gender')}
+            onChange={(e) => handleInputChange('gender', e.target.value)}
           >
             <option value="">{t.preferNotSay}</option>
             <option value="male">{t.male}</option>
@@ -158,9 +189,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, buttonText = 'Con
         </div>
       </div>
       
-      <button type="submit" className="tango-button w-full py-3">
-        {buttonText || t.continue}
-      </button>
+      {onSubmit && (
+        <button type="submit" disabled={disabled} className="tango-button w-full py-3">
+          {buttonText || t.continue}
+        </button>
+      )}
     </form>
   );
 };
