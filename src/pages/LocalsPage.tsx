@@ -23,7 +23,7 @@ const LocalsPage: React.FC = () => {
       page: currentPage,
       size: 12
     }),
-    keepPreviousData: true
+    placeholderData: (prev) => prev
   });
   
   const translations = {
