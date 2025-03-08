@@ -17,11 +17,6 @@ const LandingPage: React.FC = () => {
   const { data: cities = [], isLoading } = useQuery({
     queryKey: ['cities'],
     queryFn: getCities,
-    onSettled: (data, error) => {
-      if (error) {
-        console.error('Error fetching cities:', error);
-      }
-    }
   });
 
   const translations = {
