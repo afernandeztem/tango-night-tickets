@@ -8,12 +8,19 @@ import { useApp } from '../context/AppContext';
 import CityCard from '../components/CityCard';
 import { motion } from 'framer-motion';
 import { Globe } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 const LandingPage: React.FC = () => {
-  const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { setSelectedCity, state } = useApp();
+
+  const { data: cities = [], isLoading } = useQuery({
+    queryKey: ['cities'],
+    queryFn: getCities,
+    onError: (error) => {
+      console.error('Error fetching cities:', error);
+    }
+  });
 
   const translations = {
     en: {
@@ -31,49 +38,6 @@ const LandingPage: React.FC = () => {
   };
 
   const t = translations[state.language];
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const citiesData = await getCities();
-        // Focus only on active cities that we care about
-        const activeCities = citiesData.filter(city => city.active);
-        setCities(activeCities);
-      } catch (error) {
-        console.error('Error fetching cities:', error);
-        
-        // Fallback to hardcoded cities if API fails
-        const fallbackCities: City[] = [
-          {
-            id: 'madrid',
-            name: 'Madrid',
-            country: 'Spain',
-            image: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-            active: true
-          },
-          {
-            id: 'malaga',
-            name: 'Málaga',
-            country: 'Spain',
-            image: 'https://images.unsplash.com/photo-1591704066868-eb6f858db842?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-            active: true
-          },
-          {
-            id: 'mallorca',
-            name: 'Mallorca',
-            country: 'Spain',
-            image: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-            active: true
-          }
-        ];
-        setCities(fallbackCities);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCities();
-  }, []);
 
   const handleCitySelect = (city: City) => {
     setSelectedCity(city);
@@ -101,34 +65,34 @@ const LandingPage: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-6" /* Reduced from mb-10 to mb-6 */
+          className="text-center mb-2" // Reduced spacing here
         >
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
             {t.title}
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker mb-8">
+          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker mb-4">
             {t.subtitle}
           </p>
           
-          <h2 className="text-2xl font-medium mb-4 font-darker">{t.selectCity}</h2>
+          <h2 className="text-2xl font-medium mb-3 font-darker">{t.selectCity}</h2>
         </motion.div>
 
-        {/* City cards directly below the heading with less space */}
+        {/* City cards with less space from the heading */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.6 }}
           className="mb-16 w-full"
         >
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {[...Array(3)].map((_, index) => (
                 <div key={index} className="h-48 bg-gray-100 rounded-lg animate-pulse"></div>
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {cities.map((city, index) => (
+              {cities.filter(city => city.active).map((city, index) => (
                 <motion.div
                   key={city.id}
                   custom={index}

@@ -100,17 +100,24 @@ export const getLocals = async (
 
 export const getLocalById = async (localId: string): Promise<Local> => {
   try {
-    // The API doesn't have a specific endpoint for getting a local by ID
-    // So we fetch all locals and filter
-    const params = { size: 100 }; // Increase size to improve chances of finding the local
-    const locals = await getLocals(params);
-    const local = locals.content.find(l => l.id === localId);
+    const response = await api.get(`/public/local/${localId}`);
+    const local = response.data;
     
-    if (!local) {
-      throw new Error(`Local with ID ${localId} not found`);
-    }
-    
-    return local;
+    return {
+      id: local.localId.toString(),
+      name: local.name,
+      city: local.city,
+      address: `${local.street}, ${local.zipCode} ${local.city}`,
+      image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`,
+      tags: local.tagList || [],
+      rating: local.score > 0 ? local.score : 4.5, // Default rating if score is negative
+      capacity: 300, // Default as API doesn't provide this
+      description: local.description || '',
+      schedule: local.schedule || [
+        { day: 'Friday', openTime: '22:00', closeTime: '06:00' },
+        { day: 'Saturday', openTime: '22:00', closeTime: '06:00' },
+      ]
+    };
   } catch (error) {
     console.error(`Error fetching local with ID ${localId}:`, error);
     throw error;
@@ -119,11 +126,26 @@ export const getLocalById = async (localId: string): Promise<Local> => {
 
 export const getEventsByLocalId = async (localId: string): Promise<Event[]> => {
   try {
-    // The API doesn't have a specific endpoint for getting events by local ID
-    // So we fetch all events and filter
-    const params = { size: 100 }; // Increase size to improve chances of finding events
-    const events = await getEvents(params);
-    return events.content.filter(event => event.localId === localId);
+    const response = await api.get(`/public/events/local/${localId}`, {
+      params: {
+        size: 100 // Get a larger number to ensure we get all events
+      }
+    });
+    
+    return response.data.content.map((event: any) => ({
+      id: event.eventId.toString(),
+      title: event.title,
+      description: event.description || '',
+      date: event.eventDate + 'T20:00:00', // Adding default time since API only returns date
+      image: event.fileName || `https://source.unsplash.com/random/800x600/?event`,
+      localId: event.localId.toString(),
+      localName: event.localName,
+      city: event.localCity,
+      ageRestriction: event.age ? `${event.age}+` : 'All ages',
+      capacity: event.capacity || 200,
+      price: 15, // Default price as API doesn't provide this
+      tags: event.tagList || []
+    }));
   } catch (error) {
     console.error(`Error fetching events for local ID ${localId}:`, error);
     throw error;
@@ -194,17 +216,23 @@ export const getEvents = async (
 
 export const getEventById = async (eventId: string): Promise<Event> => {
   try {
-    // The API doesn't have a specific endpoint for getting an event by ID
-    // So we fetch all events and filter
-    const params = { size: 100 }; // Increase size to improve chances of finding the event
-    const events = await getEvents(params);
-    const event = events.content.find(e => e.id === eventId);
+    const response = await api.get(`/public/event/${eventId}`);
+    const event = response.data;
     
-    if (!event) {
-      throw new Error(`Event with ID ${eventId} not found`);
-    }
-    
-    return event;
+    return {
+      id: event.eventId.toString(),
+      title: event.title,
+      description: event.description || '',
+      date: event.eventDate + 'T20:00:00', // Adding default time since API only returns date
+      image: event.fileName || `https://source.unsplash.com/random/800x600/?event`,
+      localId: event.localId.toString(),
+      localName: event.localName,
+      city: event.localCity,
+      ageRestriction: event.age ? `${event.age}+` : 'All ages',
+      capacity: event.capacity || 200,
+      price: 15, // Default price as API doesn't provide this
+      tags: event.tagList || []
+    };
   } catch (error) {
     console.error(`Error fetching event with ID ${eventId}:`, error);
     throw error;
@@ -213,18 +241,17 @@ export const getEventById = async (eventId: string): Promise<Event> => {
 
 export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
   try {
-    const response = await api.get(`/public/drinks/local/${localId}`);
+    const response = await api.get(`/public/local/${localId}`);
+    const local = response.data;
+    const drinks = local.drinkList || [];
     
-    // Transform API response to match our Drink type
-    const drinks: Drink[] = response.data.map((drink: any) => ({
+    return drinks.map((drink: any) => ({
       id: drink.offerId.toString(),
       name: drink.title,
       price: drink.price,
       description: drink.description || '',
       localId: localId
     }));
-    
-    return drinks;
   } catch (error) {
     console.error(`Error fetching drinks for local ID ${localId}:`, error);
     
@@ -372,8 +399,9 @@ export const getFavoriteLocals = async (): Promise<Local[]> => {
       return [];
     }
     
-    const locals = await getLocals({ size: 100 });
-    return locals.content.filter(local => favoriteLocalIds.includes(local.id));
+    // Fetch each local individually
+    const promises = favoriteLocalIds.map(id => getLocalById(id));
+    return Promise.all(promises);
   } catch (error) {
     console.error('Error fetching favorite locals:', error);
     throw error;
@@ -389,8 +417,9 @@ export const getFavoriteEvents = async (): Promise<Event[]> => {
       return [];
     }
     
-    const events = await getEvents({ size: 100 });
-    return events.content.filter(event => favoriteEventIds.includes(event.id));
+    // Fetch each event individually
+    const promises = favoriteEventIds.map(id => getEventById(id));
+    return Promise.all(promises);
   } catch (error) {
     console.error('Error fetching favorite events:', error);
     throw error;
