@@ -2,29 +2,30 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Search, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Search, Filter, CalendarRange } from 'lucide-react';
 import { Event } from '../types';
 import { getEvents } from '../services/api';
 import { useApp } from '../context/AppContext';
 import EventCard from '../components/EventCard';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
 
 const EventsPage: React.FC = () => {
   const { state } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
   const { data: events, isLoading } = useQuery({
-    queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateFilter],
+    queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateRange?.from, dateRange?.to],
     queryFn: () => getEvents({ 
       city: state.selectedCity?.name || '',
-      startDate: dateFilter || undefined,
+      startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
+      endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
       search: searchTerm || undefined
     })
   });
@@ -34,8 +35,10 @@ const EventsPage: React.FC = () => {
       title: 'Events',
       subtitle: 'Discover upcoming events in',
       search: 'Search events...',
-      date: 'Filter by date',
-      pickDate: 'Pick a date',
+      date: 'Filter by date range',
+      pickDate: 'Pick date range',
+      dateSelected: '{from} to {to}',
+      onlyFromSelected: 'From {from}',
       clearFilters: 'Clear filters',
       noEvents: 'No events found with the current filters',
       loading: 'Loading events...'
@@ -44,8 +47,10 @@ const EventsPage: React.FC = () => {
       title: 'Eventos',
       subtitle: 'Descubre próximos eventos en',
       search: 'Buscar eventos...',
-      date: 'Filtrar por fecha',
-      pickDate: 'Seleccionar fecha',
+      date: 'Filtrar por rango de fecha',
+      pickDate: 'Seleccionar rango de fecha',
+      dateSelected: '{from} a {to}',
+      onlyFromSelected: 'Desde {from}',
       clearFilters: 'Limpiar filtros',
       noEvents: 'No se encontraron eventos con los filtros actuales',
       loading: 'Cargando eventos...'
@@ -56,17 +61,22 @@ const EventsPage: React.FC = () => {
   
   const handleClearFilters = () => {
     setSearchTerm('');
-    setDateFilter('');
-    setDate(undefined);
+    setDateRange(undefined);
   };
 
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    if (selectedDate) {
-      setDateFilter(format(selectedDate, 'yyyy-MM-dd'));
-    } else {
-      setDateFilter('');
+  const formatDateRange = () => {
+    if (!dateRange) return t.pickDate;
+    
+    if (dateRange.from) {
+      if (dateRange.to) {
+        return t.dateSelected
+          .replace('{from}', format(dateRange.from, 'PPP'))
+          .replace('{to}', format(dateRange.to, 'PPP'));
+      }
+      return t.onlyFromSelected.replace('{from}', format(dateRange.from, 'PPP'));
     }
+    
+    return t.pickDate;
   };
   
   return (
@@ -102,19 +112,15 @@ const EventsPage: React.FC = () => {
                     variant="outline" 
                     className="w-full justify-start text-left font-normal pl-10"
                   >
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    {date ? (
-                      format(date, "PPP")
-                    ) : (
-                      <span className="text-gray-500">{t.pickDate}</span>
-                    )}
+                    <CalendarRange className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <span className="text-gray-500">{formatDateRange()}</span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={date}
-                    onSelect={handleDateSelect}
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={setDateRange}
                     initialFocus
                     className="border rounded-lg p-3"
                   />
@@ -122,7 +128,7 @@ const EventsPage: React.FC = () => {
               </Popover>
             </div>
             
-            {(searchTerm || dateFilter) && (
+            {(searchTerm || dateRange) && (
               <button 
                 onClick={handleClearFilters}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors"
