@@ -19,6 +19,9 @@ const CityCard: React.FC<CityCardProps> = ({ city, onClick, imagePath }) => {
     onClick(normalizedCity);
   };
 
+  // Set a valid fallback if imagePath is undefined or empty
+  const imageSource = imagePath || city.image || 'https://source.unsplash.com/random/800x600/?city';
+
   return (
     <motion.div 
       className="city-card relative cursor-pointer overflow-hidden rounded-2xl shadow-lg"
@@ -36,7 +39,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, onClick, imagePath }) => {
     >
       <div className="relative h-56 md:h-64 overflow-hidden">
         <img 
-          src={imagePath || city.image || 'https://source.unsplash.com/random/800x600/?city'} 
+          src={imageSource} 
           alt={city.name}
           className="w-full h-full object-cover"
         />

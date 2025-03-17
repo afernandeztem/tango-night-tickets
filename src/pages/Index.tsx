@@ -22,8 +22,8 @@ const Index = () => {
     navigate('/home');
   };
 
-  // Updated images for specific cities
-  const cityImages = {
+  // Fixed image paths for the cities
+  const cityImages: Record<string, string> = {
     "Mallorca": "/lovable-uploads/7b083dda-f18a-41ea-bb7c-be54008d68e6.png",
     "Madrid": "/lovable-uploads/9bb4f081-0611-4b1e-b862-cd47a10c00ae.png",
     "Málaga": "/lovable-uploads/df7b178d-c9cf-4323-aaea-b856a275c91c.png"
@@ -85,6 +85,10 @@ const Index = () => {
   };
   
   const orderedCities = getOrderedCities();
+  
+  // Debug the city images
+  console.log("City Images:", cityImages);
+  console.log("Ordered Cities:", orderedCities);
   
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -188,20 +192,26 @@ const Index = () => {
                 variants={container}
                 className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
               >
-                {orderedCities.map((city, index) => (
-                  <motion.div
-                    key={city.id}
-                    variants={item}
-                    custom={index}
-                    className="transform-gpu"
-                  >
-                    <CityCard 
-                      city={city} 
-                      onClick={handleCitySelect}
-                      imagePath={cityImages[city.name as keyof typeof cityImages]}
-                    />
-                  </motion.div>
-                ))}
+                {orderedCities.map((city, index) => {
+                  // Get the image path for this city
+                  const imagePath = cityImages[city.name] || null;
+                  console.log(`City: ${city.name}, Image Path: ${imagePath}`);
+                  
+                  return (
+                    <motion.div
+                      key={city.id}
+                      variants={item}
+                      custom={index}
+                      className="transform-gpu"
+                    >
+                      <CityCard 
+                        city={city} 
+                        onClick={handleCitySelect}
+                        imagePath={imagePath}
+                      />
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             )}
           </motion.div>
