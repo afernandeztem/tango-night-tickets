@@ -1,3 +1,4 @@
+
 export interface City {
   id: string;
   name: string;
@@ -40,7 +41,7 @@ export interface Event {
   city: string;
   ageRestriction: string;
   capacity: number;
-  price: number;
+  price?: number;  // Making price optional
   tags?: string[];
 }
 

@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { City, Event, Local, Drink, User, PaginatedResponse, Ticket } from '../types';
 
@@ -195,8 +194,7 @@ export const getEventsByLocalId = async (localId: string, page = 0, size = 10): 
       city: event.localCity,
       ageRestriction: event.age ? `${event.age}+` : 'All ages',
       capacity: event.capacity || 200,
-      price: 15, // Default price as API doesn't provide this
-      tags: event.tagList || []
+      ...(event.price !== undefined ? { price: event.price } : {})
     }));
     
     return {
@@ -257,8 +255,7 @@ export const getEvents = async (
       city: event.localCity || event.city,
       ageRestriction: event.age ? `${event.age}+` : 'All ages',
       capacity: event.capacity || 200,
-      price: 15, // Default price as API doesn't provide this
-      tags: event.tagList || []
+      ...(event.price !== undefined ? { price: event.price } : {})
     }));
     
     return {
@@ -315,8 +312,7 @@ export const getCalendarEvents = async (
       city: event.localCity || event.city,
       ageRestriction: event.age ? `${event.age}+` : 'All ages',
       capacity: event.capacity || 200,
-      price: 15, // Default price as API doesn't provide this
-      tags: event.tagList || []
+      ...(event.price !== undefined ? { price: event.price } : {})
     }));
     
     return {
@@ -350,7 +346,7 @@ export const getEventById = async (eventId: string): Promise<Event> => {
       city: event.localCity,
       ageRestriction: event.age ? `${event.age}+` : 'All ages',
       capacity: event.capacity || 200,
-      price: 15, // Default price as API doesn't provide this
+      ...(event.price !== undefined ? { price: event.price } : {}),
       tags: event.tagList || []
     };
   } catch (error) {

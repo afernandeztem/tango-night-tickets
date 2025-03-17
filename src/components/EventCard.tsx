@@ -26,9 +26,12 @@ const EventCard: React.FC<EventCardProps> = ({ event, isFavorite }) => {
             alt={event.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute top-0 right-0 m-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded text-sm font-medium">
-            {event.price.toFixed(2)} €
-          </div>
+          {/* Only show the price tag if the price is set and not a default value */}
+          {event.price && event.price > 0 && (
+            <div className="absolute top-0 right-0 m-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded text-sm font-medium">
+              {event.price.toFixed(2)} €
+            </div>
+          )}
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-lg mb-2 group-hover:text-tango-primary transition-colors">
