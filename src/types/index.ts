@@ -1,5 +1,3 @@
-
-
 export interface City {
   id: string;
   name: string;
@@ -8,6 +6,8 @@ export interface City {
   image?: string;
   metricsTotalAmount?: number;
   metricsTotalTickets?: number;
+  displayName?: string;  // Normalized name without accents
+  originalName?: string; // Original name with accents preserved
 }
 
 export interface Local {
