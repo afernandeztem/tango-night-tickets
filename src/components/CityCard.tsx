@@ -8,10 +8,19 @@ interface CityCardProps {
 }
 
 const CityCard: React.FC<CityCardProps> = ({ city, onClick }) => {
+  // Create a modified city object with normalized name (without accents)
+  const handleClick = () => {
+    const normalizedCity = {
+      ...city,
+      name: city.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    };
+    onClick(normalizedCity);
+  };
+
   return (
     <div 
       className="tango-card cursor-pointer transition-transform duration-300 hover:scale-105"
-      onClick={() => onClick(city)}
+      onClick={handleClick}
     >
       <div className="relative h-48 overflow-hidden rounded-lg">
         <img 
