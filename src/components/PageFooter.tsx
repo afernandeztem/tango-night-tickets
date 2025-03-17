@@ -9,7 +9,7 @@ interface PageFooterProps {
 const PageFooter: React.FC<PageFooterProps> = ({ delay = 1.2 }) => {
   return (
     <motion.footer
-      className="mt-auto pt-4 relative z-20"
+      className="mt-auto pt-2 relative z-20"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 0.8, y: 0 }}
       transition={{ delay, duration: 0.8 }}
