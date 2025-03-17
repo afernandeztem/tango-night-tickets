@@ -43,13 +43,13 @@ const Index = () => {
       {/* Aurora Background */}
       <AuroraBackgroundSimple />
 
-      <div className="relative z-10 container mx-auto px-4 pt-16 pb-12 flex flex-col items-center">
+      <div className="relative z-10 container mx-auto px-4 pt-8 pb-6 flex flex-col items-center">
         {/* Logo and Tagline */}
         <TangoHero />
         
         {/* Content Container */}
         <motion.div
-          className="w-full max-w-4xl mx-auto"
+          className="w-full max-w-4xl mx-auto space-y-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
