@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 interface TangoLogoProps {
   variant?: 'full' | 'icon';
   className?: string;
-  linkTo?: string;
+  linkTo?: string | null;
 }
 
 const TangoLogo: React.FC<TangoLogoProps> = ({ 
@@ -17,7 +17,7 @@ const TangoLogo: React.FC<TangoLogoProps> = ({
     <img 
       src="/lovable-uploads/72e6240a-1c5c-42bc-9bab-23901aef3628.png" 
       alt="TangoApp" 
-      className={`h-8 ${className}`} 
+      className={`transition-all duration-300 hover:scale-105 ${className}`} 
     />
   ) : (
     <img 
