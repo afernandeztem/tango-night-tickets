@@ -44,6 +44,9 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
       navigate('/auth?mode=login');
     }
   };
+
+  // Make sure tags is an array before using array methods on it
+  const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
   
   return (
     <div 
@@ -75,7 +78,7 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
       </div>
       <div className="p-4 bg-white">
         <div className="flex flex-wrap gap-1 mb-3">
-          {local.tags.slice(0, 3).map((tag, index) => (
+          {tagsArray.slice(0, 3).map((tag, index) => (
             <span 
               key={index} 
               className="text-xs px-2 py-1 bg-tango-secondary text-tango-primary rounded-full"
