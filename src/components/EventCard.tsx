@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin } from 'lucide-react';
+import { Calendar, MapPin, Star } from 'lucide-react';
 import { Event } from '../types';
 import { formatDate } from '../utils/formatters';
 import { useApp } from '../context/AppContext';
@@ -19,47 +19,55 @@ const EventCard: React.FC<EventCardProps> = ({ event, isFavorite }) => {
       to={`/events/${event.id}`}
       className="block group"
     >
-      <div className="tango-card group-hover:shadow-md transition-shadow">
-        <div className="relative h-48 overflow-hidden rounded-t-lg">
+      <div className="rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300 h-full">
+        <div className="relative h-48 overflow-hidden">
           <img 
             src={event.image || 'https://source.unsplash.com/random/800x600/?concert'} 
             alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          {/* Only show the price tag if the price is set and not a default value */}
+          
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-70"></div>
+          
+          {/* Price badge - only show if price exists and is greater than 0 */}
           {event.price && event.price > 0 && (
-            <div className="absolute top-0 right-0 m-2 px-2 py-1 bg-white/80 backdrop-blur-sm rounded text-sm font-medium">
+            <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full text-sm font-semibold shadow-sm">
               {event.price.toFixed(2)} €
             </div>
           )}
-        </div>
-        <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 group-hover:text-tango-primary transition-colors">
-            {event.title}
-          </h3>
           
-          <div className="flex items-center text-gray-600 text-sm mb-2">
-            <Calendar size={14} className="mr-1" />
-            <span>{formatDate(event.date)}</span>
-          </div>
-          
-          <div className="flex items-center text-gray-600 text-sm">
-            <MapPin size={14} className="mr-1" />
-            <span>{event.localName}, {event.city}</span>
-          </div>
-          
+          {/* Tags overlay at the bottom of the image */}
           {event.tags && event.tags.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1">
-              {event.tags.slice(0, 3).map((tag, index) => (
+            <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+              {event.tags.slice(0, 2).map((tag, index) => (
                 <span 
                   key={index}
-                  className="px-2 py-1 bg-tango-secondary text-tango-primary text-xs rounded-full"
+                  className="px-2.5 py-1 bg-tango-primary/90 text-white text-xs font-medium rounded-full backdrop-blur-sm"
                 >
                   {tag}
                 </span>
               ))}
             </div>
           )}
+        </div>
+        
+        <div className="p-4">
+          <h3 className="font-semibold text-lg mb-3 group-hover:text-tango-primary transition-colors line-clamp-1">
+            {event.title}
+          </h3>
+          
+          <div className="space-y-2 text-gray-600">
+            <div className="flex items-center text-sm">
+              <Calendar size={15} className="mr-2 text-tango-primary" />
+              <span className="font-medium">{formatDate(event.date)}</span>
+            </div>
+            
+            <div className="flex items-center text-sm">
+              <MapPin size={15} className="mr-2 text-tango-primary" />
+              <span className="line-clamp-1">{event.localName}, {event.city}</span>
+            </div>
+          </div>
         </div>
       </div>
     </Link>
