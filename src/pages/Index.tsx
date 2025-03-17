@@ -4,11 +4,38 @@ import { Button } from "@/components/ui/button";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { motion } from "framer-motion";
 import TangoLogo from "@/components/TangoLogo";
-import { ChevronRight } from "lucide-react";
-import CitySelector from "@/components/CitySelector";
+import { getCities } from '@/services/api';
+import { City } from '../types';
+import CityCard from "../components/CityCard";
+import { useApp } from '../context/AppContext';
+import { useQuery } from '@tanstack/react-query';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { setSelectedCity } = useApp();
+  
+  const { data: cities = [], isLoading } = useQuery({
+    queryKey: ['cities'],
+    queryFn: getCities,
+  });
+
+  const handleCitySelect = (city: City) => {
+    setSelectedCity(city);
+    navigate('/home');
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.1 + i * 0.1,
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    })
+  };
   
   return (
     <AuroraBackground>
@@ -17,51 +44,66 @@ const Index = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-2xl w-full flex flex-col items-center"
+          className="max-w-3xl w-full flex flex-col items-center"
         >
-          {/* Larger logo */}
-          <div className="flex justify-center mb-8">
-            <TangoLogo variant="full" className="h-32 w-auto" linkTo={null} />
+          {/* Even larger logo */}
+          <div className="flex justify-center mb-10">
+            <TangoLogo variant="full" className="h-40 w-auto" linkTo={null} />
           </div>
           
-          {/* Animated tagline */}
-          <motion.p 
+          {/* Improved tagline */}
+          <motion.h1 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-2xl md:text-3xl text-center text-gray-700 mb-10 font-darker"
+            className="text-3xl md:text-4xl text-center text-gray-700 mb-6 font-darker font-bold"
+          >
+            Your Night, Your Way
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="text-xl md:text-2xl text-center text-gray-600 mb-10 font-darker"
           >
             Discover nightlife, buy tickets, and enjoy the night!
           </motion.p>
           
-          {/* Call to action buttons with staggered animation */}
+          {/* Cities grid */}
           <motion.div 
-            className="flex flex-col items-center w-full gap-6 max-w-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.6 }}
+            className="w-full"
           >
-            <Button 
-              onClick={() => navigate('/landing')} 
-              className="bg-tango-primary hover:bg-tango-primary/90 text-white px-8 py-7 text-xl font-medium rounded-xl w-full md:w-3/4 relative overflow-hidden group"
-            >
-              Get Started
-              <span className="absolute right-6 transition-transform duration-300 group-hover:translate-x-2">
-                <ChevronRight size={22} />
-              </span>
-            </Button>
+            <h2 className="text-2xl font-medium mb-6 text-center font-darker">Select Your City</h2>
             
-            {/* City selector component */}
-            <div className="mt-4">
-              <CitySelector 
-                className="text-base md:text-lg hover:text-tango-primary transition-colors"
-                onSelectCity={() => navigate('/landing')} 
-              />
-            </div>
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="h-48 bg-gray-100 rounded-lg animate-pulse"></div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {cities.filter(city => city.active).map((city, index) => (
+                  <motion.div
+                    key={city.id}
+                    custom={index}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    <CityCard city={city} onClick={handleCitySelect} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </motion.div>
         </motion.div>
         
-        {/* Decorative elements */}
+        {/* Footer copyright */}
         <motion.div
           className="absolute bottom-6 left-0 right-0 flex justify-center opacity-60"
           initial={{ opacity: 0 }}
