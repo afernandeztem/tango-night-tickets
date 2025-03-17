@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -21,10 +22,13 @@ const EventsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
   
+  // Use originalName for API calls if available, otherwise fallback to name
+  const cityName = state.selectedCity?.originalName || state.selectedCity?.name || '';
+  
   const { data: events, isLoading } = useQuery({
-    queryKey: ['events', state.selectedCity?.name || '', searchTerm, dateRange?.from, dateRange?.to],
+    queryKey: ['events', cityName, searchTerm, dateRange?.from, dateRange?.to],
     queryFn: () => getEvents({ 
-      city: state.selectedCity?.name || '',
+      city: cityName,
       startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
       endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
       search: searchTerm || undefined
@@ -101,7 +105,7 @@ const EventsPage: React.FC = () => {
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">{t.title}</h1>
           <p className="text-xl text-gray-600 mb-8 text-center">
-            {t.subtitle} {state.selectedCity?.name ? state.selectedCity.name : ''}
+            {t.subtitle} {state.selectedCity?.displayName || state.selectedCity?.name || ''}
           </p>
           
           <div className="flex flex-col md:flex-row gap-4 mb-8">

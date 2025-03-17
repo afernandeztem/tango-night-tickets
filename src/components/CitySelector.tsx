@@ -42,6 +42,9 @@ const CitySelector: React.FC<CitySelectorProps> = ({ onSelectCity, className }) 
 
   const t = translations[state.language];
 
+  // Display the normalized name if available, otherwise use the regular name
+  const displayCityName = state.selectedCity?.displayName || state.selectedCity?.name || 'Select City';
+
   return (
     <>
       <button 
@@ -49,7 +52,7 @@ const CitySelector: React.FC<CitySelectorProps> = ({ onSelectCity, className }) 
         className={`flex items-center gap-1 text-sm hover:text-tango-primary transition-colors ${className}`}
       >
         <MapPin size={16} />
-        {state.selectedCity?.name || 'Select City'}
+        {displayCityName}
         <ChevronDown size={14} />
       </button>
 

@@ -15,10 +15,13 @@ const LocalsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   
+  // Use originalName for API calls if available, otherwise fallback to name
+  const cityName = state.selectedCity?.originalName || state.selectedCity?.name || '';
+  
   const { data: localsData, isLoading } = useQuery({
-    queryKey: ['locals', state.selectedCity?.name || '', searchTerm, currentPage],
+    queryKey: ['locals', cityName, searchTerm, currentPage],
     queryFn: () => getLocals({ 
-      city: state.selectedCity?.name || '',
+      city: cityName,
       search: searchTerm || undefined,
       page: currentPage,
       size: 12
@@ -79,7 +82,7 @@ const LocalsPage: React.FC = () => {
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">{t.title}</h1>
           <p className="text-xl text-gray-600 mb-8 text-center">
-            {t.subtitle} {state.selectedCity?.name || ''}
+            {t.subtitle} {state.selectedCity?.displayName || state.selectedCity?.name || ''}
           </p>
           
           <div className="max-w-md mx-auto mb-8">
