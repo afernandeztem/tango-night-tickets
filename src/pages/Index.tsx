@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { motion } from "framer-motion";
+import TangoLogo from "@/components/TangoLogo";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -16,9 +17,9 @@ const Index = () => {
           transition={{ duration: 0.6 }}
           className="max-w-2xl"
         >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gradient">
-            TangoApp
-          </h1>
+          <div className="flex justify-center mb-6">
+            <TangoLogo variant="full" className="h-20 w-auto" linkTo={null} />
+          </div>
           <p className="text-xl md:text-2xl text-gray-700 mb-8 font-darker">
             Discover nightlife, buy tickets, and enjoy the night!
           </p>

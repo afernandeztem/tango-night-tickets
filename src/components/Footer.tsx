@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
+import TangoLogo from './TangoLogo';
 
 const Footer: React.FC = () => {
   const { state } = useApp();
@@ -42,11 +42,8 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center mb-4">
-              <div className="h-8 w-8 rounded-full bg-tango-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
-              </div>
-              <span className="ml-2 text-lg font-semibold">TangoApp</span>
+            <div className="mb-4">
+              <TangoLogo variant="icon" className="h-10" />
             </div>
             <p className="text-sm text-gray-600 mb-4">
               {t.slogan}

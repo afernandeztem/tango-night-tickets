@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import { Heart, User, Menu, X, LogIn, LogOut, Globe } from 'lucide-react';
+import TangoLogo from './TangoLogo';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,24 +56,15 @@ const Header: React.FC = () => {
     <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/home" className="flex items-center">
-            <div className="h-10 w-10 rounded-full bg-tango-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">T</span>
-            </div>
-            <span className="ml-2 text-lg font-semibold">TangoApp</span>
-          </Link>
+          <TangoLogo variant="icon" />
           
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/home" className="nav-link">{t.home}</Link>
             <Link to="/locals" className="nav-link">{t.locals}</Link>
             <Link to="/events" className="nav-link">{t.events}</Link>
           </nav>
           
-          {/* User Actions */}
           <div className="flex items-center space-x-4">
-            {/* Language Selector */}
             <div className="relative">
               <button 
                 className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -100,7 +91,6 @@ const Header: React.FC = () => {
               )}
             </div>
             
-            {/* Favorites Link (only for authenticated users) */}
             {authState.isAuthenticated && (
               <Link 
                 to="/favorites" 
@@ -110,7 +100,6 @@ const Header: React.FC = () => {
               </Link>
             )}
             
-            {/* Auth Links */}
             {authState.isAuthenticated ? (
               <div className="hidden md:flex items-center">
                 <Link 
@@ -146,7 +135,6 @@ const Header: React.FC = () => {
               </div>
             )}
             
-            {/* Mobile menu button */}
             <button 
               className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
               onClick={toggleMenu}
@@ -156,7 +144,6 @@ const Header: React.FC = () => {
           </div>
         </div>
         
-        {/* Mobile menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-100">
             <nav className="flex flex-col space-y-3">

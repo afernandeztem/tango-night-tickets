@@ -9,6 +9,7 @@ import CityCard from '../components/CityCard';
 import { motion } from 'framer-motion';
 import { Globe } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import TangoLogo from '../components/TangoLogo';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,9 +65,9 @@ const LandingPage: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-2" // Reduced spacing here
         >
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-gradient font-darker">
-            {t.title}
-          </h1>
+          <div className="flex justify-center mb-6">
+            <TangoLogo variant="full" className="h-20 w-auto" linkTo={null} />
+          </div>
           <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto font-darker mb-4">
             {t.subtitle}
           </p>
