@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLocalById, getEventsByLocalId } from '../services/api';
-import { Local, Event } from '../types';
+import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers } from '../services/api';
+import { Local, Event, Drink } from '../types';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -10,7 +10,7 @@ import Footer from '../components/Footer';
 import EventCard from '../components/EventCard';
 import ScrollableSection from '../components/ScrollableSection';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info } from 'lucide-react';
+import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Drink as DrinkIcon, Ticket, Gift } from 'lucide-react';
 import { 
   Tabs, 
   TabsContent, 
@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/tabs';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 const LocalDetailPage: React.FC = () => {
   const { localId } = useParams<{ localId: string }>();
@@ -28,9 +30,13 @@ const LocalDetailPage: React.FC = () => {
   
   const [local, setLocal] = useState<Local | null>(null);
   const [eventsData, setEventsData] = useState<{ content: Event[] } | null>(null);
-  const [loading, setLoading] = useState<{ local: boolean; events: boolean }>({
+  const [drinks, setDrinks] = useState<Drink[]>([]);
+  const [offers, setOffers] = useState<any[]>([]);
+  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; offers: boolean }>({
     local: true,
     events: true,
+    drinks: true,
+    offers: true,
   });
   
   const translations = {
@@ -51,11 +57,20 @@ const LocalDetailPage: React.FC = () => {
       schedule: 'Schedule',
       events: 'Events',
       directions: 'Directions',
+      drinkOffers: 'Drinks & Offers',
       information: 'Information',
       venue: 'Venue',
       scheduleFor: 'Schedule for',
       closed: 'Closed',
       capacityInfo: 'Capacity',
+      drinks: 'Drinks',
+      offers: 'Offers',
+      noDrinksAvailable: 'No drinks information available for this venue.',
+      noOffersAvailable: 'No special offers available at this venue.',
+      from: 'From',
+      getDirections: 'Get Directions',
+      upcomingEventsAt: 'Upcoming Events at',
+      category: 'Category',
     },
     es: {
       address: 'Dirección',
@@ -74,11 +89,20 @@ const LocalDetailPage: React.FC = () => {
       schedule: 'Horario',
       events: 'Eventos',
       directions: 'Dirección',
+      drinkOffers: 'Bebidas y Ofertas',
       information: 'Información',
       venue: 'Local',
       scheduleFor: 'Horario para',
       closed: 'Cerrado',
       capacityInfo: 'Capacidad',
+      drinks: 'Bebidas',
+      offers: 'Ofertas',
+      noDrinksAvailable: 'No hay información de bebidas disponible para este local.',
+      noOffersAvailable: 'No hay ofertas especiales disponibles en este local.',
+      from: 'Desde',
+      getDirections: 'Obtener Direcciones',
+      upcomingEventsAt: 'Próximos Eventos en',
+      category: 'Categoría',
     }
   };
   
@@ -88,7 +112,7 @@ const LocalDetailPage: React.FC = () => {
     const fetchLocal = async () => {
       if (!localId) return;
       
-      setLoading({ ...loading, local: true });
+      setLoading(prev => ({ ...prev, local: true }));
       
       try {
         const localData = await getLocalById(localId);
@@ -96,7 +120,7 @@ const LocalDetailPage: React.FC = () => {
       } catch (error) {
         console.error('Error fetching local:', error);
       } finally {
-        setLoading({ ...loading, local: false });
+        setLoading(prev => ({ ...prev, local: false }));
       }
     };
     
@@ -107,7 +131,7 @@ const LocalDetailPage: React.FC = () => {
     const fetchEvents = async () => {
       if (!localId) return;
       
-      setLoading({ ...loading, events: true });
+      setLoading(prev => ({ ...prev, events: true }));
       
       try {
         const events = await getEventsByLocalId(localId);
@@ -115,18 +139,60 @@ const LocalDetailPage: React.FC = () => {
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {
-        setLoading({ ...loading, events: false });
+        setLoading(prev => ({ ...prev, events: false }));
       }
     };
     
     fetchEvents();
   }, [localId]);
 
+  useEffect(() => {
+    const fetchDrinksAndOffers = async () => {
+      if (!localId) return;
+      
+      setLoading(prev => ({ ...prev, drinks: true, offers: true }));
+      
+      try {
+        // Fetch drinks
+        const drinksData = await getDrinksByLocalId(localId);
+        setDrinks(drinksData);
+      } catch (error) {
+        console.error('Error fetching drinks:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, drinks: false }));
+      }
+      
+      try {
+        // Fetch offers
+        const offersData = await getLocalOffers(localId);
+        setOffers(offersData);
+      } catch (error) {
+        console.error('Error fetching offers:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, offers: false }));
+      }
+    };
+    
+    fetchDrinksAndOffers();
+  }, [localId]);
+
   const upcomingEvents = eventsData?.content || [];
   const hasEvents = upcomingEvents.length > 0;
+  const hasDrinks = drinks.length > 0;
+  const hasOffers = offers.length > 0;
   
   // Create a view all link for the events
   const viewAllLink = localId ? `/events?localId=${localId}` : '/events';
+
+  // Group drinks by category
+  const drinksByCategory = drinks.reduce((acc, drink) => {
+    const category = drink.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(drink);
+    return acc;
+  }, {} as Record<string, Drink[]>);
 
   // Get days of the week in order starting from today
   const getDaysOfWeek = () => {
@@ -244,6 +310,10 @@ const LocalDetailPage: React.FC = () => {
                         <Calendar size={16} />
                         {t.events}
                       </TabsTrigger>
+                      <TabsTrigger value="drinkoffers" className="flex items-center gap-1.5">
+                        <DrinkIcon size={16} />
+                        {t.drinkOffers}
+                      </TabsTrigger>
                       <TabsTrigger value="directions" className="flex items-center gap-1.5">
                         <Navigation size={16} />
                         {t.directions}
@@ -255,7 +325,7 @@ const LocalDetailPage: React.FC = () => {
                   <TabsContent value="overview" className="mt-0">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="md:col-span-2">
-                        <Card>
+                        <Card className="overflow-hidden border border-gray-200 shadow-sm">
                           <CardContent className="p-6">
                             <h2 className="text-2xl font-semibold mb-4">{t.information}</h2>
                             <p className="text-gray-700 mb-6">
@@ -264,12 +334,13 @@ const LocalDetailPage: React.FC = () => {
                             
                             <div className="flex flex-wrap gap-2 mb-6">
                               {Array.isArray(local.tags) && local.tags.map((tag, index) => (
-                                <span 
+                                <Badge 
                                   key={index} 
-                                  className="text-sm px-3 py-1.5 bg-tango-secondary text-tango-primary rounded-full"
+                                  variant="secondary"
+                                  className="bg-tango-secondary/30 text-tango-primary hover:bg-tango-secondary/40"
                                 >
                                   {tag}
-                                </span>
+                                </Badge>
                               ))}
                             </div>
                           </CardContent>
@@ -277,7 +348,7 @@ const LocalDetailPage: React.FC = () => {
                       </div>
                       
                       <div>
-                        <Card>
+                        <Card className="overflow-hidden border border-gray-200 shadow-sm">
                           <CardContent className="p-6">
                             <h3 className="text-xl font-semibold mb-4">{t.venue} {t.information}</h3>
                             
@@ -306,7 +377,7 @@ const LocalDetailPage: React.FC = () => {
                   
                   {/* Schedule Tab */}
                   <TabsContent value="schedule" className="mt-0">
-                    <Card>
+                    <Card className="overflow-hidden border border-gray-200 shadow-sm">
                       <CardContent className="p-6">
                         <h2 className="text-2xl font-semibold mb-6">{t.scheduleFor} {local.name}</h2>
                         
@@ -344,10 +415,10 @@ const LocalDetailPage: React.FC = () => {
                   
                   {/* Events Tab */}
                   <TabsContent value="events" className="mt-0">
-                    <Card>
+                    <Card className="overflow-hidden border border-gray-200 shadow-sm">
                       <CardContent className="p-6">
                         <div className="flex justify-between items-center mb-6">
-                          <h2 className="text-2xl font-semibold">{t.upcomingEvents}</h2>
+                          <h2 className="text-2xl font-semibold">{t.upcomingEventsAt} {local.name}</h2>
                           {hasEvents && (
                             <a 
                               href={viewAllLink} 
@@ -390,39 +461,154 @@ const LocalDetailPage: React.FC = () => {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-12 bg-gray-50 rounded-lg">
+                          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
                             <Calendar size={40} className="mx-auto mb-4 text-gray-400" />
-                            <p className="text-gray-600">{t.noEvents}</p>
+                            <p className="text-gray-600 font-medium">{t.noEvents}</p>
+                            <p className="text-gray-500 text-sm mt-2">Check back later for upcoming events at this venue.</p>
                           </div>
                         )}
                       </CardContent>
                     </Card>
                   </TabsContent>
                   
+                  {/* Drinks & Offers Tab */}
+                  <TabsContent value="drinkoffers" className="mt-0">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Drinks section */}
+                      <Card className="overflow-hidden border border-gray-200 shadow-sm">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-2 mb-6">
+                            <DrinkIcon className="text-tango-primary" size={24} />
+                            <h2 className="text-2xl font-semibold">{t.drinks}</h2>
+                          </div>
+                          
+                          {loading.drinks ? (
+                            <div className="space-y-4">
+                              {[1, 2, 3].map((_, index) => (
+                                <div key={index} className="animate-pulse">
+                                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                                  <div className="space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : hasDrinks ? (
+                            <div className="space-y-6">
+                              {Object.entries(drinksByCategory).map(([category, categoryDrinks]) => (
+                                <div key={category}>
+                                  <h3 className="text-lg font-medium mb-3 text-tango-primary">
+                                    {category}
+                                  </h3>
+                                  <div className="space-y-3">
+                                    {categoryDrinks.map((drink) => (
+                                      <div key={drink.id} className="flex justify-between py-2 border-b border-gray-100">
+                                        <div>
+                                          <h4 className="font-medium">{drink.name}</h4>
+                                          {drink.description && (
+                                            <p className="text-sm text-gray-600">{drink.description}</p>
+                                          )}
+                                        </div>
+                                        <div className="text-tango-primary font-semibold">
+                                          {drink.price.toFixed(2)} €
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                              <DrinkIcon size={40} className="mx-auto mb-4 text-gray-400" />
+                              <p className="text-gray-600">{t.noDrinksAvailable}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                      
+                      {/* Offers section */}
+                      <Card className="overflow-hidden border border-gray-200 shadow-sm">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-2 mb-6">
+                            <Gift className="text-tango-primary" size={24} />
+                            <h2 className="text-2xl font-semibold">{t.offers}</h2>
+                          </div>
+                          
+                          {loading.offers ? (
+                            <div className="space-y-4">
+                              {[1, 2].map((_, index) => (
+                                <div key={index} className="animate-pulse bg-white p-4 rounded-lg">
+                                  <div className="h-5 bg-gray-200 rounded w-1/2 mb-3"></div>
+                                  <div className="h-4 bg-gray-200 rounded w-2/3 mb-3"></div>
+                                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : hasOffers ? (
+                            <div className="space-y-4">
+                              {offers.map((offer) => (
+                                <div 
+                                  key={offer.id} 
+                                  className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                                >
+                                  <div className="flex justify-between items-start">
+                                    <h3 className="font-semibold text-lg">{offer.name}</h3>
+                                    <Badge variant="outline" className="bg-tango-secondary/20 border-tango-primary/20 text-tango-primary">
+                                      {offer.price.toFixed(2)} €
+                                    </Badge>
+                                  </div>
+                                  <p className="text-gray-600 mt-2 text-sm">
+                                    {offer.description || 'Special offer at this venue.'}
+                                  </p>
+                                  {offer.rrppOffer && (
+                                    <div className="mt-3">
+                                      <Badge className="bg-tango-primary text-white">
+                                        RRPP Offer
+                                      </Badge>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                              <Ticket size={40} className="mx-auto mb-4 text-gray-400" />
+                              <p className="text-gray-600">{t.noOffersAvailable}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+                  
                   {/* Directions Tab */}
                   <TabsContent value="directions" className="mt-0">
-                    <Card>
+                    <Card className="overflow-hidden border border-gray-200 shadow-sm">
                       <CardContent className="p-6">
                         <h2 className="text-2xl font-semibold mb-6">{t.directions}</h2>
-                        <div className="bg-gray-100 rounded-lg p-6 flex items-center justify-between">
-                          <div className="flex items-start">
-                            <div className="bg-tango-primary rounded-full p-3 mr-4">
-                              <MapPin size={24} className="text-white" />
+                        <div className="bg-gradient-to-r from-tango-secondary/20 to-white rounded-lg p-6 border border-tango-secondary/20">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                            <div className="flex items-start">
+                              <div className="bg-tango-primary rounded-full p-3 mr-4 shadow-md">
+                                <MapPin size={24} className="text-white" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-lg">{local.name}</h3>
+                                <p className="text-gray-600">{local.address}, {local.city}</p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-semibold text-lg">{local.name}</h3>
-                              <p className="text-gray-600">{local.address}, {local.city}</p>
-                            </div>
+                            <a 
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-tango-primary text-white px-6 py-3 rounded-md hover:bg-tango-primary/90 transition-colors flex items-center justify-center shadow-md self-start md:self-center"
+                            >
+                              <Navigation size={18} className="mr-2" />
+                              {t.getDirections}
+                            </a>
                           </div>
-                          <a 
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-tango-primary text-white px-4 py-2 rounded-md hover:bg-tango-primary/90 transition-colors"
-                          >
-                            <Navigation size={18} className="inline mr-2" />
-                            Get Directions
-                          </a>
                         </div>
                       </CardContent>
                     </Card>
