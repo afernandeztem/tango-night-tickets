@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers } from '../services/api';
@@ -10,7 +9,7 @@ import Footer from '../components/Footer';
 import EventCard from '../components/EventCard';
 import ScrollableSection from '../components/ScrollableSection';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Drink as DrinkIcon, Ticket, Gift } from 'lucide-react';
+import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Wine, Ticket, Gift } from 'lucide-react';
 import { 
   Tabs, 
   TabsContent, 
@@ -153,7 +152,6 @@ const LocalDetailPage: React.FC = () => {
       setLoading(prev => ({ ...prev, drinks: true, offers: true }));
       
       try {
-        // Fetch drinks
         const drinksData = await getDrinksByLocalId(localId);
         setDrinks(drinksData);
       } catch (error) {
@@ -163,7 +161,6 @@ const LocalDetailPage: React.FC = () => {
       }
       
       try {
-        // Fetch offers
         const offersData = await getLocalOffers(localId);
         setOffers(offersData);
       } catch (error) {
@@ -181,10 +178,8 @@ const LocalDetailPage: React.FC = () => {
   const hasDrinks = drinks.length > 0;
   const hasOffers = offers.length > 0;
   
-  // Create a view all link for the events
   const viewAllLink = localId ? `/events?localId=${localId}` : '/events';
 
-  // Group drinks by category
   const drinksByCategory = drinks.reduce((acc, drink) => {
     const category = drink.category || 'Other';
     if (!acc[category]) {
@@ -194,7 +189,6 @@ const LocalDetailPage: React.FC = () => {
     return acc;
   }, {} as Record<string, Drink[]>);
 
-  // Get days of the week in order starting from today
   const getDaysOfWeek = () => {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const today = new Date().getDay();
@@ -203,8 +197,7 @@ const LocalDetailPage: React.FC = () => {
   };
 
   const orderedDays = getDaysOfWeek();
-  
-  // Loading skeleton
+
   if (loading.local) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
@@ -226,7 +219,6 @@ const LocalDetailPage: React.FC = () => {
     );
   }
   
-  // Local not found
   if (!loading.local && !local) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
@@ -254,7 +246,6 @@ const LocalDetailPage: React.FC = () => {
       <main className="flex-grow">
         {local && (
           <>
-            {/* Hero section */}
             <section className="relative h-[40vh] min-h-[300px] overflow-hidden">
               <div className="absolute inset-0">
                 <img 
@@ -292,7 +283,6 @@ const LocalDetailPage: React.FC = () => {
               </div>
             </section>
             
-            {/* Content section with tabs */}
             <section className="py-8">
               <div className="container mx-auto px-4">
                 <Tabs defaultValue="overview" className="w-full">
@@ -311,7 +301,7 @@ const LocalDetailPage: React.FC = () => {
                         {t.events}
                       </TabsTrigger>
                       <TabsTrigger value="drinkoffers" className="flex items-center gap-1.5">
-                        <DrinkIcon size={16} />
+                        <Wine size={16} />
                         {t.drinkOffers}
                       </TabsTrigger>
                       <TabsTrigger value="directions" className="flex items-center gap-1.5">
@@ -321,7 +311,6 @@ const LocalDetailPage: React.FC = () => {
                     </TabsList>
                   </div>
                   
-                  {/* Overview Tab */}
                   <TabsContent value="overview" className="mt-0">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="md:col-span-2">
@@ -375,7 +364,6 @@ const LocalDetailPage: React.FC = () => {
                     </div>
                   </TabsContent>
                   
-                  {/* Schedule Tab */}
                   <TabsContent value="schedule" className="mt-0">
                     <Card className="overflow-hidden border border-gray-200 shadow-sm">
                       <CardContent className="p-6">
@@ -413,7 +401,6 @@ const LocalDetailPage: React.FC = () => {
                     </Card>
                   </TabsContent>
                   
-                  {/* Events Tab */}
                   <TabsContent value="events" className="mt-0">
                     <Card className="overflow-hidden border border-gray-200 shadow-sm">
                       <CardContent className="p-6">
@@ -471,14 +458,12 @@ const LocalDetailPage: React.FC = () => {
                     </Card>
                   </TabsContent>
                   
-                  {/* Drinks & Offers Tab */}
                   <TabsContent value="drinkoffers" className="mt-0">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Drinks section */}
                       <Card className="overflow-hidden border border-gray-200 shadow-sm">
                         <CardContent className="p-6">
                           <div className="flex items-center gap-2 mb-6">
-                            <DrinkIcon className="text-tango-primary" size={24} />
+                            <Wine className="text-tango-primary" size={24} />
                             <h2 className="text-2xl font-semibold">{t.drinks}</h2>
                           </div>
                           
@@ -521,14 +506,13 @@ const LocalDetailPage: React.FC = () => {
                             </div>
                           ) : (
                             <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                              <DrinkIcon size={40} className="mx-auto mb-4 text-gray-400" />
+                              <Wine size={40} className="mx-auto mb-4 text-gray-400" />
                               <p className="text-gray-600">{t.noDrinksAvailable}</p>
                             </div>
                           )}
                         </CardContent>
                       </Card>
                       
-                      {/* Offers section */}
                       <Card className="overflow-hidden border border-gray-200 shadow-sm">
                         <CardContent className="p-6">
                           <div className="flex items-center gap-2 mb-6">
@@ -583,7 +567,6 @@ const LocalDetailPage: React.FC = () => {
                     </div>
                   </TabsContent>
                   
-                  {/* Directions Tab */}
                   <TabsContent value="directions" className="mt-0">
                     <Card className="overflow-hidden border border-gray-200 shadow-sm">
                       <CardContent className="p-6">
