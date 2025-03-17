@@ -1,6 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLocal, getEventsForLocal, Local, Event } from '../services/api';
+import { getLocalById, getEventsByLocalId } from '../services/api';
+import { Local, Event } from '../types';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -36,6 +38,7 @@ const LocalDetailPage: React.FC = () => {
       price: 'Price',
       buyTickets: 'Buy Tickets',
       noDescription: 'No description available.',
+      viewAll: 'View All'
     },
     es: {
       address: 'Dirección',
@@ -49,6 +52,7 @@ const LocalDetailPage: React.FC = () => {
       price: 'Precio',
       buyTickets: 'Comprar Entradas',
       noDescription: 'No hay descripción disponible.',
+      viewAll: 'Ver Todos'
     }
   };
   
@@ -61,7 +65,7 @@ const LocalDetailPage: React.FC = () => {
       setLoading({ ...loading, local: true });
       
       try {
-        const localData = await getLocal(localId);
+        const localData = await getLocalById(localId);
         setLocal(localData);
       } catch (error) {
         console.error('Error fetching local:', error);
@@ -80,7 +84,7 @@ const LocalDetailPage: React.FC = () => {
       setLoading({ ...loading, events: true });
       
       try {
-        const events = await getEventsForLocal(localId);
+        const events = await getEventsByLocalId(localId);
         setEventsData(events);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -115,6 +119,9 @@ const LocalDetailPage: React.FC = () => {
 
   const upcomingEvents = eventsData?.content || [];
   const hasEvents = upcomingEvents.length > 0;
+  
+  // Create a view all link for the events
+  const viewAllLink = localId ? `/events?localId=${localId}` : '/events';
   
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -183,6 +190,8 @@ const LocalDetailPage: React.FC = () => {
           <div className="container mx-auto px-4">
             <ScrollableSection
               title={t.upcomingEvents}
+              viewAllText={t.viewAll}
+              viewAllLink={viewAllLink}
               isLoading={loading.events}
               hasMore={false}
             >
