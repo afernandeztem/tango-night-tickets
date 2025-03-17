@@ -31,11 +31,13 @@ export const getCities = async (): Promise<City[]> => {
   try {
     const response = await api.get('/public/cities');
     return response.data.map((city: any) => ({
-      id: city.name.toLowerCase(), // Using name as ID since the API doesn't return IDs
+      id: city.name.toLowerCase(), // Using name as ID
       name: city.name,
       active: city.active,
       country: 'Spain', // Default country as it's not in the API response
-      image: `https://source.unsplash.com/random/800x600/?${city.name}` // Using placeholder images
+      image: `https://source.unsplash.com/random/800x600/?${city.name}`, // Using placeholder images
+      metricsTotalAmount: city.metricsTotalAmount,
+      metricsTotalTickets: city.metricsTotalTickets
     }));
   } catch (error) {
     console.error('Error fetching cities:', error);
@@ -43,8 +45,26 @@ export const getCities = async (): Promise<City[]> => {
   }
 };
 
+export const getCityById = async (cityId: string): Promise<City> => {
+  try {
+    const response = await api.get(`/public/city/${cityId}`);
+    const city = response.data;
+    
+    return {
+      id: city.cityName.toLowerCase(),
+      name: city.cityName,
+      active: city.active,
+      country: 'Spain',
+      image: `https://source.unsplash.com/random/800x600/?${city.cityName}`,
+    };
+  } catch (error) {
+    console.error(`Error fetching city with ID ${cityId}:`, error);
+    throw error;
+  }
+};
+
 export const getLocals = async (
-  params: { city?: string; page?: number; size?: number; relevant?: boolean; search?: string } = {}
+  params: { city?: string; page?: number; size?: number; relevant?: boolean; search?: string; localType?: number } = {}
 ): Promise<PaginatedResponse<Local>> => {
   try {
     const apiParams: any = {
@@ -64,30 +84,31 @@ export const getLocals = async (
       apiParams.relevant = params.relevant;
     }
     
+    if (params.localType !== undefined) {
+      apiParams.localType = params.localType;
+    }
+    
     const response = await api.get('/public/locals', { params: apiParams });
     
     // Transform API response to match our Local type
     const locals: Local[] = response.data.content.map((local: any) => ({
       id: local.localId.toString(),
       name: local.name,
-      city: local.city,
-      address: `${local.street}, ${local.zipCode} ${local.city}`,
+      city: local.cityName,
+      address: local.street || 'Address not available',
       image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`,
-      tags: local.tagList || [],
+      tags: local.tags || [],
       rating: local.score > 0 ? local.score : 4.5, // Default rating if score is negative
-      capacity: 300, // Default as API doesn't provide this
+      capacity: local.capacity || 300, // Default as API might not provide this
       description: local.description || '',
-      schedule: local.schedule || [
-        { day: 'Friday', openTime: '22:00', closeTime: '06:00' },
-        { day: 'Saturday', openTime: '22:00', closeTime: '06:00' },
-      ]
+      schedule: convertScheduleFormat(local.schedule)
     }));
     
     return {
       content: locals,
       pageable: {
-        pageNumber: response.data.number,
-        pageSize: response.data.size,
+        pageNumber: response.data.pageable.pageNumber,
+        pageSize: response.data.pageable.pageSize,
         totalElements: response.data.totalElements,
         totalPages: response.data.totalPages
       }
@@ -98,6 +119,39 @@ export const getLocals = async (
   }
 };
 
+// Helper function to convert schedule from API format to our app format
+const convertScheduleFormat = (schedule: any): { day: string, openTime: string, closeTime: string }[] => {
+  if (!schedule) {
+    return [
+      { day: 'Friday', openTime: '22:00', closeTime: '06:00' },
+      { day: 'Saturday', openTime: '22:00', closeTime: '06:00' },
+    ];
+  }
+  
+  const result = [];
+  const daysMap: {[key: string]: string} = {
+    monday: 'Monday',
+    tuesday: 'Tuesday',
+    wednesday: 'Wednesday',
+    thursday: 'Thursday',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday'
+  };
+  
+  for (const [day, times] of Object.entries(schedule)) {
+    if (Array.isArray(times) && times.length >= 2) {
+      result.push({
+        day: daysMap[day] || day,
+        openTime: times[0].slice(0, 5), // "18:00:00" -> "18:00"
+        closeTime: times[1].slice(0, 5), // "02:00:00" -> "02:00"
+      });
+    }
+  }
+  
+  return result;
+};
+
 export const getLocalById = async (localId: string): Promise<Local> => {
   try {
     const response = await api.get(`/public/local/${localId}`);
@@ -106,17 +160,14 @@ export const getLocalById = async (localId: string): Promise<Local> => {
     return {
       id: local.localId.toString(),
       name: local.name,
-      city: local.city,
-      address: `${local.street}, ${local.zipCode} ${local.city}`,
+      city: local.cityName,
+      address: local.street || 'Address not available',
       image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`,
-      tags: local.tagList || [],
+      tags: local.tags || [],
       rating: local.score > 0 ? local.score : 4.5, // Default rating if score is negative
-      capacity: 300, // Default as API doesn't provide this
+      capacity: local.capacity || 300, // Default as API might not provide this
       description: local.description || '',
-      schedule: local.schedule || [
-        { day: 'Friday', openTime: '22:00', closeTime: '06:00' },
-        { day: 'Saturday', openTime: '22:00', closeTime: '06:00' },
-      ]
+      schedule: convertScheduleFormat(local.schedule)
     };
   } catch (error) {
     console.error(`Error fetching local with ID ${localId}:`, error);
@@ -124,15 +175,16 @@ export const getLocalById = async (localId: string): Promise<Local> => {
   }
 };
 
-export const getEventsByLocalId = async (localId: string): Promise<Event[]> => {
+export const getEventsByLocalId = async (localId: string, page = 0, size = 10): Promise<PaginatedResponse<Event>> => {
   try {
     const response = await api.get(`/public/events/local/${localId}`, {
       params: {
-        size: 100 // Get a larger number to ensure we get all events
+        page,
+        size
       }
     });
     
-    return response.data.content.map((event: any) => ({
+    const events = response.data.content.map((event: any) => ({
       id: event.eventId.toString(),
       title: event.title,
       description: event.description || '',
@@ -146,6 +198,16 @@ export const getEventsByLocalId = async (localId: string): Promise<Event[]> => {
       price: 15, // Default price as API doesn't provide this
       tags: event.tagList || []
     }));
+    
+    return {
+      content: events,
+      pageable: {
+        pageNumber: response.data.pageable.pageNumber,
+        pageSize: response.data.pageable.pageSize,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
+      }
+    };
   } catch (error) {
     console.error(`Error fetching events for local ID ${localId}:`, error);
     throw error;
@@ -190,9 +252,9 @@ export const getEvents = async (
       description: event.description || '',
       date: event.eventDate + 'T20:00:00', // Adding default time since API only returns date
       image: event.fileName || `https://source.unsplash.com/random/800x600/?event`,
-      localId: event.localId.toString(),
+      localId: event.localId ? event.localId.toString() : '',
       localName: event.localName,
-      city: event.localCity,
+      city: event.localCity || event.city,
       ageRestriction: event.age ? `${event.age}+` : 'All ages',
       capacity: event.capacity || 200,
       price: 15, // Default price as API doesn't provide this
@@ -202,14 +264,72 @@ export const getEvents = async (
     return {
       content: events,
       pageable: {
-        pageNumber: response.data.number,
-        pageSize: response.data.size,
+        pageNumber: response.data.pageable.pageNumber,
+        pageSize: response.data.pageable.pageSize,
         totalElements: response.data.totalElements,
         totalPages: response.data.totalPages
       }
     };
   } catch (error) {
     console.error('Error fetching events:', error);
+    throw error;
+  }
+};
+
+export const getCalendarEvents = async (
+  params: { city?: string; startDate?: string; endDate?: string; page?: number; size?: number; relevant?: boolean} = {}
+): Promise<PaginatedResponse<Event>> => {
+  try {
+    const apiParams: any = {
+      page: params.page || 0,
+      size: params.size || 10,
+    };
+    
+    if (params.city) {
+      apiParams.city = params.city;
+    }
+    
+    if (params.startDate) {
+      apiParams.startDate = params.startDate;
+    }
+    
+    if (params.endDate) {
+      apiParams.endDate = params.endDate;
+    }
+    
+    if (params.relevant !== undefined) {
+      apiParams.relevant = params.relevant;
+    }
+    
+    const response = await api.get('/public/events/calendar', { params: apiParams });
+    
+    // Transform API response to match our Event type
+    const events: Event[] = response.data.content.map((event: any) => ({
+      id: event.eventId.toString(),
+      title: event.title,
+      description: event.description || '',
+      date: event.eventDate + 'T20:00:00', // Adding default time since API only returns date
+      image: event.fileName || `https://source.unsplash.com/random/800x600/?event`,
+      localId: event.localId ? event.localId.toString() : '',
+      localName: event.localName,
+      city: event.localCity || event.city,
+      ageRestriction: event.age ? `${event.age}+` : 'All ages',
+      capacity: event.capacity || 200,
+      price: 15, // Default price as API doesn't provide this
+      tags: event.tagList || []
+    }));
+    
+    return {
+      content: events,
+      pageable: {
+        pageNumber: response.data.pageable.pageNumber,
+        pageSize: response.data.pageable.pageSize,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching calendar events:', error);
     throw error;
   }
 };
@@ -225,7 +345,7 @@ export const getEventById = async (eventId: string): Promise<Event> => {
       description: event.description || '',
       date: event.eventDate + 'T20:00:00', // Adding default time since API only returns date
       image: event.fileName || `https://source.unsplash.com/random/800x600/?event`,
-      localId: event.localId.toString(),
+      localId: event.localId ? event.localId.toString() : '',
       localName: event.localName,
       city: event.localCity,
       ageRestriction: event.age ? `${event.age}+` : 'All ages',
@@ -239,18 +359,24 @@ export const getEventById = async (eventId: string): Promise<Event> => {
   }
 };
 
-export const getEventTicketOffers = async (eventId: string): Promise<any[]> => {
+export const getEventTicketOffers = async (eventId: string, rrppId?: string): Promise<any[]> => {
   try {
-    const response = await api.get(`/public/offers/event/${eventId}`);
+    const params: any = {};
+    if (rrppId) {
+      params.rrppId = rrppId;
+    }
+    
+    const response = await api.get(`/public/entries/event/${eventId}`, { params });
     
     // Transform API response to match the format our app expects
-    return response.data.content.map((offer: any) => ({
-      id: offer.offerId.toString(),
+    return response.data.map((offer: any) => ({
+      id: offer.offerEventId.toString(),
       name: offer.title,
       description: offer.description || 'Incluye acceso para 1 persona. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
       price: offer.price,
       available: !offer.isSoldOut,
       soldOut: offer.isSoldOut,
+      rrppOffer: offer.rrppOffer || false,
       timeLeft: offer.remainingTime || undefined
     }));
   } catch (error) {
@@ -262,22 +388,86 @@ export const getEventTicketOffers = async (eventId: string): Promise<any[]> => {
 
 export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
   try {
-    const response = await api.get(`/public/local/${localId}`);
-    const local = response.data;
-    const drinks = local.drinkList || [];
+    const response = await api.get(`/public/drinks/local/${localId}`);
     
-    return drinks.map((drink: any) => ({
-      id: drink.offerId.toString(),
+    return response.data.map((drink: any) => ({
+      id: drink.productId.toString(),
       name: drink.title,
       price: drink.price,
       description: drink.description || '',
-      localId: localId
+      localId: localId,
+      category: drink.category
     }));
   } catch (error) {
     console.error(`Error fetching drinks for local ID ${localId}:`, error);
     
     // If the API call fails, return empty array to prevent UI breaking
     return [];
+  }
+};
+
+export const getLocalOffers = async (localId: string, rrppId?: string): Promise<any[]> => {
+  try {
+    const params: any = {};
+    if (rrppId) {
+      params.rrppId = rrppId;
+    }
+    
+    const response = await api.get(`/public/offers/local/${localId}`, { params });
+    
+    return response.data.map((offer: any) => ({
+      id: offer.offerId.toString(),
+      name: offer.title,
+      price: offer.price,
+      description: offer.description || '',
+      rrppOffer: offer.rrppOffer || false
+    }));
+  } catch (error) {
+    console.error(`Error fetching offers for local ID ${localId}:`, error);
+    return [];
+  }
+};
+
+export const getLocalReviews = async (localId: string, page = 0, size = 10): Promise<PaginatedResponse<any>> => {
+  try {
+    const response = await api.get(`/public/review/local/${localId}`, {
+      params: { page, size }
+    });
+    
+    const reviews = response.data.content.map((review: any) => ({
+      id: review.reviewId.toString(),
+      userName: review.userName,
+      score: review.score,
+      comment: review.comment,
+      createdAt: review.createdAt
+    }));
+    
+    return {
+      content: reviews,
+      pageable: {
+        pageNumber: response.data.pageable.pageNumber,
+        pageSize: response.data.pageable.pageSize,
+        totalElements: response.data.totalElements,
+        totalPages: response.data.totalPages
+      }
+    };
+  } catch (error) {
+    console.error(`Error fetching reviews for local ID ${localId}:`, error);
+    throw error;
+  }
+};
+
+export const createReview = async (reviewData: { localId: string, score: number, comment: string }): Promise<any> => {
+  try {
+    const response = await api.post('/public/review/', {
+      ...reviewData,
+      userId: localStorage.getItem('userId') || undefined
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error creating review:', error);
+    throw error;
   }
 };
 
@@ -329,13 +519,14 @@ export const register = async (userData: {
     // Format the data according to API requirements
     const apiData = {
       name: userData.name,
-      surname: "", // Default empty surname
+      surnames: "", // Default empty surname
       email: userData.email,
       gender: "O", // Default 'Other' gender
       birthdate: "2000-01-01", // Default birthdate
       notifications: true,
       newsletter: false,
-      password: userData.password
+      password: userData.password,
+      phone: userData.phone || ""
     };
     
     const response = await api.post('/public/new_user', apiData);
@@ -374,6 +565,8 @@ export const getCurrentUser = async (): Promise<User> => {
         events: response.data.favoriteList.filter((item: any) => item.favoriteType === 'EVENT').map((item: any) => item.entityId.toString())
       }
     };
+    
+    localStorage.setItem('userId', user.id);
     
     return user;
   } catch (error) {
@@ -447,6 +640,24 @@ export const getFavoriteEvents = async (): Promise<Event[]> => {
   }
 };
 
+export const recoverPassword = async (email: string): Promise<void> => {
+  try {
+    await api.post('/public/recover', { email });
+  } catch (error) {
+    console.error('Error requesting password recovery:', error);
+    throw error;
+  }
+};
+
+export const setPassword = async (password: string, token: string): Promise<void> => {
+  try {
+    await api.post('/public/set-password', { password, token });
+  } catch (error) {
+    console.error('Error setting password:', error);
+    throw error;
+  }
+};
+
 // Checkout and tickets
 
 export const createTicket = async (
@@ -509,6 +720,36 @@ export const getUserTickets = async (): Promise<Ticket[]> => {
   } catch (error) {
     console.error('Error fetching user tickets:', error);
     throw error;
+  }
+};
+
+export const getTags = async (search?: string): Promise<any[]> => {
+  try {
+    const params: any = {};
+    if (search) {
+      params.search = search;
+    }
+    
+    const response = await api.get('/public/tags', { params });
+    
+    return response.data.map((tag: any) => ({
+      id: tag.tagId.toString(),
+      name: tag.name,
+      active: tag.active
+    }));
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+    return [];
+  }
+};
+
+export const getLocalTypes = async (): Promise<string[]> => {
+  try {
+    const response = await api.get('/public/types');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching local types:', error);
+    return [];
   }
 };
 

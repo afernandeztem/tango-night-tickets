@@ -1,10 +1,13 @@
 
+
 export interface City {
   id: string;
   name: string;
   active: boolean;
   country?: string;
   image?: string;
+  metricsTotalAmount?: number;
+  metricsTotalTickets?: number;
 }
 
 export interface Local {
@@ -47,6 +50,7 @@ export interface Drink {
   price: number;
   description?: string;
   localId: string;
+  category?: number;
 }
 
 export interface User {
