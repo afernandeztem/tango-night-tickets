@@ -387,7 +387,7 @@ export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
     const response = await api.get(`/public/drinks/local/${localId}`);
     
     return response.data.map((drink: any) => ({
-      id: drink.offerId ? drink.offerId.toString() : String(Math.random()),
+      id: (drink.offerId || drink.productId || Math.random().toString(36).substring(2)).toString(),
       name: drink.title,
       price: drink.price,
       description: drink.description || '',
