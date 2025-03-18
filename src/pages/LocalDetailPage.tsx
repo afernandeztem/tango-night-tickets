@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers, getLocalReviews } from '../services/api';
+import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalReviews } from '../services/api';
 import { Local, Event, Drink } from '../types';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
@@ -30,13 +30,11 @@ const LocalDetailPage: React.FC = () => {
   const [local, setLocal] = useState<Local | null>(null);
   const [eventsData, setEventsData] = useState<{ content: Event[] } | null>(null);
   const [drinks, setDrinks] = useState<Drink[]>([]);
-  const [offers, setOffers] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; offers: boolean; reviews: boolean }>({
+  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; reviews: boolean }>({
     local: true,
     events: true,
     drinks: true,
-    offers: true,
     reviews: true,
   });
   
@@ -156,10 +154,10 @@ const LocalDetailPage: React.FC = () => {
   }, [localId]);
 
   useEffect(() => {
-    const fetchDrinksAndOffers = async () => {
+    const fetchDrinks = async () => {
       if (!localId) return;
       
-      setLoading(prev => ({ ...prev, drinks: true, offers: true }));
+      setLoading(prev => ({ ...prev, drinks: true }));
       
       try {
         const drinksData = await getDrinksByLocalId(localId);
@@ -169,18 +167,9 @@ const LocalDetailPage: React.FC = () => {
       } finally {
         setLoading(prev => ({ ...prev, drinks: false }));
       }
-      
-      try {
-        const offersData = await getLocalOffers(localId);
-        setOffers(offersData);
-      } catch (error) {
-        console.error('Error fetching offers:', error);
-      } finally {
-        setLoading(prev => ({ ...prev, offers: false }));
-      }
     };
     
-    fetchDrinksAndOffers();
+    fetchDrinks();
   }, [localId]);
 
   useEffect(() => {
@@ -205,7 +194,6 @@ const LocalDetailPage: React.FC = () => {
   const upcomingEvents = eventsData?.content || [];
   const hasEvents = upcomingEvents.length > 0;
   const hasDrinks = drinks.length > 0;
-  const hasOffers = offers.length > 0;
   const hasReviews = reviews.length > 0;
   
   const viewAllLink = localId ? `/events?localId=${localId}` : '/events';
@@ -533,112 +521,58 @@ const LocalDetailPage: React.FC = () => {
                   </TabsContent>
                   
                   <TabsContent value="drinkoffers" className="mt-0">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <Card className="overflow-hidden border border-gray-200 shadow-sm">
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-2 mb-6">
-                            <Wine className="text-tango-primary" size={24} />
-                            <h2 className="text-2xl font-semibold">{t.drinks}</h2>
-                          </div>
-                          
-                          {loading.drinks ? (
-                            <div className="space-y-4">
-                              {[1, 2, 3].map((_, index) => (
-                                <div key={index} className="animate-pulse">
-                                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
-                                  <div className="space-y-2">
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                                  </div>
+                    <Card className="overflow-hidden border border-gray-200 shadow-sm">
+                      <CardContent className="p-6">
+                        <div className="flex items-center gap-2 mb-6">
+                          <Wine className="text-tango-primary" size={24} />
+                          <h2 className="text-2xl font-semibold">{t.drinks}</h2>
+                        </div>
+                        
+                        {loading.drinks ? (
+                          <div className="space-y-4">
+                            {[1, 2, 3].map((_, index) => (
+                              <div key={index} className="animate-pulse">
+                                <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                                <div className="space-y-2">
+                                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                                 </div>
-                              ))}
-                            </div>
-                          ) : hasDrinks ? (
-                            <div className="space-y-6">
-                              {Object.entries(drinksByCategory).map(([category, categoryDrinks]) => (
-                                <div key={category}>
-                                  <h3 className="text-lg font-medium mb-3 text-tango-primary">
-                                    {category}
-                                  </h3>
-                                  <div className="space-y-3">
-                                    {categoryDrinks.map((drink) => (
-                                      <div key={drink.id} className="flex justify-between py-2 border-b border-gray-100">
-                                        <div>
-                                          <h4 className="font-medium">{drink.name}</h4>
-                                          {drink.description && (
-                                            <p className="text-sm text-gray-600">{drink.description}</p>
-                                          )}
-                                        </div>
-                                        <div className="text-tango-primary font-semibold">
-                                          {drink.price.toFixed(2)} €
-                                        </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : hasDrinks ? (
+                          <div className="space-y-6">
+                            {Object.entries(drinksByCategory).map(([category, categoryDrinks]) => (
+                              <div key={category}>
+                                <h3 className="text-lg font-medium mb-3 text-tango-primary">
+                                  {category}
+                                </h3>
+                                <div className="space-y-3">
+                                  {categoryDrinks.map((drink) => (
+                                    <div key={drink.id} className="flex justify-between py-2 border-b border-gray-100">
+                                      <div>
+                                        <h4 className="font-medium">{drink.name}</h4>
+                                        {drink.description && (
+                                          <p className="text-sm text-gray-600">{drink.description}</p>
+                                        )}
                                       </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                              <Wine size={40} className="mx-auto mb-4 text-gray-400" />
-                              <p className="text-gray-600">{t.noDrinksAvailable}</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="overflow-hidden border border-gray-200 shadow-sm">
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-2 mb-6">
-                            <Gift className="text-tango-primary" size={24} />
-                            <h2 className="text-2xl font-semibold">{t.offers}</h2>
-                          </div>
-                          
-                          {loading.offers ? (
-                            <div className="space-y-4">
-                              {[1, 2].map((_, index) => (
-                                <div key={index} className="animate-pulse bg-white p-4 rounded-lg">
-                                  <div className="h-5 bg-gray-200 rounded w-1/2 mb-3"></div>
-                                  <div className="h-4 bg-gray-200 rounded w-2/3 mb-3"></div>
-                                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : hasOffers ? (
-                            <div className="space-y-4">
-                              {offers.map((offer) => (
-                                <div 
-                                  key={offer.id} 
-                                  className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                                >
-                                  <div className="flex justify-between items-start">
-                                    <h3 className="font-semibold text-lg">{offer.name}</h3>
-                                    <Badge variant="outline" className="bg-tango-secondary/20 border-tango-primary/20 text-tango-primary">
-                                      {offer.price.toFixed(2)} €
-                                    </Badge>
-                                  </div>
-                                  <p className="text-gray-600 mt-2 text-sm">
-                                    {offer.description || 'Special offer at this venue.'}
-                                  </p>
-                                  {offer.rrppOffer && (
-                                    <div className="mt-3">
-                                      <Badge className="bg-tango-primary text-white">
-                                        RRPP Offer
-                                      </Badge>
+                                      <div className="text-tango-primary font-semibold">
+                                        {drink.price.toFixed(2)} €
+                                      </div>
                                     </div>
-                                  )}
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                              <Ticket size={40} className="mx-auto mb-4 text-gray-400" />
-                              <p className="text-gray-600">{t.noOffersAvailable}</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                            <Wine size={40} className="mx-auto mb-4 text-gray-400" />
+                            <p className="text-gray-600">{t.noDrinksAvailable}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </TabsContent>
                   
                   <TabsContent value="directions" className="mt-0">
@@ -683,4 +617,3 @@ const LocalDetailPage: React.FC = () => {
 };
 
 export default LocalDetailPage;
-
