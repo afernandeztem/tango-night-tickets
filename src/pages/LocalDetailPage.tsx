@@ -543,49 +543,32 @@ const LocalDetailPage: React.FC = () => {
                   </TabsContent>
                   
                   <TabsContent value="drinkoffers" className="mt-0">
-                    <Card className="overflow-hidden border-0 shadow-lg">
+                    <Card className="overflow-hidden border-0 shadow-md">
                       <CardContent className="p-0">
-                        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 border-b relative overflow-hidden">
-                          <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                            <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white/20 blur-xl"></div>
-                            <div className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-white/20 blur-xl"></div>
-                          </div>
-                          <div className="flex justify-between items-center relative z-10">
+                        <div className="bg-gradient-to-r from-tango-primary/90 to-tango-primary p-6 text-white relative">
+                          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIgMS44LTQgNC00czQgMS44IDQgNC0xLjggNC00IDQtNC0xLjgtNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
+                          <div className="relative z-10 flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                              <div className="bg-white p-3 rounded-full shadow-md">
-                                <Martini className="text-purple-600 h-6 w-6" />
+                              <div className="p-2 bg-white/20 backdrop-blur-sm rounded-full">
+                                <Martini className="text-white h-5 w-5" />
                               </div>
-                              <h2 className="text-2xl font-bold text-white">{t.drinkOffers}</h2>
+                              <h2 className="text-2xl font-bold">{t.drinkOffers}</h2>
                             </div>
-                            <motion.div
-                              initial={{ rotate: -5 }}
-                              animate={{ rotate: 5 }}
-                              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                            >
-                              <PartyPopper className="h-7 w-7 text-white" />
-                            </motion.div>
                           </div>
                         </div>
 
-                        <div className="p-6 bg-gradient-to-br from-orange-50 to-pink-50">
+                        <div className="p-6 bg-white border-b">
                           <div className="flex items-center gap-3 mb-4">
-                            <motion.div 
-                              initial={{ scale: 0.9 }}
-                              animate={{ scale: 1 }}
-                              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
-                              className="bg-gradient-to-r from-orange-400 to-pink-500 p-3 rounded-full shadow-lg"
-                            >
-                              <Gift className="text-white h-5 w-5" />
-                            </motion.div>
-                            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-pink-500">
-                              {t.offers}
-                            </h2>
+                            <div className="bg-tango-primary/10 p-2 rounded-full">
+                              <Percent className="text-tango-primary h-5 w-5" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-800">{t.offers}</h3>
                           </div>
                           
                           {loading.offers ? (
                             <div className="space-y-4">
                               {[1, 2, 3].map((_, index) => (
-                                <div key={index} className="animate-pulse bg-white rounded-xl p-5 shadow-sm">
+                                <div key={index} className="animate-pulse bg-gray-50 rounded-lg p-5">
                                   <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
                                   <div className="space-y-2">
                                     <div className="h-4 bg-gray-200 rounded w-full"></div>
@@ -599,85 +582,68 @@ const LocalDetailPage: React.FC = () => {
                               {offers.map((offer) => (
                                 <motion.div 
                                   key={offer.id}
-                                  initial={{ opacity: 0, y: 20 }}
+                                  initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.3 }}
-                                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-orange-100 group"
+                                  className="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow transition-all duration-300 border border-gray-100 group"
                                 >
-                                  <div className="p-1 bg-gradient-to-r from-orange-400 to-pink-500"></div>
-                                  <div className="p-5">
-                                    <div className="flex items-center justify-between mb-3">
-                                      <div className="flex items-center gap-2">
-                                        <Sparkle className="h-5 w-5 text-amber-500" />
-                                        <h4 className="font-bold text-gray-800 group-hover:text-orange-500 transition-colors">
-                                          {offer.name}
-                                        </h4>
-                                      </div>
-                                      <div className="flex items-center bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold px-3 py-1.5 rounded-full shadow-sm">
-                                        <Percent className="h-3.5 w-3.5 mr-1" />
-                                        <span>{offer.price?.toFixed(2) || "0.00"} €</span>
-                                      </div>
+                                  <div className="p-0.5 bg-tango-primary"></div>
+                                  <div className="p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="font-semibold text-gray-800 group-hover:text-tango-primary transition-colors">
+                                        {offer.name}
+                                      </h4>
+                                      <Badge variant="outline" className="bg-tango-primary/10 text-tango-primary border-tango-primary/20 font-medium">
+                                        {offer.price?.toFixed(2) || "0.00"} €
+                                      </Badge>
                                     </div>
                                     {offer.description && (
-                                      <p className="text-gray-600">{offer.description}</p>
+                                      <p className="text-gray-600 text-sm">{offer.description}</p>
                                     )}
                                   </div>
                                 </motion.div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-12 bg-white rounded-xl border border-orange-100 shadow-sm">
-                              <div className="mx-auto w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-                                <Gift size={30} className="text-orange-300" />
+                            <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                <Percent size={20} className="text-gray-400" />
                               </div>
-                              <p className="text-lg font-semibold text-gray-700 mb-1">{t.noOffersAvailable}</p>
-                              <p className="text-gray-500 text-sm max-w-md mx-auto">Check back later for special promotions and offers!</p>
+                              <p className="text-gray-600 font-medium">{t.noOffersAvailable}</p>
                             </div>
                           )}
                         </div>
 
-                        <Separator className="h-1 bg-gradient-to-r from-purple-200 via-indigo-100 to-blue-200" />
-
-                        <div className="p-6 bg-gradient-to-br from-blue-50 to-teal-50">
+                        <div className="p-6 bg-white">
                           <div className="flex items-center gap-3 mb-6">
-                            <motion.div 
-                              initial={{ rotate: 0 }}
-                              animate={{ rotate: [0, 15, 0, -15, 0] }}
-                              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 1 }}
-                              className="bg-gradient-to-r from-blue-500 to-teal-500 p-3 rounded-full shadow-lg"
-                            >
-                              <Wine className="text-white h-5 w-5" />
-                            </motion.div>
-                            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-600">
-                              {t.drinks}
-                            </h2>
+                            <div className="bg-tango-primary/10 p-2 rounded-full">
+                              <Wine className="text-tango-primary h-5 w-5" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-800">{t.drinks}</h3>
                           </div>
                           
                           {loading.drinks ? (
                             <div className="space-y-6">
                               {[1, 2].map((category, idx) => (
-                                <div key={idx} className="animate-pulse bg-white rounded-xl p-5 shadow-sm">
+                                <div key={idx} className="animate-pulse bg-gray-50 rounded-lg p-5">
                                   <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {[1, 2, 3, 4].map((drink, index) => (
-                                      <div key={index} className="h-24 bg-gray-100 rounded-lg"></div>
+                                      <div key={index} className="h-16 bg-gray-100 rounded-lg"></div>
                                     ))}
                                   </div>
                                 </div>
                               ))}
                             </div>
                           ) : hasDrinks ? (
-                            <div className="space-y-8">
+                            <div className="space-y-6">
                               {Object.entries(drinksByCategory).map(([category, categoryDrinks], categoryIndex) => (
-                                <motion.div 
+                                <div 
                                   key={category}
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.4, delay: categoryIndex * 0.1 }}
-                                  className="bg-white p-5 rounded-xl border border-blue-100 shadow-md"
+                                  className="bg-gray-50 p-5 rounded-lg border border-gray-100"
                                 >
-                                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700">
-                                    <Badge className="bg-gradient-to-r from-blue-500 to-teal-500 text-white border-0 shadow-sm px-3">
+                                  <h3 className="text-lg font-medium mb-4 text-gray-700">
+                                    <Badge className="bg-tango-primary text-white border-0">
                                       {category}
                                     </Badge>
                                   </h3>
@@ -685,33 +651,32 @@ const LocalDetailPage: React.FC = () => {
                                     {categoryDrinks.map((drink, drinkIndex) => (
                                       <motion.div 
                                         key={drink.id || drinkIndex}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ duration: 0.3, delay: drinkIndex * 0.05 }}
-                                        className="flex justify-between p-3 border border-blue-50 rounded-lg bg-gradient-to-r from-white to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 shadow-sm hover:shadow group"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.2, delay: drinkIndex * 0.05 }}
+                                        className="flex justify-between p-3 rounded-md bg-white border border-gray-100 hover:border-tango-primary/20 transition-colors shadow-sm"
                                       >
                                         <div>
-                                          <h4 className="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">{drink.name}</h4>
+                                          <h4 className="font-medium text-gray-800">{drink.name}</h4>
                                           {drink.description && (
                                             <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
                                           )}
                                         </div>
-                                        <div className="bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold px-3 py-1 rounded-full self-start flex items-center transform group-hover:scale-105 transition-transform">
+                                        <div className="bg-tango-primary/10 text-tango-primary font-medium px-3 py-1 rounded-full text-sm self-start">
                                           {drink.price?.toFixed(2) || "0.00"} €
                                         </div>
                                       </motion.div>
                                     ))}
                                   </div>
-                                </motion.div>
+                                </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-12 bg-white rounded-xl border border-blue-100 shadow-sm">
-                              <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                                <Wine size={30} className="text-blue-300" />
+                            <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                <Wine size={20} className="text-gray-400" />
                               </div>
-                              <p className="text-lg font-semibold text-gray-700 mb-1">{t.noDrinksAvailable}</p>
-                              <p className="text-gray-500 text-sm max-w-md mx-auto">Check back later for menu updates!</p>
+                              <p className="text-gray-600 font-medium">{t.noDrinksAvailable}</p>
                             </div>
                           )}
                         </div>
