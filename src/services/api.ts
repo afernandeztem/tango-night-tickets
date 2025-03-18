@@ -366,13 +366,13 @@ export const getEventTicketOffers = async (eventId: string, rrppId?: string): Pr
     
     // Transform API response to match the format our app expects
     return response.data.map((offer: any) => ({
-      id: offer.offerEventId.toString(),
+      id: offer.offerId ? offer.offerId.toString() : "",
       name: offer.title,
       description: offer.description || 'Incluye acceso para 1 persona. Se asegura el acceso en caso de aforo completo. Reservado el derecho de admisión.',
       price: offer.price,
-      available: !offer.isSoldOut,
-      soldOut: offer.isSoldOut,
-      rrppOffer: offer.rrppOffer || false,
+      available: offer.available > 0,
+      soldOut: offer.available === 0,
+      rrppOffer: offer.rrpp || false,
       timeLeft: offer.remainingTime || undefined
     }));
   } catch (error) {
@@ -387,39 +387,21 @@ export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
     const response = await api.get(`/public/drinks/local/${localId}`);
     
     return response.data.map((drink: any) => ({
-      id: drink.productId.toString(),
+      id: drink.offerId ? drink.offerId.toString() : String(Math.random()),
       name: drink.title,
       price: drink.price,
       description: drink.description || '',
       localId: localId,
-      category: drink.category
+      category: typeof drink.category === 'number' ? 
+        (drink.category === 0 ? 'Beer' : 
+         drink.category === 1 ? 'Wine' : 
+         drink.category === 2 ? 'Cocktails' : 
+         drink.category === 3 ? 'Spirits' : 'Other') : 'Other'
     }));
   } catch (error) {
     console.error(`Error fetching drinks for local ID ${localId}:`, error);
     
     // If the API call fails, return empty array to prevent UI breaking
-    return [];
-  }
-};
-
-export const getLocalOffers = async (localId: string, rrppId?: string): Promise<any[]> => {
-  try {
-    const params: any = {};
-    if (rrppId) {
-      params.rrppId = rrppId;
-    }
-    
-    const response = await api.get(`/public/offers/local/${localId}`, { params });
-    
-    return response.data.map((offer: any) => ({
-      id: offer.offerId.toString(),
-      name: offer.title,
-      price: offer.price,
-      description: offer.description || '',
-      rrppOffer: offer.rrppOffer || false
-    }));
-  } catch (error) {
-    console.error(`Error fetching offers for local ID ${localId}:`, error);
     return [];
   }
 };

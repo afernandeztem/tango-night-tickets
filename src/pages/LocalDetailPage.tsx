@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers } from '../services/api';
+import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers, getLocalReviews } from '../services/api';
 import { Local, Event, Drink } from '../types';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ import Footer from '../components/Footer';
 import EventCard from '../components/EventCard';
 import ScrollableSection from '../components/ScrollableSection';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Wine, Ticket, Gift } from 'lucide-react';
+import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Wine, Ticket, Gift, MessageSquare } from 'lucide-react';
 import { 
   Tabs, 
   TabsContent, 
@@ -31,11 +31,13 @@ const LocalDetailPage: React.FC = () => {
   const [eventsData, setEventsData] = useState<{ content: Event[] } | null>(null);
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [offers, setOffers] = useState<any[]>([]);
-  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; offers: boolean }>({
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; offers: boolean; reviews: boolean }>({
     local: true,
     events: true,
     drinks: true,
     offers: true,
+    reviews: true,
   });
   
   const translations = {
@@ -70,6 +72,10 @@ const LocalDetailPage: React.FC = () => {
       getDirections: 'Get Directions',
       upcomingEventsAt: 'Upcoming Events at',
       category: 'Category',
+      reviews: 'Reviews',
+      noReviews: 'No reviews available for this venue.',
+      reviewsTitle: 'Customer Reviews',
+      reviewsSubtitle: 'See what others are saying',
     },
     es: {
       address: 'Dirección',
@@ -102,6 +108,10 @@ const LocalDetailPage: React.FC = () => {
       getDirections: 'Obtener Direcciones',
       upcomingEventsAt: 'Próximos Eventos en',
       category: 'Categoría',
+      reviews: 'Reseñas',
+      noReviews: 'No hay reseñas disponibles para este local.',
+      reviewsTitle: 'Reseñas de Clientes',
+      reviewsSubtitle: 'Mira lo que otros están diciendo',
     }
   };
   
@@ -173,10 +183,30 @@ const LocalDetailPage: React.FC = () => {
     fetchDrinksAndOffers();
   }, [localId]);
 
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!localId) return;
+      
+      setLoading(prev => ({ ...prev, reviews: true }));
+      
+      try {
+        const reviewsData = await getLocalReviews(localId);
+        setReviews(reviewsData.content);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, reviews: false }));
+      }
+    };
+    
+    fetchReviews();
+  }, [localId]);
+
   const upcomingEvents = eventsData?.content || [];
   const hasEvents = upcomingEvents.length > 0;
   const hasDrinks = drinks.length > 0;
   const hasOffers = offers.length > 0;
+  const hasReviews = reviews.length > 0;
   
   const viewAllLink = localId ? `/events?localId=${localId}` : '/events';
 
@@ -331,6 +361,50 @@ const LocalDetailPage: React.FC = () => {
                                   {tag}
                                 </Badge>
                               ))}
+                            </div>
+                            
+                            <div className="mt-8">
+                              <div className="flex items-center mb-4">
+                                <MessageSquare size={20} className="mr-2 text-tango-primary" />
+                                <h3 className="text-xl font-semibold">{t.reviewsTitle}</h3>
+                              </div>
+                              
+                              {loading.reviews ? (
+                                <div className="space-y-4">
+                                  {[1, 2, 3].map((_, index) => (
+                                    <div key={index} className="animate-pulse">
+                                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                                      <div className="h-3 bg-gray-200 rounded w-1/3 mb-2"></div>
+                                      <div className="h-10 bg-gray-200 rounded w-full"></div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : hasReviews ? (
+                                <div className="space-y-4">
+                                  {reviews.map((review) => (
+                                    <div key={review.id} className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 last:pb-0">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="font-medium">{review.userName}</div>
+                                        <div className="flex items-center">
+                                          <Star size={16} className="text-yellow-400 mr-1" />
+                                          <span>{review.score}</span>
+                                        </div>
+                                      </div>
+                                      <p className="text-gray-600">{review.comment}</p>
+                                      {review.createdAt && (
+                                        <div className="text-xs text-gray-400 mt-1">
+                                          {new Date(review.createdAt).toLocaleDateString()}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                                  <MessageSquare size={32} className="mx-auto mb-2 text-gray-300" />
+                                  <p className="text-gray-500">{t.noReviews}</p>
+                                </div>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
@@ -609,3 +683,4 @@ const LocalDetailPage: React.FC = () => {
 };
 
 export default LocalDetailPage;
+
