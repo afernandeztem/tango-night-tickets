@@ -543,21 +543,9 @@ const LocalDetailPage: React.FC = () => {
                   </TabsContent>
                   
                   <TabsContent value="drinkoffers" className="mt-0">
-                    <Card className="overflow-hidden border-0 shadow-sm">
-                      <CardContent className="p-0">
-                        <div className="bg-gradient-to-r from-tango-primary/90 to-tango-primary p-6 text-white relative">
-                          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIgMS44LTQgNC00czQgMS44IDQgNC0xLjggNC00IDQtNC0xLjgtNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
-                          <div className="relative z-10 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-white/20 backdrop-blur-sm rounded-full">
-                                <Martini className="text-white h-5 w-5" />
-                              </div>
-                              <h2 className="text-2xl font-bold">{t.drinkOffers}</h2>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-6 bg-white border-b">
+                    <Card className="overflow-hidden border border-gray-200 shadow-sm">
+                      <CardContent className="p-6">
+                        <div className="mb-8">
                           <div className="flex items-center gap-3 mb-5">
                             <div className="bg-tango-primary/10 p-2 rounded-full">
                               <Percent className="text-tango-primary h-5 w-5" />
@@ -614,7 +602,7 @@ const LocalDetailPage: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="p-6 bg-white">
+                        <div>
                           <div className="flex items-center gap-3 mb-5">
                             <div className="bg-tango-primary/10 p-2 rounded-full">
                               <Wine className="text-tango-primary h-5 w-5" />
