@@ -341,7 +341,7 @@ const LocalDetailPage: React.FC = () => {
                         {t.events}
                       </TabsTrigger>
                       <TabsTrigger value="drinkoffers" className="flex items-center gap-1.5">
-                        <Wine size={16} />
+                        <Martini size={16} />
                         {t.drinkOffers}
                       </TabsTrigger>
                       <TabsTrigger value="directions" className="flex items-center gap-1.5">
@@ -543,32 +543,41 @@ const LocalDetailPage: React.FC = () => {
                   </TabsContent>
                   
                   <TabsContent value="drinkoffers" className="mt-0">
-                    <Card className="overflow-hidden border border-gray-200 shadow-sm">
+                    <Card className="overflow-hidden border-0 shadow-lg">
                       <CardContent className="p-0">
-                        <div className="bg-gradient-to-r from-purple-100 to-white p-6 border-b">
-                          <div className="flex justify-between items-center">
+                        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 border-b relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+                            <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-white/20 blur-xl"></div>
+                            <div className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-white/20 blur-xl"></div>
+                          </div>
+                          <div className="flex justify-between items-center relative z-10">
                             <div className="flex items-center gap-3">
-                              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-3 rounded-full shadow-md">
-                                <Martini className="text-white h-6 w-6" />
+                              <div className="bg-white p-3 rounded-full shadow-md">
+                                <Martini className="text-purple-600 h-6 w-6" />
                               </div>
-                              <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700">{t.drinkOffers}</h2>
+                              <h2 className="text-2xl font-bold text-white">{t.drinkOffers}</h2>
                             </div>
                             <motion.div
                               initial={{ rotate: -5 }}
                               animate={{ rotate: 5 }}
                               transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
                             >
-                              <PartyPopper className="h-7 w-7 text-purple-500" />
+                              <PartyPopper className="h-7 w-7 text-white" />
                             </motion.div>
                           </div>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-6 bg-gradient-to-br from-orange-50 to-pink-50">
                           <div className="flex items-center gap-3 mb-4">
-                            <div className="bg-gradient-to-r from-orange-400 to-pink-500 p-2 rounded-lg shadow-md">
+                            <motion.div 
+                              initial={{ scale: 0.9 }}
+                              animate={{ scale: 1 }}
+                              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                              className="bg-gradient-to-r from-orange-400 to-pink-500 p-3 rounded-full shadow-lg"
+                            >
                               <Gift className="text-white h-5 w-5" />
-                            </div>
-                            <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-pink-500">
+                            </motion.div>
+                            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-pink-500">
                               {t.offers}
                             </h2>
                           </div>
@@ -576,7 +585,7 @@ const LocalDetailPage: React.FC = () => {
                           {loading.offers ? (
                             <div className="space-y-4">
                               {[1, 2, 3].map((_, index) => (
-                                <div key={index} className="animate-pulse">
+                                <div key={index} className="animate-pulse bg-white rounded-xl p-5 shadow-sm">
                                   <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
                                   <div className="space-y-2">
                                     <div className="h-4 bg-gray-200 rounded w-full"></div>
@@ -586,90 +595,123 @@ const LocalDetailPage: React.FC = () => {
                               ))}
                             </div>
                           ) : hasOffers ? (
-                            <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {offers.map((offer) => (
-                                <div key={offer.id} className="flex justify-between p-4 border rounded-lg bg-gradient-to-r from-orange-50 to-pink-50 hover:from-orange-100 hover:to-pink-100 transition-all shadow-sm">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <Sparkle className="h-4 w-4 text-amber-500" />
-                                      <h4 className="font-semibold text-gray-800">{offer.name}</h4>
+                                <motion.div 
+                                  key={offer.id}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-orange-100 group"
+                                >
+                                  <div className="p-1 bg-gradient-to-r from-orange-400 to-pink-500"></div>
+                                  <div className="p-5">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <div className="flex items-center gap-2">
+                                        <Sparkle className="h-5 w-5 text-amber-500" />
+                                        <h4 className="font-bold text-gray-800 group-hover:text-orange-500 transition-colors">
+                                          {offer.name}
+                                        </h4>
+                                      </div>
+                                      <div className="flex items-center bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold px-3 py-1.5 rounded-full shadow-sm">
+                                        <Percent className="h-3.5 w-3.5 mr-1" />
+                                        <span>{offer.price?.toFixed(2) || "0.00"} €</span>
+                                      </div>
                                     </div>
                                     {offer.description && (
-                                      <p className="text-sm text-gray-600 mt-1 ml-6">{offer.description}</p>
+                                      <p className="text-gray-600">{offer.description}</p>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="flex items-center bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold px-3 py-1.5 rounded-full shadow-sm">
-                                      <Percent className="h-3.5 w-3.5 mr-1" />
-                                      <span>{offer.price.toFixed(2)} €</span>
-                                    </div>
-                                  </div>
-                                </div>
+                                </motion.div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-10 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200">
-                              <Gift size={40} className="mx-auto mb-4 text-gray-300" />
-                              <p className="text-gray-600">{t.noOffersAvailable}</p>
+                            <div className="text-center py-12 bg-white rounded-xl border border-orange-100 shadow-sm">
+                              <div className="mx-auto w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
+                                <Gift size={30} className="text-orange-300" />
+                              </div>
+                              <p className="text-lg font-semibold text-gray-700 mb-1">{t.noOffersAvailable}</p>
+                              <p className="text-gray-500 text-sm max-w-md mx-auto">Check back later for special promotions and offers!</p>
                             </div>
                           )}
                         </div>
 
-                        <Separator className="bg-gradient-to-r from-purple-200 to-white h-0.5" />
+                        <Separator className="h-1 bg-gradient-to-r from-purple-200 via-indigo-100 to-blue-200" />
 
-                        <div className="p-6">
+                        <div className="p-6 bg-gradient-to-br from-blue-50 to-teal-50">
                           <div className="flex items-center gap-3 mb-6">
-                            <div className="bg-gradient-to-r from-blue-400 to-teal-500 p-2 rounded-lg shadow-md">
+                            <motion.div 
+                              initial={{ rotate: 0 }}
+                              animate={{ rotate: [0, 15, 0, -15, 0] }}
+                              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 1 }}
+                              className="bg-gradient-to-r from-blue-500 to-teal-500 p-3 rounded-full shadow-lg"
+                            >
                               <Wine className="text-white h-5 w-5" />
-                            </div>
-                            <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-600">
+                            </motion.div>
+                            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-600">
                               {t.drinks}
                             </h2>
                           </div>
                           
                           {loading.drinks ? (
-                            <div className="space-y-4">
-                              {[1, 2, 3].map((_, index) => (
-                                <div key={index} className="animate-pulse">
-                                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
-                                  <div className="space-y-2">
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                            <div className="space-y-6">
+                              {[1, 2].map((category, idx) => (
+                                <div key={idx} className="animate-pulse bg-white rounded-xl p-5 shadow-sm">
+                                  <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {[1, 2, 3, 4].map((drink, index) => (
+                                      <div key={index} className="h-24 bg-gray-100 rounded-lg"></div>
+                                    ))}
                                   </div>
                                 </div>
                               ))}
                             </div>
                           ) : hasDrinks ? (
                             <div className="space-y-8">
-                              {Object.entries(drinksByCategory).map(([category, categoryDrinks]) => (
-                                <div key={category} className="bg-gradient-to-r from-blue-50 to-white p-5 rounded-lg border border-blue-100">
+                              {Object.entries(drinksByCategory).map(([category, categoryDrinks], categoryIndex) => (
+                                <motion.div 
+                                  key={category}
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.4, delay: categoryIndex * 0.1 }}
+                                  className="bg-white p-5 rounded-xl border border-blue-100 shadow-md"
+                                >
                                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700">
-                                    <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200">
+                                    <Badge className="bg-gradient-to-r from-blue-500 to-teal-500 text-white border-0 shadow-sm px-3">
                                       {category}
                                     </Badge>
                                   </h3>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {categoryDrinks.map((drink) => (
-                                      <div key={drink.id} className="flex justify-between p-3 border border-blue-50 rounded-md bg-white hover:shadow-md transition-all">
+                                    {categoryDrinks.map((drink, drinkIndex) => (
+                                      <motion.div 
+                                        key={drink.id || drinkIndex}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.3, delay: drinkIndex * 0.05 }}
+                                        className="flex justify-between p-3 border border-blue-50 rounded-lg bg-gradient-to-r from-white to-blue-50 hover:from-blue-50 hover:to-blue-100 transition-all duration-300 shadow-sm hover:shadow group"
+                                      >
                                         <div>
-                                          <h4 className="font-medium text-gray-800">{drink.name}</h4>
+                                          <h4 className="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">{drink.name}</h4>
                                           {drink.description && (
                                             <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
                                           )}
                                         </div>
-                                        <div className="text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded-full self-start flex items-center">
-                                          {drink.price.toFixed(2)} €
+                                        <div className="bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold px-3 py-1 rounded-full self-start flex items-center transform group-hover:scale-105 transition-transform">
+                                          {drink.price?.toFixed(2) || "0.00"} €
                                         </div>
-                                      </div>
+                                      </motion.div>
                                     ))}
                                   </div>
-                                </div>
+                                </motion.div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-12 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200">
-                              <Wine size={40} className="mx-auto mb-4 text-gray-300" />
-                              <p className="text-gray-600">{t.noDrinksAvailable}</p>
+                            <div className="text-center py-12 bg-white rounded-xl border border-blue-100 shadow-sm">
+                              <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                                <Wine size={30} className="text-blue-300" />
+                              </div>
+                              <p className="text-lg font-semibold text-gray-700 mb-1">{t.noDrinksAvailable}</p>
+                              <p className="text-gray-500 text-sm max-w-md mx-auto">Check back later for menu updates!</p>
                             </div>
                           )}
                         </div>
