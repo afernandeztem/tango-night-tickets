@@ -9,7 +9,7 @@ import Footer from '../components/Footer';
 import EventCard from '../components/EventCard';
 import ScrollableSection from '../components/ScrollableSection';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Wine, Ticket, Gift, MessageSquare } from 'lucide-react';
+import { MapPin, Calendar, Star, Clock, Navigation, Tags, Users, Info, Wine, Ticket, Gift, MessageSquare, Sparkle, Martini, Percent, PartyPopper } from 'lucide-react';
 import { 
   Tabs, 
   TabsContent, 
@@ -544,60 +544,33 @@ const LocalDetailPage: React.FC = () => {
                   
                   <TabsContent value="drinkoffers" className="mt-0">
                     <Card className="overflow-hidden border border-gray-200 shadow-sm">
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-2 mb-6">
-                          <Wine className="text-tango-primary" size={24} />
-                          <h2 className="text-2xl font-semibold">{t.drinks}</h2>
+                      <CardContent className="p-0">
+                        <div className="bg-gradient-to-r from-purple-100 to-white p-6 border-b">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 p-3 rounded-full shadow-md">
+                                <Martini className="text-white h-6 w-6" />
+                              </div>
+                              <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-purple-700">{t.drinkOffers}</h2>
+                            </div>
+                            <motion.div
+                              initial={{ rotate: -5 }}
+                              animate={{ rotate: 5 }}
+                              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+                            >
+                              <PartyPopper className="h-7 w-7 text-purple-500" />
+                            </motion.div>
+                          </div>
                         </div>
-                        
-                        {loading.drinks ? (
-                          <div className="space-y-4">
-                            {[1, 2, 3].map((_, index) => (
-                              <div key={index} className="animate-pulse">
-                                <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
-                                <div className="space-y-2">
-                                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : hasDrinks ? (
-                          <div className="space-y-6">
-                            {Object.entries(drinksByCategory).map(([category, categoryDrinks]) => (
-                              <div key={category}>
-                                <h3 className="text-lg font-medium mb-3 text-tango-primary">
-                                  {category}
-                                </h3>
-                                <div className="space-y-3">
-                                  {categoryDrinks.map((drink) => (
-                                    <div key={drink.id} className="flex justify-between py-2 border-b border-gray-100">
-                                      <div>
-                                        <h4 className="font-medium">{drink.name}</h4>
-                                        {drink.description && (
-                                          <p className="text-sm text-gray-600">{drink.description}</p>
-                                        )}
-                                      </div>
-                                      <div className="text-tango-primary font-semibold">
-                                        {drink.price.toFixed(2)} €
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                            <Wine size={40} className="mx-auto mb-4 text-gray-400" />
-                            <p className="text-gray-600">{t.noDrinksAvailable}</p>
-                          </div>
-                        )}
 
-                        <div className="mt-12 pt-6 border-t border-gray-200">
-                          <div className="flex items-center gap-2 mb-6">
-                            <Gift className="text-tango-primary" size={24} />
-                            <h2 className="text-2xl font-semibold">{t.offers}</h2>
+                        <div className="p-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="bg-gradient-to-r from-orange-400 to-pink-500 p-2 rounded-lg shadow-md">
+                              <Gift className="text-white h-5 w-5" />
+                            </div>
+                            <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-pink-500">
+                              {t.offers}
+                            </h2>
                           </div>
                           
                           {loading.offers ? (
@@ -615,23 +588,88 @@ const LocalDetailPage: React.FC = () => {
                           ) : hasOffers ? (
                             <div className="space-y-4">
                               {offers.map((offer) => (
-                                <div key={offer.id} className="flex justify-between py-3 border-b border-gray-100 last:border-b-0">
-                                  <div>
-                                    <h4 className="font-medium">{offer.name}</h4>
+                                <div key={offer.id} className="flex justify-between p-4 border rounded-lg bg-gradient-to-r from-orange-50 to-pink-50 hover:from-orange-100 hover:to-pink-100 transition-all shadow-sm">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <Sparkle className="h-4 w-4 text-amber-500" />
+                                      <h4 className="font-semibold text-gray-800">{offer.name}</h4>
+                                    </div>
                                     {offer.description && (
-                                      <p className="text-sm text-gray-600">{offer.description}</p>
+                                      <p className="text-sm text-gray-600 mt-1 ml-6">{offer.description}</p>
                                     )}
                                   </div>
-                                  <div className="text-tango-primary font-semibold">
-                                    {offer.price.toFixed(2)} €
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex items-center bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold px-3 py-1.5 rounded-full shadow-sm">
+                                      <Percent className="h-3.5 w-3.5 mr-1" />
+                                      <span>{offer.price.toFixed(2)} €</span>
+                                    </div>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                              <Gift size={40} className="mx-auto mb-4 text-gray-400" />
+                            <div className="text-center py-10 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200">
+                              <Gift size={40} className="mx-auto mb-4 text-gray-300" />
                               <p className="text-gray-600">{t.noOffersAvailable}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <Separator className="bg-gradient-to-r from-purple-200 to-white h-0.5" />
+
+                        <div className="p-6">
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="bg-gradient-to-r from-blue-400 to-teal-500 p-2 rounded-lg shadow-md">
+                              <Wine className="text-white h-5 w-5" />
+                            </div>
+                            <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-600">
+                              {t.drinks}
+                            </h2>
+                          </div>
+                          
+                          {loading.drinks ? (
+                            <div className="space-y-4">
+                              {[1, 2, 3].map((_, index) => (
+                                <div key={index} className="animate-pulse">
+                                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                                  <div className="space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : hasDrinks ? (
+                            <div className="space-y-8">
+                              {Object.entries(drinksByCategory).map(([category, categoryDrinks]) => (
+                                <div key={category} className="bg-gradient-to-r from-blue-50 to-white p-5 rounded-lg border border-blue-100">
+                                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700">
+                                    <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200">
+                                      {category}
+                                    </Badge>
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {categoryDrinks.map((drink) => (
+                                      <div key={drink.id} className="flex justify-between p-3 border border-blue-50 rounded-md bg-white hover:shadow-md transition-all">
+                                        <div>
+                                          <h4 className="font-medium text-gray-800">{drink.name}</h4>
+                                          {drink.description && (
+                                            <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
+                                          )}
+                                        </div>
+                                        <div className="text-blue-600 font-semibold bg-blue-50 px-3 py-1 rounded-full self-start flex items-center">
+                                          {drink.price.toFixed(2)} €
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-12 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200">
+                              <Wine size={40} className="mx-auto mb-4 text-gray-300" />
+                              <p className="text-gray-600">{t.noDrinksAvailable}</p>
                             </div>
                           )}
                         </div>
