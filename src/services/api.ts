@@ -406,6 +406,26 @@ export const getDrinksByLocalId = async (localId: string): Promise<Drink[]> => {
   }
 };
 
+export const getLocalOffers = async (localId: string): Promise<any[]> => {
+  try {
+    const response = await api.get(`/public/offers/local/${localId}`);
+    
+    return response.data.map((offer: any) => ({
+      id: (offer.offerId || Math.random().toString(36).substring(2)).toString(),
+      name: offer.title,
+      price: offer.price,
+      description: offer.description || '',
+      type: 'offer',
+      localId: localId
+    }));
+  } catch (error) {
+    console.error(`Error fetching offers for local ID ${localId}:`, error);
+    
+    // If the API call fails, return empty array to prevent UI breaking
+    return [];
+  }
+};
+
 export const getLocalReviews = async (localId: string, page = 0, size = 10): Promise<PaginatedResponse<any>> => {
   try {
     const response = await api.get(`/public/review/local/${localId}`, {
@@ -413,25 +433,34 @@ export const getLocalReviews = async (localId: string, page = 0, size = 10): Pro
     });
     
     const reviews = response.data.content.map((review: any) => ({
-      id: review.reviewId.toString(),
-      userName: review.userName,
-      score: review.score,
-      comment: review.comment,
-      createdAt: review.createdAt
+      id: review.reviewId ? review.reviewId.toString() : Math.random().toString(36).substring(2),
+      userName: review.userName || 'Anonymous',
+      score: review.score || 0,
+      comment: review.comment || '',
+      createdAt: review.createdAt || new Date().toISOString()
     }));
     
     return {
       content: reviews,
       pageable: {
-        pageNumber: response.data.pageable.pageNumber,
-        pageSize: response.data.pageable.pageSize,
-        totalElements: response.data.totalElements,
-        totalPages: response.data.totalPages
+        pageNumber: response.data.pageable?.pageNumber || 0,
+        pageSize: response.data.pageable?.pageSize || 10,
+        totalElements: response.data.totalElements || reviews.length,
+        totalPages: response.data.totalPages || 1
       }
     };
   } catch (error) {
     console.error(`Error fetching reviews for local ID ${localId}:`, error);
-    throw error;
+    // Return empty response to prevent UI breaking
+    return {
+      content: [],
+      pageable: {
+        pageNumber: 0,
+        pageSize: 10,
+        totalElements: 0,
+        totalPages: 0
+      }
+    };
   }
 };
 

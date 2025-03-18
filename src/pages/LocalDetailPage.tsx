@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalReviews } from '../services/api';
+import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalReviews, getLocalOffers } from '../services/api';
 import { Local, Event, Drink } from '../types';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
@@ -30,11 +30,13 @@ const LocalDetailPage: React.FC = () => {
   const [local, setLocal] = useState<Local | null>(null);
   const [eventsData, setEventsData] = useState<{ content: Event[] } | null>(null);
   const [drinks, setDrinks] = useState<Drink[]>([]);
+  const [offers, setOffers] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; reviews: boolean }>({
+  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; offers: boolean; reviews: boolean }>({
     local: true,
     events: true,
     drinks: true,
+    offers: true,
     reviews: true,
   });
   
@@ -173,6 +175,25 @@ const LocalDetailPage: React.FC = () => {
   }, [localId]);
 
   useEffect(() => {
+    const fetchOffers = async () => {
+      if (!localId) return;
+      
+      setLoading(prev => ({ ...prev, offers: true }));
+      
+      try {
+        const offersData = await getLocalOffers(localId);
+        setOffers(offersData);
+      } catch (error) {
+        console.error('Error fetching offers:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, offers: false }));
+      }
+    };
+    
+    fetchOffers();
+  }, [localId]);
+
+  useEffect(() => {
     const fetchReviews = async () => {
       if (!localId) return;
       
@@ -194,6 +215,7 @@ const LocalDetailPage: React.FC = () => {
   const upcomingEvents = eventsData?.content || [];
   const hasEvents = upcomingEvents.length > 0;
   const hasDrinks = drinks.length > 0;
+  const hasOffers = offers.length > 0;
   const hasReviews = reviews.length > 0;
   
   const viewAllLink = localId ? `/events?localId=${localId}` : '/events';
@@ -571,6 +593,48 @@ const LocalDetailPage: React.FC = () => {
                             <p className="text-gray-600">{t.noDrinksAvailable}</p>
                           </div>
                         )}
+
+                        <div className="mt-12 pt-6 border-t border-gray-200">
+                          <div className="flex items-center gap-2 mb-6">
+                            <Gift className="text-tango-primary" size={24} />
+                            <h2 className="text-2xl font-semibold">{t.offers}</h2>
+                          </div>
+                          
+                          {loading.offers ? (
+                            <div className="space-y-4">
+                              {[1, 2, 3].map((_, index) => (
+                                <div key={index} className="animate-pulse">
+                                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+                                  <div className="space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : hasOffers ? (
+                            <div className="space-y-4">
+                              {offers.map((offer) => (
+                                <div key={offer.id} className="flex justify-between py-3 border-b border-gray-100 last:border-b-0">
+                                  <div>
+                                    <h4 className="font-medium">{offer.name}</h4>
+                                    {offer.description && (
+                                      <p className="text-sm text-gray-600">{offer.description}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-tango-primary font-semibold">
+                                    {offer.price.toFixed(2)} €
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+                              <Gift size={40} className="mx-auto mb-4 text-gray-400" />
+                              <p className="text-gray-600">{t.noOffersAvailable}</p>
+                            </div>
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   </TabsContent>
