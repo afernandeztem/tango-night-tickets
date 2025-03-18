@@ -543,7 +543,7 @@ const LocalDetailPage: React.FC = () => {
                   </TabsContent>
                   
                   <TabsContent value="drinkoffers" className="mt-0">
-                    <Card className="overflow-hidden border-0 shadow-md">
+                    <Card className="overflow-hidden border-0 shadow-sm">
                       <CardContent className="p-0">
                         <div className="bg-gradient-to-r from-tango-primary/90 to-tango-primary p-6 text-white relative">
                           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIgMS44LTQgNC00czQgMS44IDQgNC0xLjggNC00IDQtNC0xLjgtNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-20"></div>
@@ -558,7 +558,7 @@ const LocalDetailPage: React.FC = () => {
                         </div>
 
                         <div className="p-6 bg-white border-b">
-                          <div className="flex items-center gap-3 mb-4">
+                          <div className="flex items-center gap-3 mb-5">
                             <div className="bg-tango-primary/10 p-2 rounded-full">
                               <Percent className="text-tango-primary h-5 w-5" />
                             </div>
@@ -585,7 +585,7 @@ const LocalDetailPage: React.FC = () => {
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.3 }}
-                                  className="bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow transition-all duration-300 border border-gray-100 group"
+                                  className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow transition-all duration-300 border border-gray-100 group"
                                 >
                                   <div className="p-0.5 bg-tango-primary"></div>
                                   <div className="p-4">
@@ -615,7 +615,7 @@ const LocalDetailPage: React.FC = () => {
                         </div>
 
                         <div className="p-6 bg-white">
-                          <div className="flex items-center gap-3 mb-6">
+                          <div className="flex items-center gap-3 mb-5">
                             <div className="bg-tango-primary/10 p-2 rounded-full">
                               <Wine className="text-tango-primary h-5 w-5" />
                             </div>
