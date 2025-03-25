@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalReviews, getLocalOffers } from '../services/api';
@@ -118,7 +119,8 @@ const LocalDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchLocals = async () => {
       try {
-        const response = await fetch('https://api.grupotangoapp.com/public/locals?city=Madrid');
+        // Fetch all locals without city filter to ensure we find the right one
+        const response = await fetch('https://api.grupotangoapp.com/public/locals');
         const data = await response.json();
         const locals = data.content || [];
         
