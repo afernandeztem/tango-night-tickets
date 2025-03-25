@@ -40,13 +40,71 @@ const LocalDetailPage: React.FC = () => {
   
   useEffect(() => {
     const fetchLocals = async () => {
+      if (!localSlug) {
+        console.error('No localSlug provided');
+        setLoading(prev => ({ ...prev, local: false }));
+        return;
+      }
+      
       try {
-        // Fetch all locals without city filter to ensure we find the right one
-        const response = await fetch('https://api.grupotangoapp.com/public/locals');
+        // First, try to fetch all locals to find the matching one by slug
+        // We don't filter by city to make sure we get all locals
+        console.log('Fetching locals to find matching slug:', localSlug);
+        const fetchUrl = 'https://api.grupotangoapp.com/public/locals?page=0&size=100';
+        console.log('Fetch URL:', fetchUrl);
+        
+        // Attempt to fetch locals. If this fails due to missing city param, we'll handle it
+        const response = await fetch(fetchUrl);
+        
+        if (!response.ok) {
+          // If first approach fails (likely due to missing city param)
+          // Try an alternative approach by fetching a specific city's locals
+          console.log('First approach failed, trying with a specific city');
+          
+          // Get all cities
+          const citiesResponse = await fetch('https://api.grupotangoapp.com/public/cities');
+          const citiesData = await citiesResponse.json();
+          
+          if (!Array.isArray(citiesData)) {
+            throw new Error('Invalid cities response');
+          }
+          
+          // For each active city, try to fetch locals
+          for (const city of citiesData) {
+            if (city.active) {
+              console.log(`Trying to find local in city: ${city.name}`);
+              const cityLocalsResponse = await fetch(`https://api.grupotangoapp.com/public/locals?city=${encodeURIComponent(city.name)}`);
+              
+              if (cityLocalsResponse.ok) {
+                const cityLocalsData = await cityLocalsResponse.json();
+                const locals = cityLocalsData.content || [];
+                
+                // Look for a matching local by slug
+                const foundLocal = locals.find((local: any) => {
+                  const slug = local.name.toLowerCase().normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                  return slug === localSlug;
+                });
+                
+                if (foundLocal) {
+                  console.log('Found local in city:', city.name, foundLocal);
+                  processFoundLocal(foundLocal);
+                  return;
+                }
+              }
+            }
+          }
+          
+          console.error('Local not found in any city');
+          setLoading(prev => ({ ...prev, local: false }));
+          return;
+        }
+        
+        // If first approach succeeded
         const data = await response.json();
         const locals = data.content || [];
         
-        if (localSlug && locals.length > 0) {
+        if (locals.length > 0) {
           const foundLocal = locals.find((local: any) => {
             const slug = local.name.toLowerCase().normalize("NFD")
               .replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -55,32 +113,36 @@ const LocalDetailPage: React.FC = () => {
           
           if (foundLocal) {
             console.log('Found local with matching slug:', foundLocal);
-            setLocal({
-              id: foundLocal.localId,
-              name: foundLocal.name,
-              description: foundLocal.description || '',
-              address: foundLocal.address || '',
-              city: foundLocal.city || '',
-              capacity: foundLocal.capacity || 0,
-              rating: foundLocal.rating || 4.5,
-              tags: foundLocal.categories || [],
-              image: foundLocal.filename || 'https://source.unsplash.com/random/800x600/?club',
-              schedule: foundLocal.schedule || []
-            });
-            
-            fetchAdditionalLocalData(foundLocal.localId);
+            processFoundLocal(foundLocal);
           } else {
             console.error('Local not found with slug:', localSlug);
             setLoading(prev => ({ ...prev, local: false }));
           }
         } else {
-          console.error('No locals found or no localSlug provided');
+          console.error('No locals found');
           setLoading(prev => ({ ...prev, local: false }));
         }
       } catch (error) {
         console.error('Error fetching locals:', error);
         setLoading(prev => ({ ...prev, local: false }));
       }
+    };
+    
+    const processFoundLocal = (foundLocal: any) => {
+      setLocal({
+        id: foundLocal.localId,
+        name: foundLocal.name,
+        description: foundLocal.description || '',
+        address: foundLocal.address || '',
+        city: foundLocal.city || '',
+        capacity: foundLocal.capacity || 0,
+        rating: foundLocal.rating || 4.5,
+        tags: foundLocal.categories || [],
+        image: foundLocal.filename || 'https://source.unsplash.com/random/800x600/?club',
+        schedule: foundLocal.schedule || []
+      });
+      
+      fetchAdditionalLocalData(foundLocal.localId);
     };
     
     const fetchAdditionalLocalData = (localId: string) => {
