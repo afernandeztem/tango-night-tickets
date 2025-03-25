@@ -32,8 +32,13 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
   
   const t = translations[state.language];
   
+  const createSlug = (name: string) => {
+    return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  };
+  
   const handleClick = () => {
-    navigate(`/locals/${local.id}`);
+    const slug = createSlug(local.name);
+    navigate(`/locals/${slug}`);
   };
   
   const handleFavoriteClick = (e: React.MouseEvent) => {
