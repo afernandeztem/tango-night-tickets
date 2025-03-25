@@ -16,6 +16,11 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
           src={local.image} 
           alt={local.name} 
           className="w-full h-full object-cover" 
+          onError={(e) => {
+            // Fallback image if the main image fails to load
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://source.unsplash.com/random/800x600/?club';
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-transparent"></div>
       </div>

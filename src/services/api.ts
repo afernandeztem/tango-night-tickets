@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { City, Event, Local, Drink, User, PaginatedResponse, Ticket } from '../types';
 
@@ -96,7 +95,7 @@ export const getLocals = async (
       name: local.name,
       city: local.cityName,
       address: local.street || 'Address not available',
-      image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`,
+      image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`, // Fixed: changed filename to fileName
       tags: local.tags || [],
       rating: local.score > 0 ? local.score : 4.5, // Default rating if score is negative
       capacity: local.capacity || 300, // Default as API might not provide this
@@ -162,7 +161,7 @@ export const getLocalById = async (localId: string): Promise<Local> => {
       name: local.name,
       city: local.cityName,
       address: local.street || 'Address not available',
-      image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`,
+      image: local.fileName || `https://source.unsplash.com/random/800x600/?nightclub`, // Fixed: changed filename to fileName
       tags: local.tags || [],
       rating: local.score > 0 ? local.score : 4.5, // Default rating if score is negative
       capacity: local.capacity || 300, // Default as API might not provide this

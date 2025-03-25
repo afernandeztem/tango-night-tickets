@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getEventsByLocalId, getDrinksByLocalId, getLocalReviews, getLocalOffers } from '../services/api';
@@ -133,12 +132,12 @@ const LocalDetailPage: React.FC = () => {
         id: foundLocal.localId,
         name: foundLocal.name,
         description: foundLocal.description || '',
-        address: foundLocal.address || '',
+        address: foundLocal.street || '',
         city: foundLocal.city || '',
         capacity: foundLocal.capacity || 0,
         rating: foundLocal.rating || 4.5,
         tags: foundLocal.categories || [],
-        image: foundLocal.filename || 'https://source.unsplash.com/random/800x600/?club',
+        image: foundLocal.fileName || 'https://source.unsplash.com/random/800x600/?club',
         schedule: foundLocal.schedule || []
       });
       
