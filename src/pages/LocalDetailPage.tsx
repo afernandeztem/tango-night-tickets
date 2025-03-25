@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalReviews, getLocalOffers } from '../services/api';
@@ -119,8 +118,9 @@ const LocalDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchLocals = async () => {
       try {
-        const response = await fetch('https://api.grupotangoapp.com/public/locals');
-        const locals = await response.json();
+        const response = await fetch('https://api.grupotangoapp.com/public/locals?city=Madrid');
+        const data = await response.json();
+        const locals = data.content || [];
         
         if (localSlug && locals.length > 0) {
           const foundLocal = locals.find((local: any) => {
@@ -130,6 +130,7 @@ const LocalDetailPage: React.FC = () => {
           });
           
           if (foundLocal) {
+            console.log('Found local with matching slug:', foundLocal);
             setLocal({
               id: foundLocal.localId,
               name: foundLocal.name,
