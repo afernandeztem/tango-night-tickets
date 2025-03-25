@@ -1,4 +1,3 @@
-
 export interface City {
   id: string;
   name: string;
@@ -21,13 +20,17 @@ export interface Local {
   rating: number;
   capacity: number;
   description?: string;
-  schedule?: LocalSchedule[];
+  schedule?: LocalSchedule[] | ScheduleObject;
 }
 
 export interface LocalSchedule {
   day: string;
   openTime: string;
   closeTime: string;
+}
+
+export interface ScheduleObject {
+  [key: string]: string[] | never[];
 }
 
 export interface Event {

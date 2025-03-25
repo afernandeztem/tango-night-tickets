@@ -2,7 +2,7 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Local } from '../../types';
+import { Local, LocalSchedule, ScheduleObject } from '../../types';
 
 interface ScheduleCardProps {
   local: Local;
@@ -24,21 +24,28 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ local, translations: t }) =
   const orderedDays = getDaysOfWeek();
 
   // Process the schedule data based on its format
-  const getScheduleForDay = (day: string) => {
+  const getScheduleForDay = (day: string): LocalSchedule | null => {
     if (!local.schedule) return null;
     
     // If schedule is an array (old format)
     if (Array.isArray(local.schedule)) {
-      return local.schedule.find(s => s.day.toLowerCase() === day.toLowerCase());
+      return local.schedule.find(s => s.day.toLowerCase() === day.toLowerCase()) || null;
     }
     
     // If schedule is an object with day keys (new format)
+    const scheduleObj = local.schedule as ScheduleObject;
     const dayKey = day.toLowerCase();
-    if (local.schedule[dayKey] && Array.isArray(local.schedule[dayKey]) && local.schedule[dayKey].length >= 2) {
+    
+    if (
+      scheduleObj[dayKey] && 
+      Array.isArray(scheduleObj[dayKey]) && 
+      scheduleObj[dayKey].length >= 2
+    ) {
+      const times = scheduleObj[dayKey] as string[];
       return {
         day: day,
-        openTime: local.schedule[dayKey][0].slice(0, 5), // "18:00:00" -> "18:00"
-        closeTime: local.schedule[dayKey][1].slice(0, 5), // "04:00:00" -> "04:00"
+        openTime: times[0].slice(0, 5), // "18:00:00" -> "18:00"
+        closeTime: times[1].slice(0, 5), // "04:00:00" -> "04:00"
       };
     }
     
