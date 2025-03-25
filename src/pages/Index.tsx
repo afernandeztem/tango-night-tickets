@@ -24,18 +24,11 @@ const Index = () => {
     setSelectedCity(city);
     navigate('/home');
   };
-
-  // Fixed image paths for the cities
-  const cityImages: Record<string, string> = {
-    "Mallorca": "/lovable-uploads/7b083dda-f18a-41ea-bb7c-be54008d68e6.png",
-    "Madrid": "/lovable-uploads/9bb4f081-0611-4b1e-b862-cd47a10c00ae.png",
-    "Málaga": "/lovable-uploads/df7b178d-c9cf-4323-aaea-b856a275c91c.png"
-  };
   
   const orderedCities = getOrderedCities(cities);
   
-  // Debug the city images
-  console.log("City Images:", cityImages);
+  // Debug the city data
+  console.log("Cities from API:", cities);
   console.log("Ordered Cities:", orderedCities);
   
   return (
@@ -58,7 +51,6 @@ const Index = () => {
           <CityGrid 
             cities={orderedCities} 
             onCitySelect={handleCitySelect} 
-            cityImages={cityImages}
             isLoading={isLoading}
           />
         </motion.div>

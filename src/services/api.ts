@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { City, Event, Local, Drink, User, PaginatedResponse, Ticket } from '../types';
 
@@ -34,7 +35,7 @@ export const getCities = async (): Promise<City[]> => {
       name: city.name,
       active: city.active,
       country: 'Spain', // Default country as it's not in the API response
-      image: `https://source.unsplash.com/random/800x600/?${city.name}`, // Using placeholder images
+      image: city.filename || `https://source.unsplash.com/random/800x600/?${city.name}`, // Use the filename from API
       metricsTotalAmount: city.metricsTotalAmount,
       metricsTotalTickets: city.metricsTotalTickets
     }));

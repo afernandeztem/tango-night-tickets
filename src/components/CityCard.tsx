@@ -6,10 +6,9 @@ import { motion } from 'framer-motion';
 interface CityCardProps {
   city: City;
   onClick: (city: City) => void;
-  imagePath?: string;
 }
 
-const CityCard: React.FC<CityCardProps> = ({ city, onClick, imagePath }) => {
+const CityCard: React.FC<CityCardProps> = ({ city, onClick }) => {
   const handleClick = () => {
     const normalizedCity = {
       ...city,
@@ -18,9 +17,6 @@ const CityCard: React.FC<CityCardProps> = ({ city, onClick, imagePath }) => {
     };
     onClick(normalizedCity);
   };
-
-  // Set a valid fallback if imagePath is undefined or empty
-  const imageSource = imagePath || city.image || 'https://source.unsplash.com/random/800x600/?city';
 
   return (
     <motion.div 
@@ -39,7 +35,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, onClick, imagePath }) => {
     >
       <div className="relative h-56 md:h-64 overflow-hidden">
         <img 
-          src={imageSource} 
+          src={city.image} 
           alt={city.name}
           className="w-full h-full object-cover"
         />

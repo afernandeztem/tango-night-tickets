@@ -7,11 +7,10 @@ import CityCard from "./CityCard";
 interface CityGridProps {
   cities: City[];
   onCitySelect: (city: City) => void;
-  cityImages: Record<string, string>;
   isLoading: boolean;
 }
 
-const CityGrid: React.FC<CityGridProps> = ({ cities, onCitySelect, cityImages, isLoading }) => {
+const CityGrid: React.FC<CityGridProps> = ({ cities, onCitySelect, isLoading }) => {
   // Animation variants
   const container = {
     hidden: { opacity: 0 },
@@ -65,9 +64,7 @@ const CityGrid: React.FC<CityGridProps> = ({ cities, onCitySelect, cityImages, i
           className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
         >
           {cities.map((city, index) => {
-            // Get the image path for this city
-            const imagePath = cityImages[city.name] || null;
-            console.log(`City: ${city.name}, Image Path: ${imagePath}`);
+            console.log(`City: ${city.name}, Image: ${city.image}`);
             
             return (
               <motion.div
@@ -79,7 +76,6 @@ const CityGrid: React.FC<CityGridProps> = ({ cities, onCitySelect, cityImages, i
                 <CityCard 
                   city={city} 
                   onClick={onCitySelect}
-                  imagePath={imagePath}
                 />
               </motion.div>
             );

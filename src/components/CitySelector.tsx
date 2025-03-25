@@ -22,9 +22,14 @@ const CitySelector: React.FC<CitySelectorProps> = ({ onSelectCity, className }) 
   });
 
   const handleCitySelect = (city: City) => {
-    setSelectedCity(city);
+    const normalizedCity = {
+      ...city,
+      displayName: city.name.normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+      originalName: city.name
+    };
+    setSelectedCity(normalizedCity);
     setIsOpen(false);
-    if (onSelectCity) onSelectCity(city);
+    if (onSelectCity) onSelectCity(normalizedCity);
   };
 
   const translations = {
