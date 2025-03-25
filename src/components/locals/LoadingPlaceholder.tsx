@@ -10,6 +10,7 @@ const LoadingPlaceholder: React.FC = () => {
         <div className="h-4 bg-gray-200 rounded w-full"></div>
         <div className="h-4 bg-gray-200 rounded w-full"></div>
       </div>
+      <div className="h-32 bg-gray-200 rounded-xl w-full"></div>
       <div className="flex space-x-4">
         <div className="h-20 bg-gray-200 rounded w-1/4"></div>
         <div className="h-20 bg-gray-200 rounded w-1/4"></div>

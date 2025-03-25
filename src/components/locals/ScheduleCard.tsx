@@ -23,6 +23,28 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ local, translations: t }) =
 
   const orderedDays = getDaysOfWeek();
 
+  // Process the schedule data based on its format
+  const getScheduleForDay = (day: string) => {
+    if (!local.schedule) return null;
+    
+    // If schedule is an array (old format)
+    if (Array.isArray(local.schedule)) {
+      return local.schedule.find(s => s.day.toLowerCase() === day.toLowerCase());
+    }
+    
+    // If schedule is an object with day keys (new format)
+    const dayKey = day.toLowerCase();
+    if (local.schedule[dayKey] && Array.isArray(local.schedule[dayKey]) && local.schedule[dayKey].length >= 2) {
+      return {
+        day: day,
+        openTime: local.schedule[dayKey][0].slice(0, 5), // "18:00:00" -> "18:00"
+        closeTime: local.schedule[dayKey][1].slice(0, 5), // "04:00:00" -> "04:00"
+      };
+    }
+    
+    return null;
+  };
+
   return (
     <Card className="mb-8 border border-gray-200 shadow-sm overflow-hidden">
       <CardContent className="p-6">
@@ -36,7 +58,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ local, translations: t }) =
         <div className="overflow-x-auto pb-2">
           <div className="grid grid-cols-7 gap-3 min-w-[640px]">
             {orderedDays.map((day, index) => {
-              const scheduleForDay = local.schedule?.find(s => s.day.toLowerCase() === day.toLowerCase());
+              const scheduleForDay = getScheduleForDay(day);
               
               return (
                 <div 
