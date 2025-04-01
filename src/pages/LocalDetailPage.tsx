@@ -1,8 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers, getLocalReviews } from '../services/api';
+import { Local, Event } from '../types';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LocalHero from '../components/locals/LocalHero';
@@ -171,7 +171,7 @@ const LocalDetailPage: React.FC = () => {
         <Header />
         <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-tango-primary mb-4"></div>
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-tango-primary mb-4"></div>
             <p className="text-gray-600">Loading local information...</p>
           </div>
         </div>
@@ -210,9 +210,9 @@ const LocalDetailPage: React.FC = () => {
       <Header />
       <LocalHero local={local} />
       
-      <div className="container mx-auto px-4 py-8 relative -mt-16">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2">
             <OverviewCard 
               local={local} 
               translations={{
@@ -265,7 +265,7 @@ const LocalDetailPage: React.FC = () => {
             />
           </div>
           
-          <div className="lg:col-span-1 space-y-8">
+          <div className="lg:col-span-1">
             <ScheduleCard
               local={local}
               translations={{
