@@ -22,12 +22,10 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
   const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
   
   return (
-    <Card className="mb-8 border-none shadow-xl overflow-hidden bg-white rounded-xl">
+    <Card className="mb-8 border-none shadow-lg overflow-hidden bg-white">
       <CardContent className="p-8">
-        <div className="flex items-center gap-3 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 border-b-2 border-tango-primary pb-1">
-            {t.venue} <span className="text-tango-primary">Overview</span>
-          </h2>
+        <div className="flex items-center gap-3 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">{t.venue} <span className="text-tango-primary">Overview</span></h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -36,11 +34,11 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
               {local.description || t.noDescription}
             </p>
             
-            <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex flex-wrap gap-3 mb-6">
               {tagsArray.map((tag, index) => (
                 <span 
                   key={index} 
-                  className="uppercase text-xs tracking-wider text-tango-primary font-semibold"
+                  className="uppercase text-xs tracking-wider text-[#8AB4F8] font-medium"
                 >
                   {tag}
                 </span>
@@ -48,16 +46,15 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
             </div>
           </div>
           
-          <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-inner">
-            <h3 className="text-lg font-bold text-gray-800 mb-5 pb-2 border-b border-gray-200 flex items-center">
-              <Info size={16} className="mr-2 text-tango-primary" />
+          <div className="bg-gray-50 p-6 rounded-xl">
+            <h3 className="text-lg font-bold text-gray-800 mb-5 pb-2 border-b border-gray-200">
               {t.venue} {t.information}
             </h3>
             
             <div className="space-y-5">
               <div className="group">
                 <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1.5">{t.address}</h4>
-                <p className="flex items-start group-hover:text-tango-primary transition-colors duration-200">
+                <p className="flex items-start">
                   <MapPin size={18} className="mr-3 mt-0.5 text-tango-primary flex-shrink-0" />
                   <span className="text-gray-700">{local.address}, {local.city}</span>
                 </p>
@@ -65,7 +62,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
               
               <div className="group">
                 <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1.5">{t.capacityInfo}</h4>
-                <p className="flex items-start group-hover:text-tango-primary transition-colors duration-200">
+                <p className="flex items-start">
                   <Users size={18} className="mr-3 mt-0.5 text-tango-primary flex-shrink-0" />
                   <span className="text-gray-700">{local.capacity} {t.capacity}</span>
                 </p>
@@ -75,7 +72,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full mt-6 bg-gradient-to-r from-tango-primary to-tango-primary/90 text-white px-4 py-3 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                className="block w-full mt-6 bg-tango-primary text-white px-4 py-3 rounded-lg hover:bg-tango-primary/90 transition-colors flex items-center justify-center shadow-sm"
               >
                 <Navigation size={16} className="mr-2" />
                 {t.getDirections}
