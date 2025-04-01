@@ -37,9 +37,11 @@ const EventDetailPage: React.FC = () => {
       backToEvents: 'Back to Events',
       date: 'Date',
       time: 'Time',
+      dateAndTime: 'Date & Time',
       location: 'Location',
       capacity: 'Capacity',
       ageRestriction: 'Age Restriction',
+      capacityAndAge: 'Capacity & Age Restriction',
       description: 'Description',
       tickets: 'Tickets',
       ticketsAvailable: 'Tickets Available',
@@ -62,9 +64,11 @@ const EventDetailPage: React.FC = () => {
       backToEvents: 'Volver a Eventos',
       date: 'Fecha',
       time: 'Hora',
+      dateAndTime: 'Fecha y Hora',
       location: 'Ubicación',
       capacity: 'Capacidad',
       ageRestriction: 'Restricción de edad',
+      capacityAndAge: 'Capacidad y Restricción de edad',
       description: 'Descripción',
       tickets: 'Entradas',
       ticketsAvailable: 'Entradas Disponibles',
@@ -221,23 +225,26 @@ const EventDetailPage: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  {/* Combined Date & Time Card */}
                   <div className="p-4 border rounded-lg bg-gray-50">
                     <div className="flex items-center mb-2">
                       <Calendar size={18} className="mr-2 text-tango-primary" />
-                      <h3 className="font-semibold">{t.date}</h3>
+                      <h3 className="font-semibold">{t.dateAndTime}</h3>
                     </div>
-                    <p>{formatDate(event.date)}</p>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-start">
+                        <span className="font-medium text-gray-600 w-24">{t.date}:</span>
+                        <span>{formatDate(event.date)}</span>
+                      </div>
+                      <div className="flex items-start">
+                        <span className="font-medium text-gray-600 w-24">{t.time}:</span>
+                        <span>20:00</span>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="p-4 border rounded-lg bg-gray-50">
-                    <div className="flex items-center mb-2">
-                      <Clock size={18} className="mr-2 text-tango-primary" />
-                      <h3 className="font-semibold">{t.time}</h3>
-                    </div>
-                    <p>20:00</p>
-                  </div>
-                  
+                  {/* Location Card */}
                   <div className="p-4 border rounded-lg bg-gray-50">
                     <div className="flex items-center mb-2">
                       <MapPin size={18} className="mr-2 text-tango-primary" />
@@ -246,25 +253,25 @@ const EventDetailPage: React.FC = () => {
                     <p>{event.localName}, {event.city}</p>
                   </div>
                   
-                  {event.capacity && (
-                    <div className="p-4 border rounded-lg bg-gray-50">
-                      <div className="flex items-center mb-2">
-                        <Users size={18} className="mr-2 text-tango-primary" />
-                        <h3 className="font-semibold">{t.capacity}</h3>
-                      </div>
-                      <p>{event.capacity}</p>
+                  {/* Combined Capacity & Age Restriction Card */}
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <div className="flex items-center mb-2">
+                      <Users size={18} className="mr-2 text-tango-primary" />
+                      <h3 className="font-semibold">{t.capacityAndAge}</h3>
                     </div>
-                  )}
-                  
-                  {event.ageRestriction && (
-                    <div className="p-4 border rounded-lg bg-gray-50">
-                      <div className="flex items-center mb-2">
-                        <Info size={18} className="mr-2 text-tango-primary" />
-                        <h3 className="font-semibold">{t.ageRestriction}</h3>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-start">
+                        <span className="font-medium text-gray-600 w-24">{t.capacity}:</span>
+                        <span>{event.capacity}</span>
                       </div>
-                      <p>{event.ageRestriction}</p>
+                      {event.ageRestriction && (
+                        <div className="flex items-start">
+                          <span className="font-medium text-gray-600 w-24">{t.ageRestriction}:</span>
+                          <span>{event.ageRestriction}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
                 
                 {event.description && (
