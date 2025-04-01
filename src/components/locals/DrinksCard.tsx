@@ -21,8 +21,8 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
   const getCategoryName = (category: CategoryEnum | number | undefined) => {
     if (category === undefined) return 'Other';
     
-    // Handle CategoryEnum values
-    if (typeof category === 'number' && category in CategoryEnum) {
+    // Handle CategoryEnum values by directly using the CategoryLabelMap
+    if (typeof category === 'number' && Object.values(CategoryEnum).includes(category)) {
       return CategoryLabelMap[category as CategoryEnum];
     }
     
@@ -37,8 +37,12 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
       switch (category) {
         case CategoryEnum.CERVEZA:
           return <Beer className="text-tango-primary h-5 w-5" />;
+        case CategoryEnum.COPA:
+        case CategoryEnum.COPA_PREMIUM:
+        case CategoryEnum.CHUPITO:
+          return <GlassWater className="text-tango-primary h-5 w-5" />;
         case CategoryEnum.COCTEL:
-          return <GlassWater className="text-tango-primary h-5 w-5" />; // Replaced Cocktail with GlassWater
+          return <GlassWater className="text-tango-primary h-5 w-5" />; 
         case CategoryEnum.VINO:
           return <Wine className="text-tango-primary h-5 w-5" />;
         default:
