@@ -38,7 +38,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
               {tagsArray.map((tag, index) => (
                 <span 
                   key={index} 
-                  className="uppercase text-xs tracking-wider text-[#8AB4F8] font-medium"
+                  className="uppercase text-xs tracking-wider text-tango-primary font-medium"
                 >
                   {tag}
                 </span>
