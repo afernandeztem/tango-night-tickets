@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PartyPopper, Beer, Wine, Martini, Cocktail, GlassWater, CupSoda } from 'lucide-react';
+import { PartyPopper, Beer, Wine, Martini, GlassWater, CupSoda, Citrus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CategoryEnum, CategoryLabelMap } from '../../types/CategoryEnum';
@@ -46,7 +46,7 @@ const OffersCard: React.FC<OffersCardProps> = ({ offers, loading, category, tran
       case CategoryEnum.COPA_PREMIUM:
         return <CupSoda className="text-tango-primary h-5 w-5" />;
       case CategoryEnum.COCTEL:
-        return <Cocktail className="text-tango-primary h-5 w-5" />;
+        return <Citrus className="text-tango-primary h-5 w-5" />; // Changed from Cocktail to Citrus
       case CategoryEnum.VINO:
         return <Wine className="text-tango-primary h-5 w-5" />;
       case CategoryEnum.CHUPITO:
