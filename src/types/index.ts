@@ -48,13 +48,15 @@ export interface Event {
   tags?: string[];
 }
 
+import { CategoryEnum } from './CategoryEnum';
+
 export interface Drink {
   id: string;
   name: string;
   price: number;
   description?: string;
   localId: string;
-  category?: number;
+  category?: CategoryEnum | number;
 }
 
 export interface User {

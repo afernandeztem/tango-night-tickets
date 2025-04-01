@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Wine } from 'lucide-react';
+import { Beer, Cocktail, Wine } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Drink } from '../../types';
+import { CategoryEnum, CategoryLabelMap } from '../../types/CategoryEnum';
 
 interface DrinksCardProps {
   drinks: Drink[];
@@ -17,12 +18,43 @@ interface DrinksCardProps {
 const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: t }) => {
   const hasDrinks = drinks.length > 0;
 
-  const drinksByCategory = drinks.reduce((acc, drink) => {
-    const category = drink.category?.toString() || 'Other';
-    if (!acc[category]) {
-      acc[category] = [];
+  const getCategoryName = (category: CategoryEnum | number | undefined) => {
+    if (category === undefined) return 'Other';
+    
+    // Handle CategoryEnum values
+    if (typeof category === 'number' && category in CategoryEnum) {
+      return CategoryLabelMap[category as CategoryEnum];
     }
-    acc[category].push(drink);
+    
+    // Fallback for any other number values
+    return 'Other';
+  };
+  
+  const getCategoryIcon = (category: CategoryEnum | number | undefined) => {
+    if (category === undefined) return <Wine className="text-tango-primary h-5 w-5" />;
+    
+    if (typeof category === 'number') {
+      switch (category) {
+        case CategoryEnum.CERVEZA:
+          return <Beer className="text-tango-primary h-5 w-5" />;
+        case CategoryEnum.COCTEL:
+          return <Cocktail className="text-tango-primary h-5 w-5" />;
+        case CategoryEnum.VINO:
+          return <Wine className="text-tango-primary h-5 w-5" />;
+        default:
+          return <Wine className="text-tango-primary h-5 w-5" />;
+      }
+    }
+    
+    return <Wine className="text-tango-primary h-5 w-5" />;
+  };
+
+  const drinksByCategory = drinks.reduce((acc, drink) => {
+    const categoryName = getCategoryName(drink.category);
+    if (!acc[categoryName]) {
+      acc[categoryName] = [];
+    }
+    acc[categoryName].push(drink);
     return acc;
   }, {} as Record<string, Drink[]>);
 
@@ -55,7 +87,10 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
               key={category}
               className="bg-gray-50 p-5 rounded-lg border border-gray-100"
             >
-              <h3 className="text-lg font-medium mb-4 text-gray-700">
+              <h3 className="text-lg font-medium mb-4 text-gray-700 flex items-center gap-2">
+                <div className="bg-tango-primary/10 p-1.5 rounded-full">
+                  {getCategoryIcon(categoryDrinks[0]?.category)}
+                </div>
                 <Badge className="bg-tango-primary text-white border-0">
                   {category}
                 </Badge>
