@@ -25,7 +25,7 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ local, translations: t }) =
 
   // Process the schedule data based on its format
   const getScheduleForDay = (day: string): LocalSchedule | null => {
-    if (!local.schedule) return null;
+    if (!local || !local.schedule) return null;
     
     // If schedule is an array (old format)
     if (Array.isArray(local.schedule)) {

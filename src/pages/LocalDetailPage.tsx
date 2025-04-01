@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -136,6 +137,9 @@ const LocalDetailPage: React.FC = () => {
       writeReview: 'Write a Review',
       noReviews: 'No reviews yet',
       beFirst: 'Be the first to leave a review',
+      scheduleFor: 'Schedule for',
+      closed: 'Closed',
+      today: 'Today',
     },
     es: {
       overview: 'Descripción',
@@ -151,6 +155,9 @@ const LocalDetailPage: React.FC = () => {
       writeReview: 'Escribir Reseña',
       noReviews: 'Aún no hay reseñas',
       beFirst: 'Sé el primero en dejar una reseña',
+      scheduleFor: 'Horario para',
+      closed: 'Cerrado',
+      today: 'Hoy',
     }
   };
 
@@ -239,7 +246,7 @@ const LocalDetailPage: React.FC = () => {
               localId={local.id}
               localName={local.name}
               translations={{
-                reviews: t.reviews,
+                reviewsTitle: t.reviews,
                 writeReview: t.writeReview,
                 noReviews: t.noReviews,
                 beFirst: t.beFirst
@@ -250,9 +257,11 @@ const LocalDetailPage: React.FC = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <ScheduleCard
-              schedule={local.schedule || []}
+              local={local}
               translations={{
-                schedule: t.schedule
+                scheduleFor: t.scheduleFor,
+                closed: t.closed,
+                today: t.today
               }}
             />
           </div>
