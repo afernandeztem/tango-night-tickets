@@ -19,16 +19,8 @@ interface OverviewCardProps {
 }
 
 const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) => {
-  // Tag colors for diversity - simpler design without borders
-  const tagColors = [
-    'bg-violet-500 text-white', // Purple
-    'bg-blue-500 text-white',   // Blue 
-    'bg-emerald-500 text-white', // Green
-    'bg-amber-500 text-white',  // Amber
-    'bg-rose-500 text-white',   // Rose
-    'bg-cyan-500 text-white',   // Cyan
-    'bg-lime-500 text-white',   // Lime
-  ];
+  // Single color for all tags - matching the purple in the example image
+  const tagColor = 'bg-[#8052e0] text-white';
   
   // Make sure tags is an array
   const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
@@ -53,7 +45,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
               {tagsArray.map((tag, index) => (
                 <span 
                   key={index} 
-                  className={`text-xs px-3 py-1.5 rounded-full ${tagColors[index % tagColors.length]}`}
+                  className={`text-xs px-3 py-1.5 rounded-full ${tagColor}`}
                 >
                   {tag}
                 </span>
