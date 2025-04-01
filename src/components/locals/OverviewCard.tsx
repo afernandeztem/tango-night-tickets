@@ -19,13 +19,15 @@ interface OverviewCardProps {
 }
 
 const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) => {
-  // Tag colors for diversity
+  // Tag colors for diversity - more stylish design
   const tagColors = [
-    'bg-violet-100 text-violet-700 border-violet-200',  // Purple
-    'bg-blue-100 text-blue-700 border-blue-200',        // Blue 
-    'bg-green-100 text-green-700 border-green-200',     // Green
-    'bg-amber-100 text-amber-700 border-amber-200',     // Amber
-    'bg-rose-100 text-rose-700 border-rose-200'         // Rose
+    'bg-gradient-to-r from-violet-100 to-violet-50 text-violet-700 border-violet-200', // Purple
+    'bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 border-blue-200',         // Blue 
+    'bg-gradient-to-r from-emerald-100 to-emerald-50 text-emerald-700 border-emerald-200', // Green
+    'bg-gradient-to-r from-amber-100 to-amber-50 text-amber-700 border-amber-200',      // Amber
+    'bg-gradient-to-r from-rose-100 to-rose-50 text-rose-700 border-rose-200',          // Rose
+    'bg-gradient-to-r from-cyan-100 to-cyan-50 text-cyan-700 border-cyan-200',          // Cyan
+    'bg-gradient-to-r from-lime-100 to-lime-50 text-lime-700 border-lime-200',          // Lime
   ];
   
   // Make sure tags is an array
@@ -51,7 +53,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
               {tagsArray.map((tag, index) => (
                 <span 
                   key={index} 
-                  className={`text-xs px-2.5 py-1 rounded-full ${tagColors[index % tagColors.length]} border shadow-sm`}
+                  className={`text-xs px-3 py-1.5 rounded-full ${tagColors[index % tagColors.length]} border shadow-sm font-medium tracking-wide`}
                 >
                   {tag}
                 </span>

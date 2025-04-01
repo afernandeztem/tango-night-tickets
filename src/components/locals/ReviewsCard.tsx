@@ -17,6 +17,8 @@ interface ReviewsCardProps {
   translations: {
     reviewsTitle: string;
     noReviews: string;
+    beFirst?: string;
+    writeReview?: string;
   };
 }
 
@@ -67,6 +69,7 @@ const ReviewsCard: React.FC<ReviewsCardProps> = ({ reviews, loading, translation
           <div className="text-center py-6 bg-gray-50 rounded-lg">
             <MessageSquare size={32} className="mx-auto mb-2 text-gray-300" />
             <p className="text-gray-500">{t.noReviews}</p>
+            {t.beFirst && <p className="text-gray-400 text-sm mt-1">{t.beFirst}</p>}
           </div>
         )}
       </CardContent>
