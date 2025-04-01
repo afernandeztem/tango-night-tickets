@@ -10,14 +10,14 @@ interface LocalHeroProps {
 
 const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-black to-gray-900 min-h-[65vh]">
+    <section className="relative overflow-hidden bg-black">
       {/* Full-width blurred background */}
       <div className="absolute inset-0 w-full h-[65vh] overflow-hidden">
-        <div className="absolute inset-0 bg-black/60 z-10"></div>
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
         <img 
           src={local.image} 
           alt={local.name} 
-          className="w-full h-full object-cover blur-md scale-110 opacity-60" 
+          className="w-full h-full object-cover blur-md scale-110 opacity-80" 
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = 'https://source.unsplash.com/random/1200x800/?nightclub';
@@ -33,50 +33,33 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative mb-8 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-b from-white/5 to-black/20 backdrop-blur-sm border border-white/10"
+            className="relative mb-8 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-white"
           >
             <img 
               src={local.image} 
               alt={local.name} 
-              className="w-full h-[45vh] object-cover" 
+              className="w-full h-[40vh] object-cover" 
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = 'https://source.unsplash.com/random/1200x800/?nightclub';
               }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
             
             {/* Local Information Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-8">
               {/* Category Label */}
               <div className="mb-3">
-                <motion.span 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="uppercase text-xs tracking-wider text-white font-semibold px-4 py-1.5 bg-gradient-to-r from-tango-primary to-tango-secondary rounded-full shadow-lg"
-                >
+                <span className="uppercase text-xs tracking-wider text-white font-semibold px-3 py-1 bg-tango-primary rounded-full">
                   Club
-                </motion.span>
+                </span>
               </div>
               
               {/* Local Name */}
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-md"
-              >
-                {local.name}
-              </motion.h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">{local.name}</h1>
               
               {/* Meta Information */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6"
-              >
+              <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
                 <div className="flex items-center text-white/90">
                   <MapPin size={16} className="mr-2 text-tango-primary" />
                   <span>{local.city}</span>
@@ -84,16 +67,8 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
                 
                 <div className="flex items-center gap-5">
                   <div className="flex items-center text-white/90">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          size={16} 
-                          className={`${i < Math.floor(local.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'} mr-0.5`} 
-                        />
-                      ))}
-                    </div>
-                    <span className="ml-1.5 font-medium">{local.rating.toFixed(1)}</span>
+                    <Star size={16} className="text-yellow-400 mr-1.5" />
+                    <span className="font-medium">{local.rating.toFixed(1)}</span>
                   </div>
                   
                   <div className="flex items-center text-white/90">
@@ -101,7 +76,7 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
                     <span>{local.capacity} capacity</span>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -120,9 +95,9 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="absolute top-6 right-6 p-3.5 rounded-full bg-gradient-to-r from-tango-primary/80 to-tango-secondary/80 backdrop-blur-sm hover:from-tango-primary hover:to-tango-secondary transition-all z-30 shadow-lg"
+        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all z-30"
       >
-        <Heart size={22} className="text-white" />
+        <Heart size={20} className="text-white" />
       </motion.button>
     </section>
   );
