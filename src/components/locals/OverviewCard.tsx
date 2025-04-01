@@ -23,8 +23,8 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
   const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
   
   return (
-    <Card className="mb-8 border-none shadow-lg overflow-hidden bg-white">
-      <CardContent className="p-8">
+    <Card className="mb-8 border-none shadow-lg overflow-hidden bg-white rounded-xl">
+      <CardContent className="p-8 pt-0">
         <div className="flex items-center gap-3 mb-6">
           <h2 className="text-2xl font-bold text-gray-800">{t.venue} <span className="text-tango-primary">Overview</span></h2>
         </div>
@@ -47,7 +47,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
             </div>
           </div>
           
-          <div className="bg-gray-50 p-6 rounded-xl">
+          <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
             <h3 className="text-lg font-bold text-gray-800 mb-5 pb-2 border-b border-gray-200">
               {t.venue} {t.information}
             </h3>

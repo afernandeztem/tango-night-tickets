@@ -10,14 +10,14 @@ interface LocalHeroProps {
 
 const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
   return (
-    <section className="relative overflow-hidden">
-      {/* Blurred Background Image */}
-      <div className="absolute inset-0 h-[60vh] overflow-hidden">
-        <div className="absolute inset-0 bg-black/30"></div>
+    <section className="relative overflow-hidden bg-black">
+      {/* Full-width blurred background */}
+      <div className="absolute inset-0 w-full h-[65vh] overflow-hidden">
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
         <img 
           src={local.image} 
           alt={local.name} 
-          className="w-full h-full object-cover blur-md scale-105" 
+          className="w-full h-full object-cover blur-md scale-110 opacity-80" 
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             target.src = 'https://source.unsplash.com/random/1200x800/?nightclub';
@@ -25,15 +25,15 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
         />
       </div>
 
-      {/* Content Container */}
-      <div className="container relative mx-auto px-4 py-20">
+      {/* Content Container with the clear image */}
+      <div className="container relative mx-auto px-4 pt-20 pb-32 z-20">
         <div className="flex flex-col items-center">
-          {/* Focused Foreground Image */}
+          {/* Clear Foreground Image */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative mb-8 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden"
+            className="relative mb-8 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-white"
           >
             <img 
               src={local.image} 
@@ -82,17 +82,20 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
         </div>
       </div>
 
-      {/* White Curved Edge */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-white" style={{ 
-        borderTopLeftRadius: '24px', 
-        borderTopRightRadius: '24px' 
-      }}></div>
+      {/* Curved white section that overlaps with the hero */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-32 bg-white z-10"
+        style={{ 
+          borderTopLeftRadius: '32px', 
+          borderTopRightRadius: '32px',
+        }}
+      />
 
       {/* Action Button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all z-10"
+        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all z-30"
       >
         <Heart size={20} className="text-white" />
       </motion.button>
