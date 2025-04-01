@@ -12,6 +12,7 @@ interface Offer {
   description?: string;
   price?: number;
   category?: CategoryEnum | number;
+  title?: string; // Add the title property to the interface
 }
 
 interface DrinksOffersCardProps {
