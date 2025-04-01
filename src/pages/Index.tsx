@@ -32,7 +32,13 @@ const Index = () => {
   console.log("Ordered Cities:", orderedCities);
   
   return (
-    <AuroraBackground className="p-0 justify-start">
+    <div className="relative min-h-screen">
+      {/* Background with lower z-index */}
+      <div className="absolute inset-0 z-0">
+        <AuroraBackgroundSimple />
+      </div>
+
+      {/* Content with higher z-index */}
       <div className="relative z-10 container mx-auto px-4 py-6 flex flex-col items-center min-h-screen">
         {/* Logo and Tagline */}
         <TangoHero />
@@ -48,17 +54,24 @@ const Index = () => {
           <TitleSection title="Your Night, Your Way" />
           
           {/* City Selection */}
-          <CityGrid 
-            cities={orderedCities} 
-            onCitySelect={handleCitySelect} 
-            isLoading={isLoading}
-          />
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-center mb-4 text-black">
+              Select Your City
+            </h2>
+            <CityGrid 
+              cities={orderedCities} 
+              onCitySelect={handleCitySelect} 
+              isLoading={isLoading}
+            />
+          </div>
         </motion.div>
         
         {/* Footer */}
-        <PageFooter />
+        <div className="mt-auto">
+          <PageFooter />
+        </div>
       </div>
-    </AuroraBackground>
+    </div>
   );
 };
 
