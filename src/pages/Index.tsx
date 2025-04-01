@@ -5,6 +5,7 @@ import { getCities } from '@/services/api';
 import { useApp } from '../context/AppContext';
 import { useQuery } from '@tanstack/react-query';
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import AuroraBackgroundSimple from "../components/AuroraBackgroundSimple";
 import TangoHero from "../components/TangoHero";
 import TitleSection from "../components/TitleSection";
 import CityGrid from "../components/CityGrid";
