@@ -42,6 +42,8 @@ export const useLocalPageTranslations = () => {
       reviewsTitle: 'Customer Reviews',
       reviewsSubtitle: 'See what others are saying',
       today: 'Today',
+      writeReview: 'Write a Review', // Added missing translation
+      beFirst: 'Be the first to leave a review', // Added missing translation
     },
     es: {
       address: 'Dirección',
@@ -79,6 +81,8 @@ export const useLocalPageTranslations = () => {
       reviewsTitle: 'Reseñas de Clientes',
       reviewsSubtitle: 'Mira lo que otros están diciendo',
       today: 'Hoy',
+      writeReview: 'Escribir una Reseña', // Added missing translation
+      beFirst: 'Sé el primero en dejar una reseña', // Added missing translation
     }
   };
   
