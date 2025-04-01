@@ -1,36 +1,68 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PartyPopper } from 'lucide-react';
+import { PartyPopper, Beer, Wine, Martini, Cocktail, GlassWater, CupSoda } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { CategoryEnum, CategoryLabelMap } from '../../types/CategoryEnum';
 
 interface Offer {
   id: string;
   name: string;
   description?: string;
   price?: number;
+  category?: CategoryEnum | number;
 }
 
 interface OffersCardProps {
   offers: Offer[];
   loading: boolean;
+  category?: number;
   translations: {
     offers: string;
     noOffersAvailable: string;
   };
 }
 
-const OffersCard: React.FC<OffersCardProps> = ({ offers, loading, translations: t }) => {
+const OffersCard: React.FC<OffersCardProps> = ({ offers, loading, category, translations: t }) => {
   const hasOffers = offers.length > 0;
+  
+  // Get the appropriate category title
+  const getCategoryTitle = () => {
+    if (category === undefined) return t.offers;
+    
+    return CategoryLabelMap[category as CategoryEnum] || t.offers;
+  };
+  
+  // Get the appropriate icon for the category
+  const getCategoryIcon = () => {
+    if (category === undefined) return <PartyPopper className="text-tango-primary h-5 w-5" />;
+    
+    switch (category) {
+      case CategoryEnum.CERVEZA:
+        return <Beer className="text-tango-primary h-5 w-5" />;
+      case CategoryEnum.COPA:
+        return <GlassWater className="text-tango-primary h-5 w-5" />;
+      case CategoryEnum.COPA_PREMIUM:
+        return <CupSoda className="text-tango-primary h-5 w-5" />;
+      case CategoryEnum.COCTEL:
+        return <Cocktail className="text-tango-primary h-5 w-5" />;
+      case CategoryEnum.VINO:
+        return <Wine className="text-tango-primary h-5 w-5" />;
+      case CategoryEnum.CHUPITO:
+        return <Martini className="text-tango-primary h-5 w-5" />;
+      default:
+        return <PartyPopper className="text-tango-primary h-5 w-5" />;
+    }
+  };
 
   return (
     <div className="mb-8">
       <div className="flex items-center gap-3 mb-5">
         <div className="bg-tango-primary/10 p-2 rounded-full">
-          <PartyPopper className="text-tango-primary h-5 w-5" />
+          {getCategoryIcon()}
         </div>
-        <h2 className="text-2xl font-semibold">{t.offers}</h2>
+        <h2 className="text-2xl font-semibold">{getCategoryTitle()}</h2>
       </div>
       
       {loading ? (
@@ -75,7 +107,7 @@ const OffersCard: React.FC<OffersCardProps> = ({ offers, loading, translations: 
       ) : (
         <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
           <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-            <PartyPopper size={20} className="text-gray-400" />
+            {getCategoryIcon()}
           </div>
           <p className="text-gray-600 font-medium">{t.noOffersAvailable}</p>
         </div>
