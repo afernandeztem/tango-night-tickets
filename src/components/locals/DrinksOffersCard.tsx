@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import DrinksCard from './DrinksCard';
 import OffersCard from './OffersCard';
 import { Drink } from '../../types';
-import { CategoryEnum, CategoryLabelMap } from '../../types/CategoryEnum';
+import { CategoryEnum } from '../../types/CategoryEnum';
 
 interface Offer {
   id: string;
@@ -39,6 +39,7 @@ const DrinksOffersCard: React.FC<DrinksOffersCardProps> = ({
     const grouped: Record<string, Offer[]> = {};
     
     offers.forEach(offer => {
+      // Ensure category is treated as a number
       const category = typeof offer.category === 'number' ? offer.category : CategoryEnum.OTRO;
       const categoryKey = category.toString();
       
@@ -46,7 +47,11 @@ const DrinksOffersCard: React.FC<DrinksOffersCardProps> = ({
         grouped[categoryKey] = [];
       }
       
-      grouped[categoryKey].push(offer);
+      // Map the API field 'title' to the component's expected field 'name'
+      grouped[categoryKey].push({
+        ...offer,
+        name: offer.name || offer.title || ''  // Make sure name field is populated
+      });
     });
     
     return grouped;

@@ -31,25 +31,30 @@ const OffersCard: React.FC<OffersCardProps> = ({ offers, loading, category, tran
   const getCategoryTitle = () => {
     if (category === undefined) return t.offers;
     
-    return CategoryLabelMap[category as CategoryEnum] || t.offers;
+    // Convert the number to CategoryEnum to ensure correct mapping
+    const categoryEnum = Number(category) as CategoryEnum;
+    return CategoryLabelMap[categoryEnum] || t.offers;
   };
   
   // Get the appropriate icon for the category
   const getCategoryIcon = () => {
     if (category === undefined) return <PartyPopper className="text-tango-primary h-5 w-5" />;
     
-    switch (category) {
-      case CategoryEnum.CERVEZA:
+    // Ensure we're using the number as a CategoryEnum value
+    const categoryEnum = Number(category);
+    
+    switch (categoryEnum) {
+      case CategoryEnum.CERVEZA: // 0
         return <Beer className="text-tango-primary h-5 w-5" />;
-      case CategoryEnum.COPA:
+      case CategoryEnum.COPA: // 1
         return <GlassWater className="text-tango-primary h-5 w-5" />;
-      case CategoryEnum.COPA_PREMIUM:
+      case CategoryEnum.COPA_PREMIUM: // 2
         return <CupSoda className="text-tango-primary h-5 w-5" />;
-      case CategoryEnum.COCTEL:
+      case CategoryEnum.COCTEL: // 3
         return <Citrus className="text-tango-primary h-5 w-5" />; // Changed from Cocktail to Citrus
-      case CategoryEnum.VINO:
+      case CategoryEnum.VINO: // 4
         return <Wine className="text-tango-primary h-5 w-5" />;
-      case CategoryEnum.CHUPITO:
+      case CategoryEnum.CHUPITO: // 5
         return <Martini className="text-tango-primary h-5 w-5" />;
       default:
         return <PartyPopper className="text-tango-primary h-5 w-5" />;
