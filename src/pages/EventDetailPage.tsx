@@ -259,14 +259,14 @@ const EventDetailPage: React.FC = () => {
                       <Users size={18} className="mr-2 text-tango-primary" />
                       <h3 className="font-semibold">{t.capacityAndAge}</h3>
                     </div>
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex items-start">
-                        <span className="font-medium text-gray-600 w-24">{t.capacity}:</span>
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-600 mr-2">{t.capacity}:</span>
                         <span>{event.capacity}</span>
                       </div>
                       {event.ageRestriction && (
-                        <div className="flex items-start">
-                          <span className="font-medium text-gray-600 w-24">{t.ageRestriction}:</span>
+                        <div className="flex items-center">
+                          <span className="font-medium text-gray-600 mr-2">{t.ageRestriction}:</span>
                           <span>{event.ageRestriction}</span>
                         </div>
                       )}
