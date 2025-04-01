@@ -14,39 +14,15 @@ interface DrinksCardProps {
   };
 }
 
-// Map numeric categories to human-readable names
-const getCategoryName = (categoryId: number | undefined): string => {
-  switch (categoryId) {
-    case 0:
-      return "Cerveza";
-    case 1:
-      return "Copa";
-    case 2:
-      return "Copa Premium";
-    case 3:
-      return "Cóctel";
-    case 4:
-      return "Vino";
-    case 5:
-      return "Chupito";
-    case 6:
-      return "Otro";
-    default:
-      return "Otro";
-  }
-};
-
 const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: t }) => {
   const hasDrinks = drinks.length > 0;
 
   const drinksByCategory = drinks.reduce((acc, drink) => {
-    const categoryId = drink.category !== undefined ? Number(drink.category) : 6; // Default to "Otro" if undefined
-    const categoryName = getCategoryName(categoryId);
-    
-    if (!acc[categoryName]) {
-      acc[categoryName] = [];
+    const category = drink.category?.toString() || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[categoryName].push(drink);
+    acc[category].push(drink);
     return acc;
   }, {} as Record<string, Drink[]>);
 
