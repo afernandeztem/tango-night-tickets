@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Beer, Cocktail, Wine } from 'lucide-react';
+import { Beer, GlassWater, Wine } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Drink } from '../../types';
 import { CategoryEnum, CategoryLabelMap } from '../../types/CategoryEnum';
@@ -38,7 +38,7 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
         case CategoryEnum.CERVEZA:
           return <Beer className="text-tango-primary h-5 w-5" />;
         case CategoryEnum.COCTEL:
-          return <Cocktail className="text-tango-primary h-5 w-5" />;
+          return <GlassWater className="text-tango-primary h-5 w-5" />; // Replaced Cocktail with GlassWater
         case CategoryEnum.VINO:
           return <Wine className="text-tango-primary h-5 w-5" />;
         default:
