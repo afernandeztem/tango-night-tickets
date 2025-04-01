@@ -12,7 +12,7 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
   return (
     <section className="relative overflow-hidden bg-black">
       {/* Full-width blurred background */}
-      <div className="absolute inset-0 w-full h-[65vh] overflow-hidden">
+      <div className="absolute inset-0 w-full h-[60vh] overflow-hidden">
         <div className="absolute inset-0 bg-black/40 z-10"></div>
         <img 
           src={local.image} 
@@ -26,14 +26,14 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
       </div>
 
       {/* Content Container with the clear image */}
-      <div className="container relative mx-auto px-4 pt-20 pb-32 z-20">
+      <div className="container relative mx-auto px-4 pt-20 pb-20 z-20">
         <div className="flex flex-col items-center">
           {/* Clear Foreground Image */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative mb-8 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-white"
+            className="relative mb-4 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-white"
           >
             <img 
               src={local.image} 
@@ -47,7 +47,7 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
             
             {/* Local Information Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="absolute bottom-0 left-0 right-0 p-6">
               {/* Category Label */}
               <div className="mb-3">
                 <span className="uppercase text-xs tracking-wider text-white font-semibold px-3 py-1 bg-tango-primary rounded-full">
@@ -56,7 +56,7 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
               </div>
               
               {/* Local Name */}
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">{local.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">{local.name}</h1>
               
               {/* Meta Information */}
               <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
@@ -84,10 +84,10 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
 
       {/* Curved white section that overlaps with the hero */}
       <div 
-        className="absolute bottom-0 left-0 right-0 h-32 bg-white z-10"
+        className="absolute bottom-0 left-0 right-0 h-24 bg-white z-10"
         style={{ 
-          borderTopLeftRadius: '32px', 
-          borderTopRightRadius: '32px',
+          borderTopLeftRadius: '24px', 
+          borderTopRightRadius: '24px',
         }}
       />
 

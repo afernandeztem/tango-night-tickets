@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,12 +7,12 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LocalHero from '../components/locals/LocalHero';
 import OverviewCard from '../components/locals/OverviewCard';
-import ScheduleCard from '../components/locals/ScheduleCard';
 import EventsCard from '../components/locals/EventsCard';
 import DrinksOffersCard from '../components/locals/DrinksOffersCard';
 import ReviewsCard from '../components/locals/ReviewsCard';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
+import { useLocalPageTranslations } from '../hooks/useTranslations';
 
 const LocalDetailPage: React.FC = () => {
   const { state } = useApp();
@@ -19,6 +20,9 @@ const LocalDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { localSlug } = useParams<{ localSlug: string }>();
   const [localId, setLocalId] = useState<string | null>(null);
+  
+  // Use the translation hook
+  const t = useLocalPageTranslations();
 
   useEffect(() => {
     if (!localSlug) return;
@@ -109,61 +113,6 @@ const LocalDetailPage: React.FC = () => {
     enabled: !!localId,
   });
 
-  const translations = {
-    en: {
-      overview: 'Overview',
-      schedule: 'Schedule',
-      upcomingEvents: 'Upcoming Events at',
-      viewAll: 'View All',
-      noEvents: 'No upcoming events',
-      drinks: 'Drinks',
-      offers: 'Offers',
-      noDrinksAvailable: 'No drinks available',
-      noOffersAvailable: 'No offers available',
-      reviews: 'Reviews',
-      writeReview: 'Write a Review',
-      noReviews: 'No reviews yet',
-      beFirst: 'Be the first to leave a review',
-      scheduleFor: 'Schedule for',
-      closed: 'Closed',
-      today: 'Today',
-      address: 'Address',
-      venue: 'Venue',
-      information: 'Information',
-      capacity: 'People',
-      capacityInfo: 'Capacity',
-      getDirections: 'Get Directions',
-      noDescription: 'No description available for this venue.',
-    },
-    es: {
-      overview: 'Descripción',
-      schedule: 'Horario',
-      upcomingEvents: 'Próximos Eventos en',
-      viewAll: 'Ver Todos',
-      noEvents: 'No hay eventos próximos',
-      drinks: 'Bebidas',
-      offers: 'Ofertas',
-      noDrinksAvailable: 'No hay bebidas disponibles',
-      noOffersAvailable: 'No hay ofertas disponibles',
-      reviews: 'Reseñas',
-      writeReview: 'Escribir Reseña',
-      noReviews: 'Aún no hay reseñas',
-      beFirst: 'Sé el primero en dejar una reseña',
-      scheduleFor: 'Horario para',
-      closed: 'Cerrado',
-      today: 'Hoy',
-      address: 'Dirección',
-      venue: 'Local',
-      information: 'Información',
-      capacity: 'Personas',
-      capacityInfo: 'Capacidad',
-      getDirections: 'Obtener Direcciones',
-      noDescription: 'No hay descripción disponible para este local.',
-    }
-  };
-
-  const t = translations[state.language];
-
   if (isLoadingLocal) {
     return (
       <div className="min-h-screen bg-white">
@@ -209,7 +158,7 @@ const LocalDetailPage: React.FC = () => {
       <Header />
       <LocalHero local={local} />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <OverviewCard 
           local={local} 
           translations={{
@@ -219,23 +168,11 @@ const LocalDetailPage: React.FC = () => {
             capacity: t.capacity,
             capacityInfo: t.capacityInfo,
             getDirections: t.getDirections,
-            noDescription: t.noDescription
-          }} 
-        />
-        
-        <ScheduleCard
-          local={local}
-          translations={{
-            scheduleFor: t.scheduleFor,
-            closed: t.closed,
+            noDescription: t.noDescription,
             today: t.today,
-            address: t.address,
-            venue: t.venue,
-            information: t.information,
-            capacity: t.capacity,
-            capacityInfo: t.capacityInfo,
-            getDirections: t.getDirections
-          }}
+            closed: t.closed,
+            scheduleFor: t.scheduleFor
+          }} 
         />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -273,10 +210,10 @@ const LocalDetailPage: React.FC = () => {
               localId={local.id}
               localName={local.name}
               translations={{
-                reviewsTitle: t.reviews,
-                writeReview: t.writeReview,
+                reviewsTitle: t.reviewsTitle,
+                writeReview: t.writeReview || 'Write a Review',
                 noReviews: t.noReviews,
-                beFirst: t.beFirst
+                beFirst: t.beFirst || 'Be the first to leave a review'
               }}
             />
           </div>
