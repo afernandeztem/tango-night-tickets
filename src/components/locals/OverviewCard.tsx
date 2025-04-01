@@ -2,6 +2,7 @@
 import React from 'react';
 import { Info, MapPin, Users, Navigation } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Local } from '../../types';
 
 interface OverviewCardProps {
@@ -36,12 +37,12 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
             
             <div className="flex flex-wrap gap-3 mb-6">
               {tagsArray.map((tag, index) => (
-                <span 
+                <Badge 
                   key={index} 
-                  className="uppercase text-xs tracking-wider text-[#8AB4F8] font-medium"
+                  className="bg-tango-primary/10 hover:bg-tango-primary/20 text-tango-primary uppercase text-xs tracking-wider font-medium py-1.5 px-3 border-none"
                 >
                   {tag}
-                </span>
+                </Badge>
               ))}
             </div>
           </div>
