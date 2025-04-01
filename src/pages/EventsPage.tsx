@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
@@ -22,7 +21,6 @@ const EventsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState(false);
   
-  // Use originalName for API calls if available, otherwise fallback to name
   const cityName = state.selectedCity?.originalName || state.selectedCity?.name || '';
   
   const { data: events, isLoading } = useQuery({
