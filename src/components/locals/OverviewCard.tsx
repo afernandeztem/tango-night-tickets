@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Info, MapPin, Users, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -67,7 +66,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
   
   return (
     <Card className="mb-6 border border-gray-100 shadow-sm overflow-hidden bg-white rounded-xl">
-      <CardContent className="p-6 pt-5">
+      <CardContent className="p-6 pt-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 border-b border-gray-100 pb-3">
           <h2 className="text-2xl font-bold">
             <span className="text-gray-800">{t.venue}</span> <span className="text-tango-primary">Overview</span>
@@ -90,70 +89,67 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
             {local.description || t.noDescription}
           </p>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Local Information */}
-            <div className="bg-gray-50 p-5 rounded-xl">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 flex items-center">
-                <MapPin size={18} className="mr-2 text-tango-primary" />
-                {t.information}
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="group">
-                  <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">{t.address}</h4>
-                  <p className="flex items-start">
-                    <MapPin size={16} className="mr-2 mt-0.5 text-tango-primary flex-shrink-0" />
-                    <span className="text-gray-700">{local.address}, {local.city}</span>
-                  </p>
-                </div>
-                
-                <div className="group">
-                  <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">{t.capacityInfo}</h4>
-                  <p className="flex items-start">
-                    <Users size={16} className="mr-2 mt-0.5 text-tango-primary flex-shrink-0" />
-                    <span className="text-gray-700">{local.capacity} {t.capacity}</span>
-                  </p>
-                </div>
-                
-                <div className="group">
-                  <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">{t.today}</h4>
-                  <p className="flex items-start">
-                    <Clock size={16} className="mr-2 mt-0.5 text-tango-primary flex-shrink-0" />
-                    <span className="text-gray-700">
-                      {todaySchedule ? (
-                        <>{todaySchedule.openTime} - {todaySchedule.closeTime}</>
-                      ) : (
-                        <>{t.closed}</>
-                      )}
-                    </span>
-                  </p>
-                </div>
-                
-                <div className="pt-2 flex gap-3">
-                  <a 
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 block bg-tango-primary text-white px-3 py-2 rounded-md hover:bg-tango-primary/90 transition-colors text-center text-sm"
-                  >
-                    {t.getDirections}
-                  </a>
-                  
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button className="flex-1 bg-tango-primary/10 text-tango-primary hover:bg-tango-primary/20 transition-colors px-3 py-2 rounded-md text-sm">
-                        {t.scheduleFor}
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>{t.scheduleFor} {local.name}</DialogTitle>
-                      </DialogHeader>
-                      <WeekSchedule local={local} translations={t} />
-                    </DialogContent>
-                  </Dialog>
-                </div>
+          <div className="bg-gray-50 p-5 rounded-xl">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 flex items-center">
+              <MapPin size={18} className="mr-2 text-tango-primary" />
+              {t.information}
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="group">
+                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">{t.address}</h4>
+                <p className="flex items-start">
+                  <MapPin size={16} className="mr-2 mt-0.5 text-tango-primary flex-shrink-0" />
+                  <span className="text-gray-700">{local.address}, {local.city}</span>
+                </p>
               </div>
+              
+              <div className="group">
+                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">{t.capacityInfo}</h4>
+                <p className="flex items-start">
+                  <Users size={16} className="mr-2 mt-0.5 text-tango-primary flex-shrink-0" />
+                  <span className="text-gray-700">{local.capacity} {t.capacity}</span>
+                </p>
+              </div>
+              
+              <div className="group">
+                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">{t.today}</h4>
+                <p className="flex items-start">
+                  <Clock size={16} className="mr-2 mt-0.5 text-tango-primary flex-shrink-0" />
+                  <span className="text-gray-700">
+                    {todaySchedule ? (
+                      <>{todaySchedule.openTime} - {todaySchedule.closeTime}</>
+                    ) : (
+                      <>{t.closed}</>
+                    )}
+                  </span>
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <a 
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block bg-tango-primary text-white px-3 py-2 rounded-md hover:bg-tango-primary/90 transition-colors text-center text-sm"
+              >
+                {t.getDirections}
+              </a>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="bg-tango-primary/10 text-tango-primary hover:bg-tango-primary/20 transition-colors px-3 py-2 rounded-md text-sm">
+                    {t.scheduleFor}
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{t.scheduleFor} {local.name}</DialogTitle>
+                  </DialogHeader>
+                  <WeekSchedule local={local} translations={t} />
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
       </div>
 
       {/* Content Container with the clear image */}
-      <div className="container relative mx-auto px-4 pt-20 pb-20 z-20">
+      <div className="container relative mx-auto px-4 pt-20 pb-12 z-20">
         <div className="flex flex-col items-center">
           {/* Clear Foreground Image */}
           <motion.div
@@ -84,7 +84,7 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
 
       {/* Curved white section that overlaps with the hero */}
       <div 
-        className="absolute bottom-0 left-0 right-0 h-24 bg-white z-10"
+        className="absolute bottom-0 left-0 right-0 h-16 bg-white z-10"
         style={{ 
           borderTopLeftRadius: '24px', 
           borderTopRightRadius: '24px',
