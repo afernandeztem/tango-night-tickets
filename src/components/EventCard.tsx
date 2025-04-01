@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users } from 'lucide-react';
 import { Event } from '../types';
 import { formatDate } from '../utils/formatters';
 import { useApp } from '../context/AppContext';
@@ -70,14 +70,14 @@ const EventCard: React.FC<EventCardProps> = ({ event, isFavorite }) => {
               <span className="line-clamp-1">{event.localName}, {event.city}</span>
             </div>
 
-            {/* Capacity and Age Restriction (if available) */}
+            {/* Combined Capacity and Age Restriction (if available) */}
             {(event.capacity || event.ageRestriction) && (
               <div className="flex items-center text-sm">
                 <Users size={15} className="mr-2 text-tango-primary" />
                 <span>
-                  {event.capacity && `${event.capacity} capacity`}
-                  {event.capacity && event.ageRestriction && " · "}
-                  {event.ageRestriction && `${event.ageRestriction}+`}
+                  {event.capacity ? `${event.capacity} capacity` : ""}
+                  {event.capacity && event.ageRestriction ? " · " : ""}
+                  {event.ageRestriction ? `${event.ageRestriction}+` : ""}
                 </span>
               </div>
             )}

@@ -42,6 +42,11 @@ const DrinksOffersCard: React.FC<DrinksOffersCardProps> = ({
           translations={translations}
         />
 
+        {/* Divider */}
+        {offers.length > 0 && drinks.length > 0 && (
+          <div className="border-t border-gray-100 my-8"></div>
+        )}
+
         {/* Drinks Section */}
         <DrinksCard 
           drinks={drinks}
