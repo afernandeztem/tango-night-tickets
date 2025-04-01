@@ -3,6 +3,8 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import DrinksCard from './DrinksCard';
 import OffersCard from './OffersCard';
+import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Drink } from '../../types';
 
 interface Offer {
@@ -41,6 +43,11 @@ const DrinksOffersCard: React.FC<DrinksOffersCardProps> = ({
           loading={loadingOffers}
           translations={translations}
         />
+        
+        {/* Separator between sections */}
+        {offers.length > 0 && drinks.length > 0 && (
+          <Separator className="my-6" />
+        )}
 
         {/* Drinks Section */}
         <DrinksCard 

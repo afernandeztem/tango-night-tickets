@@ -5,6 +5,8 @@ import { Calendar, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import EventCard from '../EventCard';
 import { Event } from '../../types';
+import ScrollableSection from '../ScrollableSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EventsCardProps {
   events: Event[];
@@ -26,6 +28,7 @@ const EventsCard: React.FC<EventsCardProps> = ({
   favorites = [] 
 }) => {
   const hasEvents = events.length > 0;
+  const isMobile = useIsMobile();
 
   return (
     <Card className="mb-8 border border-gray-200 shadow-sm overflow-hidden">
@@ -61,21 +64,39 @@ const EventsCard: React.FC<EventsCardProps> = ({
             ))}
           </div>
         ) : hasEvents ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.slice(0, 3).map(event => (
-              <motion.div 
-                key={event.id} 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
+          isMobile ? (
+            <ScrollableSection
+              title=""
+              viewAllText=""
+              viewAllLink=""
+              isLoading={false}
+              hasMore={events.length > 1}
+            >
+              {events.slice(0, 3).map(event => (
                 <EventCard 
+                  key={event.id}
                   event={event} 
                   isFavorite={favorites.includes(event.id)}
                 />
-              </motion.div>
-            ))}
-          </div>
+              ))}
+            </ScrollableSection>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.slice(0, 3).map(event => (
+                <motion.div 
+                  key={event.id} 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <EventCard 
+                    event={event} 
+                    isFavorite={favorites.includes(event.id)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )
         ) : (
           <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
             <Calendar size={40} className="mx-auto mb-4 text-gray-400" />

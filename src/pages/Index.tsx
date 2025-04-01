@@ -5,7 +5,6 @@ import { getCities } from '@/services/api';
 import { useApp } from '../context/AppContext';
 import { useQuery } from '@tanstack/react-query';
 import { AuroraBackground } from "@/components/ui/aurora-background";
-import AuroraBackgroundSimple from "../components/AuroraBackgroundSimple";
 import TangoHero from "../components/TangoHero";
 import TitleSection from "../components/TitleSection";
 import CityGrid from "../components/CityGrid";
@@ -33,13 +32,7 @@ const Index = () => {
   console.log("Ordered Cities:", orderedCities);
   
   return (
-    <div className="relative min-h-screen">
-      {/* Background with lower z-index */}
-      <div className="absolute inset-0 z-0">
-        <AuroraBackgroundSimple />
-      </div>
-
-      {/* Content with higher z-index */}
+    <AuroraBackground className="p-0 justify-start">
       <div className="relative z-10 container mx-auto px-4 py-6 flex flex-col items-center min-h-screen">
         {/* Logo and Tagline */}
         <TangoHero />
@@ -55,24 +48,17 @@ const Index = () => {
           <TitleSection title="Your Night, Your Way" />
           
           {/* City Selection */}
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold text-center mb-4 text-black">
-              Select Your City
-            </h2>
-            <CityGrid 
-              cities={orderedCities} 
-              onCitySelect={handleCitySelect} 
-              isLoading={isLoading}
-            />
-          </div>
+          <CityGrid 
+            cities={orderedCities} 
+            onCitySelect={handleCitySelect} 
+            isLoading={isLoading}
+          />
         </motion.div>
         
         {/* Footer */}
-        <div className="mt-auto">
-          <PageFooter />
-        </div>
+        <PageFooter />
       </div>
-    </div>
+    </AuroraBackground>
   );
 };
 
