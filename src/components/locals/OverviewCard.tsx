@@ -19,6 +19,18 @@ interface OverviewCardProps {
 }
 
 const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) => {
+  // Tag colors for diversity
+  const tagColors = [
+    'bg-violet-100 text-violet-700 border-violet-200',  // Purple
+    'bg-blue-100 text-blue-700 border-blue-200',        // Blue 
+    'bg-green-100 text-green-700 border-green-200',     // Green
+    'bg-amber-100 text-amber-700 border-amber-200',     // Amber
+    'bg-rose-100 text-rose-700 border-rose-200'         // Rose
+  ];
+  
+  // Make sure tags is an array
+  const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
+  
   return (
     <Card className="mb-8 border border-gray-200 shadow-sm overflow-hidden">
       <CardContent className="p-6">
@@ -36,14 +48,13 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
             </p>
             
             <div className="flex flex-wrap gap-2 mb-6">
-              {Array.isArray(local.tags) && local.tags.map((tag, index) => (
-                <Badge 
+              {tagsArray.map((tag, index) => (
+                <span 
                   key={index} 
-                  variant="secondary"
-                  className="bg-tango-secondary/30 text-tango-primary hover:bg-tango-secondary/40"
+                  className={`text-xs px-2.5 py-1 rounded-full ${tagColors[index % tagColors.length]} border shadow-sm`}
                 >
                   {tag}
-                </Badge>
+                </span>
               ))}
             </div>
           </div>

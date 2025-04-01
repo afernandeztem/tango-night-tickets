@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -22,22 +21,18 @@ const LocalDetailPage: React.FC = () => {
   const { localSlug } = useParams<{ localSlug: string }>();
   const [localId, setLocalId] = useState<string | null>(null);
 
-  // If localSlug is a valid ID, use it directly
   useEffect(() => {
     if (!localSlug) return;
     
-    // Check if localSlug is already an ID (numeric)
     if (/^\d+$/.test(localSlug)) {
       setLocalId(localSlug);
     } else {
-      // Otherwise, fetch the ID from the API using the slug
       fetchLocalIdFromSlug(localSlug);
     }
   }, [localSlug]);
 
   const fetchLocalIdFromSlug = async (slug: string) => {
     try {
-      // Convert the slug to a local name format
       const localName = slug
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -45,11 +40,8 @@ const LocalDetailPage: React.FC = () => {
 
       console.log(`Fetching locals to find matching slug: ${slug}`);
       
-      // Try to get the local ID by searching all locals
-      // First try without city to get all locals
       let foundLocal = null;
       
-      // We need to try each city since the API requires a city parameter
       const cities = ['Valencia', 'Madrid', 'Málaga', 'Mallorca'];
       
       for (const city of cities) {
@@ -76,7 +68,6 @@ const LocalDetailPage: React.FC = () => {
     }
   };
 
-  // Helper function to create slug - must match the one in LocalCard
   const createSlug = (name: string) => {
     return name.toLowerCase().normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -84,14 +75,11 @@ const LocalDetailPage: React.FC = () => {
       .replace(/[^a-z0-9-]/g, '');
   };
 
-  // Import the getLocals function at the top of your file
   const getLocals = async (params: { city?: string; page?: number; size?: number }) => {
-    // If you have access to the imported function, use that
     const { getLocals } = await import('../services/api');
     return getLocals(params);
   };
 
-  // Queries - will only run when localId is available
   const { data: local, isLoading: isLoadingLocal } = useQuery({
     queryKey: ['local', localId],
     queryFn: () => localId ? getLocalById(localId) : Promise.reject('No local ID'),
@@ -140,6 +128,13 @@ const LocalDetailPage: React.FC = () => {
       scheduleFor: 'Schedule for',
       closed: 'Closed',
       today: 'Today',
+      address: 'Address',
+      venue: 'Venue',
+      information: 'Information',
+      capacity: 'People',
+      capacityInfo: 'Capacity',
+      getDirections: 'Get Directions',
+      noDescription: 'No description available for this venue.',
     },
     es: {
       overview: 'Descripción',
@@ -158,6 +153,13 @@ const LocalDetailPage: React.FC = () => {
       scheduleFor: 'Horario para',
       closed: 'Cerrado',
       today: 'Hoy',
+      address: 'Dirección',
+      venue: 'Local',
+      information: 'Información',
+      capacity: 'Personas',
+      capacityInfo: 'Capacidad',
+      getDirections: 'Obtener Direcciones',
+      noDescription: 'No hay descripción disponible para este local.',
     }
   };
 
@@ -199,7 +201,6 @@ const LocalDetailPage: React.FC = () => {
     );
   }
 
-  // Get favorite events for the user
   const favoriteEvents = authState.isAuthenticated && authState.user?.favorites?.events
     ? authState.user.favorites.events
     : [];
@@ -211,9 +212,19 @@ const LocalDetailPage: React.FC = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2">
-            <OverviewCard local={local} translations={{ overview: t.overview }} />
+            <OverviewCard 
+              local={local} 
+              translations={{
+                address: t.address,
+                venue: t.venue,
+                information: t.information,
+                capacity: t.capacity,
+                capacityInfo: t.capacityInfo,
+                getDirections: t.getDirections,
+                noDescription: t.noDescription
+              }} 
+            />
             
             <EventsCard
               events={events?.content || []}
@@ -254,7 +265,6 @@ const LocalDetailPage: React.FC = () => {
             />
           </div>
           
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <ScheduleCard
               local={local}

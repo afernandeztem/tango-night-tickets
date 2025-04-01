@@ -32,13 +32,6 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
   
   const t = translations[state.language];
   
-  const createSlug = (name: string) => {
-    return name.toLowerCase().normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
-      .replace(/\s+/g, '-')            // Replace spaces with hyphens
-      .replace(/[^a-z0-9-]/g, '');     // Remove all non-alphanumeric characters except hyphens
-  };
-  
   const handleClick = () => {
     // Use the local ID directly for navigation instead of the slug
     navigate(`/locals/${local.id}`);
@@ -55,6 +48,15 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
 
   // Make sure tags is an array before using array methods on it
   const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
+
+  // Tag colors for diversity
+  const tagColors = [
+    'bg-violet-100 text-violet-700',  // Purple
+    'bg-blue-100 text-blue-700',      // Blue 
+    'bg-green-100 text-green-700',    // Green
+    'bg-amber-100 text-amber-700',    // Amber
+    'bg-rose-100 text-rose-700'       // Rose
+  ];
   
   return (
     <div 
@@ -90,17 +92,21 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
             {tagsArray.slice(0, 3).map((tag, index) => (
               <span 
                 key={index} 
-                className="text-xs px-2.5 py-1 bg-tango-secondary text-tango-primary rounded-full"
+                className={`text-xs px-2.5 py-1 rounded-full ${tagColors[index % tagColors.length]} shadow-sm border border-white/30`}
               >
                 {tag}
               </span>
             ))}
           </div>
           <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center">
-              <Star size={16} className="text-yellow-500 mr-1" />
-              <span className="text-sm font-medium">{local.rating.toFixed(1)}</span>
-            </div>
+            {typeof local.rating === 'number' && local.rating > 0 ? (
+              <div className="flex items-center">
+                <Star size={16} className="text-yellow-500 mr-1" />
+                <span className="text-sm font-medium">{local.rating.toFixed(1)}</span>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-400">No ratings yet</div>
+            )}
             <div className="flex items-center">
               <Users size={16} className="text-gray-500 mr-1" />
               <span className="text-sm text-gray-600">{local.capacity}</span>
