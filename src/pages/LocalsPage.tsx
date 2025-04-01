@@ -9,6 +9,14 @@ import { useApp } from '../context/AppContext';
 import LocalCard from '../components/LocalCard';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
 
 const LocalsPage: React.FC = () => {
   const { state } = useApp();
@@ -115,28 +123,63 @@ const LocalsPage: React.FC = () => {
               </div>
               
               {totalPages > 1 && (
-                <div className="mt-10 flex justify-center">
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={handlePreviousPage}
-                      disabled={currentPage === 0}
-                      className="p-2 rounded-full border flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    
-                    <span className="text-sm">
-                      {t.page} {currentPage + 1} {t.of} {totalPages}
-                    </span>
-                    
-                    <button
-                      onClick={handleNextPage}
-                      disabled={currentPage >= totalPages - 1}
-                      className="p-2 rounded-full border flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </div>
+                <div className="mt-10">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={handlePreviousPage}
+                          className={currentPage === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {/* Display page numbers */}
+                      {[...Array(totalPages)].map((_, index) => {
+                        // Show current page, first, last, and one page before and after current
+                        if (
+                          index === 0 || 
+                          index === totalPages - 1 ||
+                          index === currentPage ||
+                          index === currentPage - 1 ||
+                          index === currentPage + 1
+                        ) {
+                          return (
+                            <PaginationItem key={index}>
+                              <PaginationLink 
+                                onClick={() => {
+                                  setCurrentPage(index);
+                                  window.scrollTo(0, 0);
+                                }}
+                                isActive={currentPage === index}
+                                className="cursor-pointer"
+                              >
+                                {index + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        }
+                        // Show ellipsis for gaps
+                        if (
+                          (index === 1 && currentPage > 2) ||
+                          (index === totalPages - 2 && currentPage < totalPages - 3)
+                        ) {
+                          return (
+                            <PaginationItem key={index}>
+                              <span className="flex h-9 w-9 items-center justify-center">...</span>
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      })}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={handleNextPage}
+                          className={currentPage >= totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               )}
             </>

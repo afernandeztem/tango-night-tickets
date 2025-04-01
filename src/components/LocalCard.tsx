@@ -40,8 +40,8 @@ const LocalCard: React.FC<LocalCardProps> = ({ local, isFavorite = false }) => {
   };
   
   const handleClick = () => {
-    const slug = createSlug(local.name);
-    navigate(`/locals/${slug}`);
+    // Use the local ID directly for navigation instead of the slug
+    navigate(`/locals/${local.id}`);
   };
   
   const handleFavoriteClick = (e: React.MouseEvent) => {

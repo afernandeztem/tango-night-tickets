@@ -1,292 +1,263 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getEventsByLocalId, getDrinksByLocalId, getLocalReviews, getLocalOffers } from '../services/api';
-import { Local, Event, Drink } from '../types';
-import { useApp } from '../context/AppContext';
-import { useAuth } from '../context/AuthContext';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers, getLocalReviews } from '../services/api';
+import { Local, Event } from '../types';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useLocalPageTranslations } from '../hooks/useTranslations';
-
-// Import refactored components
 import LocalHero from '../components/locals/LocalHero';
 import OverviewCard from '../components/locals/OverviewCard';
 import ScheduleCard from '../components/locals/ScheduleCard';
 import EventsCard from '../components/locals/EventsCard';
 import DrinksOffersCard from '../components/locals/DrinksOffersCard';
 import ReviewsCard from '../components/locals/ReviewsCard';
-import LoadingPlaceholder from '../components/locals/LoadingPlaceholder';
-import NotFoundPlaceholder from '../components/locals/NotFoundPlaceholder';
+import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 const LocalDetailPage: React.FC = () => {
-  const { localSlug } = useParams<{ localSlug: string }>();
   const { state } = useApp();
   const { state: authState } = useAuth();
-  const t = useLocalPageTranslations();
-  
-  const [local, setLocal] = useState<Local | null>(null);
-  const [eventsData, setEventsData] = useState<{ content: Event[] } | null>(null);
-  const [drinks, setDrinks] = useState<Drink[]>([]);
-  const [offers, setOffers] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [loading, setLoading] = useState<{ local: boolean; events: boolean; drinks: boolean; offers: boolean; reviews: boolean }>({
-    local: true,
-    events: true,
-    drinks: true,
-    offers: true,
-    reviews: true,
-  });
-  
+  const navigate = useNavigate();
+  const { localSlug } = useParams<{ localSlug: string }>();
+  const [localId, setLocalId] = useState<string | null>(null);
+
+  // If localSlug is a valid ID, use it directly
   useEffect(() => {
-    const fetchLocals = async () => {
-      if (!localSlug) {
-        console.error('No localSlug provided');
-        setLoading(prev => ({ ...prev, local: false }));
-        return;
-      }
+    if (!localSlug) return;
+    
+    // Check if localSlug is already an ID (numeric)
+    if (/^\d+$/.test(localSlug)) {
+      setLocalId(localSlug);
+    } else {
+      // Otherwise, fetch the ID from the API using the slug
+      fetchLocalIdFromSlug(localSlug);
+    }
+  }, [localSlug]);
+
+  const fetchLocalIdFromSlug = async (slug: string) => {
+    try {
+      // Convert the slug to a local name format
+      const localName = slug
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      console.log(`Fetching locals to find matching slug: ${slug}`);
       
-      try {
-        // First, try to fetch all locals to find the matching one by slug
-        // We don't filter by city to make sure we get all locals
-        console.log('Fetching locals to find matching slug:', localSlug);
-        const fetchUrl = 'https://api.grupotangoapp.com/public/locals?page=0&size=100';
-        console.log('Fetch URL:', fetchUrl);
+      // Try to get the local ID by searching all locals
+      // First try without city to get all locals
+      let foundLocal = null;
+      
+      // We need to try each city since the API requires a city parameter
+      const cities = ['Valencia', 'Madrid', 'Málaga', 'Mallorca'];
+      
+      for (const city of cities) {
+        console.log(`Trying to find local in city: ${city}`);
+        const result = await getLocals({ city, size: 100 });
         
-        // Attempt to fetch locals. If this fails due to missing city param, we'll handle it
-        const response = await fetch(fetchUrl);
+        foundLocal = result.content.find(local => 
+          createSlug(local.name) === slug || local.id === slug
+        );
         
-        if (!response.ok) {
-          // If first approach fails (likely due to missing city param)
-          // Try an alternative approach by fetching a specific city's locals
-          console.log('First approach failed, trying with a specific city');
-          
-          // Get all cities
-          const citiesResponse = await fetch('https://api.grupotangoapp.com/public/cities');
-          const citiesData = await citiesResponse.json();
-          
-          if (!Array.isArray(citiesData)) {
-            throw new Error('Invalid cities response');
-          }
-          
-          // For each active city, try to fetch locals
-          for (const city of citiesData) {
-            if (city.active) {
-              console.log(`Trying to find local in city: ${city.name}`);
-              const cityLocalsResponse = await fetch(`https://api.grupotangoapp.com/public/locals?city=${encodeURIComponent(city.name)}`);
-              
-              if (cityLocalsResponse.ok) {
-                const cityLocalsData = await cityLocalsResponse.json();
-                const locals = cityLocalsData.content || [];
-                
-                // Look for a matching local by slug
-                const foundLocal = locals.find((local: any) => {
-                  const slug = local.name.toLowerCase().normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                  return slug === localSlug;
-                });
-                
-                if (foundLocal) {
-                  console.log('Found local in city:', city.name, foundLocal);
-                  processFoundLocal(foundLocal);
-                  return;
-                }
-              }
-            }
-          }
-          
-          console.error('Local not found in any city');
-          setLoading(prev => ({ ...prev, local: false }));
+        if (foundLocal) {
+          setLocalId(foundLocal.id);
           return;
         }
-        
-        // If first approach succeeded
-        const data = await response.json();
-        const locals = data.content || [];
-        
-        if (locals.length > 0) {
-          const foundLocal = locals.find((local: any) => {
-            const slug = local.name.toLowerCase().normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-            return slug === localSlug;
-          });
-          
-          if (foundLocal) {
-            console.log('Found local with matching slug:', foundLocal);
-            processFoundLocal(foundLocal);
-          } else {
-            console.error('Local not found with slug:', localSlug);
-            setLoading(prev => ({ ...prev, local: false }));
-          }
-        } else {
-          console.error('No locals found');
-          setLoading(prev => ({ ...prev, local: false }));
-        }
-      } catch (error) {
-        console.error('Error fetching locals:', error);
-        setLoading(prev => ({ ...prev, local: false }));
       }
-    };
-    
-    const processFoundLocal = (foundLocal: any) => {
-      setLocal({
-        id: foundLocal.localId,
-        name: foundLocal.name,
-        description: foundLocal.description || '',
-        address: foundLocal.street || '',
-        city: foundLocal.city || '',
-        capacity: foundLocal.capacity || 0,
-        rating: foundLocal.rating || 4.5,
-        tags: foundLocal.categories || [],
-        image: foundLocal.fileName || 'https://source.unsplash.com/random/800x600/?club',
-        schedule: foundLocal.schedule || []
-      });
       
-      fetchAdditionalLocalData(foundLocal.localId);
-    };
-    
-    const fetchAdditionalLocalData = (localId: string) => {
-      fetchEvents(localId);
-      fetchDrinks(localId);
-      fetchOffers(localId);
-      fetchReviews(localId);
-      setLoading(prev => ({ ...prev, local: false }));
-    };
-    
-    fetchLocals();
-  }, [localSlug]);
-  
-  const fetchEvents = async (localId: string) => {
-    setLoading(prev => ({ ...prev, events: true }));
-    
-    try {
-      const events = await getEventsByLocalId(localId);
-      setEventsData(events);
+      if (!foundLocal) {
+        console.error('Local not found in any city');
+        navigate('/locals');
+      }
     } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, events: false }));
+      console.error('Error fetching local ID:', error);
+      navigate('/locals');
     }
   };
 
-  const fetchDrinks = async (localId: string) => {
-    setLoading(prev => ({ ...prev, drinks: true }));
-    
-    try {
-      const drinksData = await getDrinksByLocalId(localId);
-      setDrinks(drinksData);
-    } catch (error) {
-      console.error('Error fetching drinks:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, drinks: false }));
+  // Helper function to create slug - must match the one in LocalCard
+  const createSlug = (name: string) => {
+    return name.toLowerCase().normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+  };
+
+  // Import the getLocals function at the top of your file
+  const getLocals = async (params: { city?: string; page?: number; size?: number }) => {
+    // If you have access to the imported function, use that
+    const { getLocals } = await import('../services/api');
+    return getLocals(params);
+  };
+
+  // Queries - will only run when localId is available
+  const { data: local, isLoading: isLoadingLocal } = useQuery({
+    queryKey: ['local', localId],
+    queryFn: () => localId ? getLocalById(localId) : Promise.reject('No local ID'),
+    enabled: !!localId,
+  });
+
+  const { data: events, isLoading: isLoadingEvents } = useQuery({
+    queryKey: ['events', localId],
+    queryFn: () => localId ? getEventsByLocalId(localId) : Promise.reject('No local ID'),
+    enabled: !!localId,
+  });
+
+  const { data: drinks, isLoading: isLoadingDrinks } = useQuery({
+    queryKey: ['drinks', localId],
+    queryFn: () => localId ? getDrinksByLocalId(localId) : Promise.reject('No local ID'),
+    enabled: !!localId,
+  });
+
+  const { data: offers, isLoading: isLoadingOffers } = useQuery({
+    queryKey: ['offers', localId],
+    queryFn: () => localId ? getLocalOffers(localId) : Promise.reject('No local ID'),
+    enabled: !!localId,
+  });
+
+  const { data: reviews, isLoading: isLoadingReviews } = useQuery({
+    queryKey: ['reviews', localId],
+    queryFn: () => localId ? getLocalReviews(localId) : Promise.reject('No local ID'),
+    enabled: !!localId,
+  });
+
+  const translations = {
+    en: {
+      overview: 'Overview',
+      schedule: 'Schedule',
+      upcomingEvents: 'Upcoming Events at',
+      viewAll: 'View All',
+      noEvents: 'No upcoming events',
+      drinks: 'Drinks',
+      offers: 'Offers',
+      noDrinksAvailable: 'No drinks available',
+      noOffersAvailable: 'No offers available',
+      reviews: 'Reviews',
+      writeReview: 'Write a Review',
+      noReviews: 'No reviews yet',
+      beFirst: 'Be the first to leave a review',
+    },
+    es: {
+      overview: 'Descripción',
+      schedule: 'Horario',
+      upcomingEvents: 'Próximos Eventos en',
+      viewAll: 'Ver Todos',
+      noEvents: 'No hay eventos próximos',
+      drinks: 'Bebidas',
+      offers: 'Ofertas',
+      noDrinksAvailable: 'No hay bebidas disponibles',
+      noOffersAvailable: 'No hay ofertas disponibles',
+      reviews: 'Reseñas',
+      writeReview: 'Escribir Reseña',
+      noReviews: 'Aún no hay reseñas',
+      beFirst: 'Sé el primero en dejar una reseña',
     }
   };
 
-  const fetchOffers = async (localId: string) => {
-    setLoading(prev => ({ ...prev, offers: true }));
-    
-    try {
-      const offersData = await getLocalOffers(localId);
-      setOffers(offersData);
-    } catch (error) {
-      console.error('Error fetching offers:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, offers: false }));
-    }
-  };
+  const t = translations[state.language];
 
-  const fetchReviews = async (localId: string) => {
-    setLoading(prev => ({ ...prev, reviews: true }));
-    
-    try {
-      const reviewsData = await getLocalReviews(localId);
-      setReviews(reviewsData.content);
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-    } finally {
-      setLoading(prev => ({ ...prev, reviews: false }));
-    }
-  };
+  if (isLoadingLocal) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-tango-primary mb-4"></div>
+            <p className="text-gray-600">Loading local information...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
-  const upcomingEvents = eventsData?.content || [];
-  const viewAllLink = local?.id ? `/events?localId=${local.id}` : '/events';
-  const favoriteEvents = authState.isAuthenticated && authState.user?.favorites?.events 
-    ? authState.user.favorites.events 
+  if (!local) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Local not found</h2>
+            <p className="text-gray-600 mb-6">The local you're looking for doesn't exist or has been removed.</p>
+            <button
+              onClick={() => navigate('/locals')}
+              className="px-6 py-2 bg-tango-primary text-white rounded-md hover:bg-tango-primary/90"
+            >
+              Back to Locals
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Get favorite events for the user
+  const favoriteEvents = authState.isAuthenticated && authState.user?.favorites?.events
+    ? authState.user.favorites.events
     : [];
 
-  if (loading.local) {
-    return (
-      <div className="min-h-screen flex flex-col bg-white">
-        <Header />
-        <main className="flex-grow">
-          <div className="container mx-auto px-4 py-12">
-            <LoadingPlaceholder />
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
-  if (!loading.local && !local) {
-    return (
-      <div className="min-h-screen flex flex-col bg-white">
-        <Header />
-        <main className="flex-grow">
-          <NotFoundPlaceholder />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header />
+      <LocalHero local={local} />
       
-      <main className="flex-grow">
-        {local && (
-          <>
-            {/* Hero Section */}
-            <LocalHero local={local} />
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            <OverviewCard local={local} translations={{ overview: t.overview }} />
             
-            {/* Content Section */}
-            <section className="py-8">
-              <div className="container mx-auto px-4 max-w-5xl">
-                {/* Overview */}
-                <OverviewCard local={local} translations={t} />
-                
-                {/* Schedule */}
-                <ScheduleCard local={local} translations={t} />
-                
-                {/* Events */}
-                <EventsCard 
-                  events={upcomingEvents} 
-                  loading={loading.events} 
-                  viewAllLink={viewAllLink} 
-                  translations={t}
-                  favorites={favoriteEvents} 
-                />
-                
-                {/* Drinks & Offers */}
-                <DrinksOffersCard 
-                  drinks={drinks}
-                  offers={offers}
-                  loadingDrinks={loading.drinks}
-                  loadingOffers={loading.offers}
-                  translations={t}
-                />
-
-                {/* Reviews */}
-                <ReviewsCard 
-                  reviews={reviews}
-                  loading={loading.reviews}
-                  translations={t}
-                />
-              </div>
-            </section>
-          </>
-        )}
-      </main>
+            <EventsCard
+              events={events?.content || []}
+              loading={isLoadingEvents}
+              viewAllLink={`/events?localId=${local.id}`}
+              translations={{
+                upcomingEventsAt: `${t.upcomingEvents} ${local.name}`,
+                viewAll: t.viewAll,
+                noEvents: t.noEvents
+              }}
+              favorites={favoriteEvents}
+            />
+            
+            <DrinksOffersCard
+              drinks={drinks || []}
+              offers={offers || []}
+              loadingDrinks={isLoadingDrinks}
+              loadingOffers={isLoadingOffers}
+              translations={{
+                drinks: t.drinks,
+                offers: t.offers,
+                noDrinksAvailable: t.noDrinksAvailable,
+                noOffersAvailable: t.noOffersAvailable
+              }}
+            />
+            
+            <ReviewsCard
+              reviews={reviews?.content || []}
+              loading={isLoadingReviews}
+              localId={local.id}
+              localName={local.name}
+              translations={{
+                reviews: t.reviews,
+                writeReview: t.writeReview,
+                noReviews: t.noReviews,
+                beFirst: t.beFirst
+              }}
+            />
+          </div>
+          
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <ScheduleCard
+              schedule={local.schedule || []}
+              translations={{
+                schedule: t.schedule
+              }}
+            />
+          </div>
+        </div>
+      </div>
       
       <Footer />
     </div>
