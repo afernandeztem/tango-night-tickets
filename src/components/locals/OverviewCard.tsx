@@ -127,19 +127,19 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
               </div>
             </div>
             
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="mt-5 flex justify-center gap-4">
               <a 
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block bg-tango-primary text-white px-3 py-2 rounded-md hover:bg-tango-primary/90 transition-colors text-center text-sm"
+                className="inline-block bg-tango-primary text-white px-6 py-2 rounded-md hover:bg-tango-primary/90 transition-colors text-center text-sm"
               >
                 {t.getDirections}
               </a>
               
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="bg-tango-primary/10 text-tango-primary hover:bg-tango-primary/20 transition-colors px-3 py-2 rounded-md text-sm">
+                  <button className="inline-block bg-tango-primary/10 text-tango-primary hover:bg-tango-primary/20 transition-colors px-6 py-2 rounded-md text-sm">
                     {t.scheduleFor}
                   </button>
                 </DialogTrigger>
@@ -158,7 +158,6 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
   );
 };
 
-// Add a component for the full week schedule that appears in the dialog
 const WeekSchedule: React.FC<{local: Local, translations: any}> = ({ local, translations: t }) => {
   const getDaysOfWeek = () => {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -167,16 +166,13 @@ const WeekSchedule: React.FC<{local: Local, translations: any}> = ({ local, tran
 
   const days = getDaysOfWeek();
   
-  // Process the schedule data based on its format
   const getScheduleForDay = (day: string): LocalSchedule | null => {
     if (!local || !local.schedule) return null;
     
-    // If schedule is an array (old format)
     if (Array.isArray(local.schedule)) {
       return local.schedule.find(s => s.day.toLowerCase() === day.toLowerCase()) || null;
     }
     
-    // If schedule is an object with day keys (new format)
     const scheduleObj = local.schedule as ScheduleObject;
     const dayKey = day.toLowerCase();
     
@@ -196,7 +192,6 @@ const WeekSchedule: React.FC<{local: Local, translations: any}> = ({ local, tran
     return null;
   };
   
-  // Get today's day
   const todayIndex = new Date().getDay();
   const todayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][todayIndex];
 
