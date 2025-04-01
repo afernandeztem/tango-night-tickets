@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Beer, GlassWater, Wine } from 'lucide-react';
+import { Beer, GlassWater, Wine, Cocktail2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Drink } from '../../types';
@@ -40,12 +40,13 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
           return <Beer className="text-tango-primary h-5 w-5" />;
         case CategoryEnum.COPA:
         case CategoryEnum.COPA_PREMIUM:
-        case CategoryEnum.CHUPITO:
           return <GlassWater className="text-tango-primary h-5 w-5" />;
         case CategoryEnum.COCTEL:
-          return <GlassWater className="text-tango-primary h-5 w-5" />; 
+          return <Cocktail2 className="text-tango-primary h-5 w-5" />; 
         case CategoryEnum.VINO:
           return <Wine className="text-tango-primary h-5 w-5" />;
+        case CategoryEnum.CHUPITO:
+          return <GlassWater className="text-tango-primary h-6 w-6 -rotate-45" />;
         default:
           return <Wine className="text-tango-primary h-5 w-5" />;
       }
@@ -67,8 +68,8 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
     <Card className="mb-8 border-none shadow-lg overflow-hidden bg-white rounded-xl">
       <CardContent className="p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="bg-tango-primary/10 p-2 rounded-full">
-            <Wine className="text-tango-primary h-5 w-5" />
+          <div className="bg-gradient-to-tr from-tango-primary/20 to-tango-primary/5 p-3 rounded-full shadow-sm">
+            <Wine className="text-tango-primary h-6 w-6" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800">{t.drinks}</h2>
         </div>
@@ -94,13 +95,13 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: categoryIndex * 0.1 }}
-                className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm"
+                className="bg-gradient-to-br from-gray-50 to-gray-50/50 p-6 rounded-xl border border-gray-100 shadow-sm"
               >
                 <h3 className="text-lg font-semibold mb-5 text-gray-800 flex items-center gap-2">
-                  <div className="bg-tango-primary/10 p-1.5 rounded-full">
+                  <div className="bg-gradient-to-tr from-tango-primary/20 to-tango-primary/5 p-2 rounded-full shadow-sm">
                     {getCategoryIcon(categoryDrinks[0]?.category)}
                   </div>
-                  <Badge variant="outline" className="bg-tango-primary/10 text-tango-primary border-0 py-1 px-3">
+                  <Badge variant="outline" className="bg-gradient-to-r from-tango-primary/20 to-tango-primary/5 text-tango-primary border-0 py-1.5 px-4">
                     {category}
                   </Badge>
                 </h3>
@@ -111,15 +112,15 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.2, delay: drinkIndex * 0.05 }}
-                      className="flex justify-between p-4 rounded-lg bg-white border border-gray-100 hover:border-tango-primary/20 hover:shadow-md transition-all"
+                      className="flex justify-between p-5 rounded-xl bg-white border border-gray-100 hover:border-tango-primary/20 hover:shadow-md transition-all group"
                     >
                       <div>
-                        <h4 className="font-semibold text-gray-800">{drink.name}</h4>
+                        <h4 className="font-semibold text-gray-800 group-hover:text-tango-primary transition-colors">{drink.name}</h4>
                         {drink.description && (
                           <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
                         )}
                       </div>
-                      <div className="bg-tango-primary/10 text-tango-primary font-semibold px-3 py-1 rounded-full text-sm self-start">
+                      <div className="bg-gradient-to-r from-tango-primary to-tango-secondary text-white font-semibold px-4 py-1.5 rounded-full text-sm self-start shadow-sm">
                         {drink.price?.toFixed(2) || "0.00"} €
                       </div>
                     </motion.div>
@@ -129,9 +130,9 @@ const DrinksCard: React.FC<DrinksCardProps> = ({ drinks, loading, translations: 
             ))}
           </div>
         ) : (
-          <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-100">
-            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Wine size={24} className="text-gray-400" />
+          <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-50/50 rounded-xl border border-gray-100">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-tango-primary/20 to-tango-primary/5 rounded-full flex items-center justify-center mb-4 shadow-sm">
+              <Wine size={24} className="text-tango-primary" />
             </div>
             <p className="text-gray-700 font-medium">{t.noDrinksAvailable}</p>
           </div>
