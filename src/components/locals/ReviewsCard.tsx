@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MessageSquare, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +13,8 @@ interface Review {
 interface ReviewsCardProps {
   reviews: Review[];
   loading: boolean;
+  localId?: string;
+  localName?: string;
   translations: {
     reviewsTitle: string;
     noReviews: string;
