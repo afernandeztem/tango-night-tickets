@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ScrollableSectionProps {
   title: string;
@@ -26,7 +25,6 @@ const ScrollableSection: React.FC<ScrollableSectionProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
-  const isMobile = useIsMobile();
   
   useEffect(() => {
     const checkArrows = () => {
@@ -109,17 +107,9 @@ const ScrollableSection: React.FC<ScrollableSectionProps> = ({
           <div 
             ref={scrollRef}
             className="flex overflow-x-auto scrollbar-hide space-x-6 py-2 px-1"
-            style={{ 
-              scrollbarWidth: 'none', 
-              msOverflowStyle: 'none',
-            }}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {/* Adjust card sizes to ensure partial visibility of next card */}
-            {React.Children.map(children, child => (
-              <div className={`flex-none ${isMobile ? 'w-[75%]' : 'w-full md:w-1/3 lg:w-1/3'} min-w-[240px]`}>
-                {child}
-              </div>
-            ))}
+            {children}
           </div>
         </div>
       )}
