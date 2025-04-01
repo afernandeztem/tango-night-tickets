@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getLocalById, getEventsByLocalId, getDrinksByLocalId, getLocalOffers, getLocalReviews } from '../services/api';
-import { Local, Event } from '../types';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LocalHero from '../components/locals/LocalHero';
@@ -211,21 +210,36 @@ const LocalDetailPage: React.FC = () => {
       <LocalHero local={local} />
       
       <div className="container mx-auto px-4 py-8">
+        <OverviewCard 
+          local={local} 
+          translations={{
+            address: t.address,
+            venue: t.venue,
+            information: t.information,
+            capacity: t.capacity,
+            capacityInfo: t.capacityInfo,
+            getDirections: t.getDirections,
+            noDescription: t.noDescription
+          }} 
+        />
+        
+        <ScheduleCard
+          local={local}
+          translations={{
+            scheduleFor: t.scheduleFor,
+            closed: t.closed,
+            today: t.today,
+            address: t.address,
+            venue: t.venue,
+            information: t.information,
+            capacity: t.capacity,
+            capacityInfo: t.capacityInfo,
+            getDirections: t.getDirections
+          }}
+        />
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <OverviewCard 
-              local={local} 
-              translations={{
-                address: t.address,
-                venue: t.venue,
-                information: t.information,
-                capacity: t.capacity,
-                capacityInfo: t.capacityInfo,
-                getDirections: t.getDirections,
-                noDescription: t.noDescription
-              }} 
-            />
-            
             <EventsCard
               events={events?.content || []}
               loading={isLoadingEvents}
@@ -250,7 +264,9 @@ const LocalDetailPage: React.FC = () => {
                 noOffersAvailable: t.noOffersAvailable
               }}
             />
-            
+          </div>
+          
+          <div className="lg:col-span-1">
             <ReviewsCard
               reviews={reviews?.content || []}
               loading={isLoadingReviews}
@@ -261,17 +277,6 @@ const LocalDetailPage: React.FC = () => {
                 writeReview: t.writeReview,
                 noReviews: t.noReviews,
                 beFirst: t.beFirst
-              }}
-            />
-          </div>
-          
-          <div className="lg:col-span-1">
-            <ScheduleCard
-              local={local}
-              translations={{
-                scheduleFor: t.scheduleFor,
-                closed: t.closed,
-                today: t.today
               }}
             />
           </div>

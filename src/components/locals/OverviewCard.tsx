@@ -23,63 +23,29 @@ const OverviewCard: React.FC<OverviewCardProps> = ({ local, translations: t }) =
   const tagsArray = Array.isArray(local.tags) ? local.tags : (local.tags ? [local.tags] : []);
   
   return (
-    <Card className="mb-8 border-none shadow-lg overflow-hidden bg-white rounded-xl">
-      <CardContent className="p-8 pt-0">
-        <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">{t.venue} <span className="text-tango-primary">Overview</span></h2>
+    <Card className="mb-8 border border-gray-100 shadow-lg overflow-hidden bg-white rounded-xl">
+      <CardContent className="p-8 pt-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 border-b border-gray-100 pb-4">
+          <h2 className="text-2xl font-bold">
+            <span className="text-gray-800">{t.venue}</span> <span className="text-tango-primary">Overview</span>
+          </h2>
+          
+          <div className="flex flex-wrap gap-2">
+            {tagsArray.map((tag, index) => (
+              <Badge 
+                key={index} 
+                className="bg-tango-primary/10 hover:bg-tango-primary/20 text-tango-primary uppercase text-xs tracking-wider font-medium py-1.5 px-3 border-none"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          <div className="md:col-span-2">
-            <p className="text-gray-700 mb-8 leading-relaxed text-base">
-              {local.description || t.noDescription}
-            </p>
-            
-            <div className="flex flex-wrap gap-3 mb-6">
-              {tagsArray.map((tag, index) => (
-                <Badge 
-                  key={index} 
-                  className="bg-tango-primary/10 hover:bg-tango-primary/20 text-tango-primary uppercase text-xs tracking-wider font-medium py-1.5 px-3 border-none"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-bold text-gray-800 mb-5 pb-2 border-b border-gray-200">
-              {t.venue} {t.information}
-            </h3>
-            
-            <div className="space-y-5">
-              <div className="group">
-                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1.5">{t.address}</h4>
-                <p className="flex items-start">
-                  <MapPin size={18} className="mr-3 mt-0.5 text-tango-primary flex-shrink-0" />
-                  <span className="text-gray-700">{local.address}, {local.city}</span>
-                </p>
-              </div>
-              
-              <div className="group">
-                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1.5">{t.capacityInfo}</h4>
-                <p className="flex items-start">
-                  <Users size={18} className="mr-3 mt-0.5 text-tango-primary flex-shrink-0" />
-                  <span className="text-gray-700">{local.capacity} {t.capacity}</span>
-                </p>
-              </div>
-              
-              <a 
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full mt-6 bg-tango-primary text-white px-4 py-3 rounded-lg hover:bg-tango-primary/90 transition-colors flex items-center justify-center shadow-sm"
-              >
-                <Navigation size={16} className="mr-2" />
-                {t.getDirections}
-              </a>
-            </div>
-          </div>
+        <div>
+          <p className="text-gray-700 mb-8 leading-relaxed text-lg">
+            {local.description || t.noDescription}
+          </p>
         </div>
       </CardContent>
     </Card>

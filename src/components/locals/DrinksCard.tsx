@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Beer, GlassWater, Wine } from 'lucide-react';
+import { Beer, GlassWater, Wine, Cocktail } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Drink } from '../../types';
 import { CategoryEnum, CategoryLabelMap } from '../../types/CategoryEnum';

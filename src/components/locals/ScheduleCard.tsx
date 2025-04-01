@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, MapPin, Users, Navigation } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Local, LocalSchedule, ScheduleObject } from '../../types';
 
@@ -10,6 +10,12 @@ interface ScheduleCardProps {
     scheduleFor: string;
     closed: string;
     today: string;
+    address: string;
+    venue: string;
+    information: string;
+    capacity: string;
+    capacityInfo: string;
+    getDirections: string;
   };
 }
 
@@ -53,44 +59,84 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ local, translations: t }) =
   };
 
   return (
-    <Card className="mb-8 border border-gray-200 shadow-sm overflow-hidden">
+    <Card className="mb-8 border border-gray-100 shadow-lg overflow-hidden bg-white rounded-xl">
       <CardContent className="p-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="bg-tango-primary/10 p-2 rounded-full">
-            <Clock className="text-tango-primary h-5 w-5" />
-          </div>
-          <h2 className="text-2xl font-semibold">{t.scheduleFor}</h2>
-        </div>
-        
-        <div className="overflow-x-auto pb-2">
-          <div className="grid grid-cols-7 gap-3 min-w-[640px]">
-            {orderedDays.map((day, index) => {
-              const scheduleForDay = getScheduleForDay(day);
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Venue Information Section */}
+          <div className="bg-gray-50 p-6 rounded-xl">
+            <h3 className="text-xl font-bold text-gray-800 mb-5 pb-2 border-b border-gray-200 flex items-center">
+              <MapPin size={18} className="mr-2 text-tango-primary" />
+              {t.venue} {t.information}
+            </h3>
+            
+            <div className="space-y-5">
+              <div className="group">
+                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1.5">{t.address}</h4>
+                <p className="flex items-start">
+                  <MapPin size={18} className="mr-3 mt-0.5 text-tango-primary flex-shrink-0" />
+                  <span className="text-gray-700">{local.address}, {local.city}</span>
+                </p>
+              </div>
               
-              return (
-                <div 
-                  key={index} 
-                  className={`p-4 rounded-lg border ${index === 0 ? 'bg-tango-secondary/20 border-tango-primary/20' : 'bg-white'}`}
-                >
-                  <h3 className={`text-center font-semibold mb-2 ${index === 0 ? 'text-tango-primary' : ''}`}>
-                    {day}
-                    {index === 0 && <span className="block text-xs mt-1">({t.today})</span>}
-                  </h3>
-                  {scheduleForDay ? (
-                    <div className="text-center">
-                      <div className="text-sm">
-                        <Clock size={14} className="inline mr-1 text-tango-primary" />
-                        {scheduleForDay.openTime} - {scheduleForDay.closeTime}
-                      </div>
+              <div className="group">
+                <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1.5">{t.capacityInfo}</h4>
+                <p className="flex items-start">
+                  <Users size={18} className="mr-3 mt-0.5 text-tango-primary flex-shrink-0" />
+                  <span className="text-gray-700">{local.capacity} {t.capacity}</span>
+                </p>
+              </div>
+              
+              <a 
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.address + ', ' + local.city)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full mt-6 bg-tango-primary text-white px-4 py-3 rounded-lg hover:bg-tango-primary/90 transition-colors flex items-center justify-center shadow-sm"
+              >
+                <Navigation size={16} className="mr-2" />
+                {t.getDirections}
+              </a>
+            </div>
+          </div>
+
+          {/* Schedule Section */}
+          <div className="bg-gray-50 p-6 rounded-xl">
+            <h3 className="text-xl font-bold text-gray-800 mb-5 pb-2 border-b border-gray-200 flex items-center">
+              <Clock size={18} className="mr-2 text-tango-primary" />
+              {t.scheduleFor}
+            </h3>
+            
+            <div className="overflow-x-auto pb-2">
+              <div className="grid grid-cols-7 gap-2 min-w-[480px]">
+                {orderedDays.map((day, index) => {
+                  const scheduleForDay = getScheduleForDay(day);
+                  const isToday = index === 0;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`p-2 rounded-lg border ${isToday ? 'bg-tango-primary/10 border-tango-primary/20' : 'bg-white'}`}
+                    >
+                      <h3 className={`text-center font-semibold mb-2 text-sm ${isToday ? 'text-tango-primary' : ''}`}>
+                        {day}
+                        {isToday && <span className="block text-xs mt-1">({t.today})</span>}
+                      </h3>
+                      {scheduleForDay ? (
+                        <div className="text-center">
+                          <div className="text-xs">
+                            <Clock size={12} className="inline mr-1 text-tango-primary" />
+                            {scheduleForDay.openTime} - {scheduleForDay.closeTime}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center text-gray-500 text-xs">
+                          {t.closed}
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-center text-gray-500 text-sm">
-                      {t.closed}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>
