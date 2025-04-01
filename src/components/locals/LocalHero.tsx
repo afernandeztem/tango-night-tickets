@@ -2,13 +2,36 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Star, Users, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Local } from '../../types';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface LocalHeroProps {
   local: Local;
 }
 
 const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
+  const { state: authState, toggleFavorite } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const isFavorite = authState.isAuthenticated && 
+    authState.user?.favorites?.locals?.includes(local.id);
+    
+  const handleFavoriteClick = () => {
+    if (authState.isAuthenticated) {
+      toggleFavorite('local', local.id);
+    } else {
+      // Redirect to login page
+      toast({
+        title: "Authentication required",
+        description: "Please login to add to favorites",
+      });
+      navigate('/auth?mode=login');
+    }
+  };
+  
   return (
     <section className="relative overflow-hidden bg-black">
       {/* Full-width blurred background */}
@@ -26,14 +49,14 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
       </div>
 
       {/* Content Container with the clear image */}
-      <div className="container relative mx-auto px-4 pt-20 pb-12 z-20">
+      <div className="container relative mx-auto px-4 pt-16 pb-8 z-20">
         <div className="flex flex-col items-center">
           {/* Clear Foreground Image */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative mb-4 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-white"
+            className="relative mb-2 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden bg-white"
           >
             <img 
               src={local.image} 
@@ -95,9 +118,13 @@ const LocalHero: React.FC<LocalHeroProps> = ({ local }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
+        onClick={handleFavoriteClick}
         className="absolute top-6 right-6 p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all z-30"
       >
-        <Heart size={20} className="text-white" />
+        <Heart 
+          size={20} 
+          className={isFavorite ? "text-tango-primary fill-tango-primary" : "text-white"} 
+        />
       </motion.button>
     </section>
   );
