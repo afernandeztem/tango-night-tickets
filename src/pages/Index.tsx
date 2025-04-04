@@ -10,10 +10,11 @@ import TitleSection from "../components/TitleSection";
 import CityGrid from "../components/CityGrid";
 import PageFooter from "../components/PageFooter";
 import { getOrderedCities } from "../utils/cityUtils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { setSelectedCity } = useApp();
+  const { setSelectedCity, state, setLanguage } = useApp();
   
   const { data: cities = [], isLoading } = useQuery({
     queryKey: ['cities'],
@@ -27,6 +28,21 @@ const Index = () => {
   
   const orderedCities = getOrderedCities(cities);
   
+  const translations = {
+    en: {
+      title: "Your Night, Your Way",
+      selectCity: "Select Your City",
+      language: "Language"
+    },
+    es: {
+      title: "Tu Noche, A Tu Manera",
+      selectCity: "Elige Tu Ciudad",
+      language: "Idioma"
+    }
+  };
+  
+  const t = translations[state.language];
+  
   // Debug the city data
   console.log("Cities from API:", cities);
   console.log("Ordered Cities:", orderedCities);
@@ -34,6 +50,19 @@ const Index = () => {
   return (
     <AuroraBackground className="p-0 justify-start">
       <div className="relative z-10 container mx-auto px-4 py-6 flex flex-col items-center min-h-screen">
+        {/* Language Selector */}
+        <div className="self-end mb-4">
+          <Select value={state.language} onValueChange={(value: 'en' | 'es') => setLanguage(value)}>
+            <SelectTrigger className="w-[140px] bg-white/80 backdrop-blur-sm border-none">
+              <SelectValue placeholder={state.language === 'en' ? 'English' : 'Español'} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         {/* Logo and Tagline */}
         <TangoHero />
         
@@ -45,9 +74,14 @@ const Index = () => {
           transition={{ duration: 0.8 }}
         >
           {/* Title */}
-          <TitleSection title="Your Night, Your Way" />
+          <TitleSection title={t.title} />
           
           {/* City Selection */}
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-medium text-gray-800">{t.selectCity}</h2>
+          </div>
+          
+          {/* City Grid */}
           <CityGrid 
             cities={orderedCities} 
             onCitySelect={handleCitySelect} 

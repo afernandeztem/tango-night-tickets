@@ -42,8 +42,12 @@ export const useLocalPageTranslations = () => {
       reviewsTitle: 'Customer Reviews',
       reviewsSubtitle: 'See what others are saying',
       today: 'Today',
-      writeReview: 'Write a Review', // Added missing translation
-      beFirst: 'Be the first to leave a review', // Added missing translation
+      writeReview: 'Write a Review',
+      beFirst: 'Be the first to leave a review',
+      // Index page translations
+      yourNightYourWay: 'Your Night, Your Way',
+      selectYourCity: 'Select Your City',
+      language: 'Language'
     },
     es: {
       address: 'Dirección',
@@ -81,8 +85,12 @@ export const useLocalPageTranslations = () => {
       reviewsTitle: 'Reseñas de Clientes',
       reviewsSubtitle: 'Mira lo que otros están diciendo',
       today: 'Hoy',
-      writeReview: 'Escribir una Reseña', // Added missing translation
-      beFirst: 'Sé el primero en dejar una reseña', // Added missing translation
+      writeReview: 'Escribir una Reseña',
+      beFirst: 'Sé el primero en dejar una reseña',
+      // Index page translations
+      yourNightYourWay: 'Tu Noche, A Tu Manera',
+      selectYourCity: 'Elige Tu Ciudad',
+      language: 'Idioma'
     }
   };
   

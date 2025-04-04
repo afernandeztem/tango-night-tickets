@@ -2,8 +2,22 @@
 import React from 'react';
 import { motion } from "framer-motion";
 import TangoLogo from "@/components/TangoLogo";
+import { useApp } from '../context/AppContext';
 
 const TangoHero: React.FC = () => {
+  const { state } = useApp();
+  
+  const translations = {
+    en: {
+      tagline: "Discover nightlife, buy tickets, and enjoy the night!"
+    },
+    es: {
+      tagline: "Descubre la vida nocturna, compra entradas y disfruta la noche!"
+    }
+  };
+  
+  const t = translations[state.language];
+
   return (
     <div className="flex flex-col items-center mb-4">
       <motion.div 
@@ -27,7 +41,7 @@ const TangoHero: React.FC = () => {
         }}
         className="text-xl text-gray-600 mt-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-tango-primary/90 to-tango-secondary/90 relative z-20"
       >
-        Discover nightlife, buy tickets, and enjoy the night!
+        {t.tagline}
       </motion.p>
     </div>
   );
