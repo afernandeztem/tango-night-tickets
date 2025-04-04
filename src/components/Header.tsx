@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
-import { Heart, User, Menu, X, LogIn, LogOut, Globe } from 'lucide-react';
+import { Heart, User, Menu, X, LogIn, LogOut } from 'lucide-react';
 import TangoLogo from './TangoLogo';
 
 const Header: React.FC = () => {
@@ -36,7 +36,8 @@ const Header: React.FC = () => {
       profile: 'Profile',
       login: 'Login',
       register: 'Register',
-      logout: 'Logout'
+      logout: 'Logout',
+      language: 'English'
     },
     es: {
       home: 'Inicio',
@@ -46,7 +47,8 @@ const Header: React.FC = () => {
       profile: 'Perfil',
       login: 'Iniciar Sesión',
       register: 'Registrarse',
-      logout: 'Cerrar Sesión'
+      logout: 'Cerrar Sesión',
+      language: 'Español'
     }
   };
   
@@ -67,10 +69,10 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <button 
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="px-3 py-1 rounded-full hover:bg-gray-100 transition-colors text-sm font-medium"
                 onClick={() => setIsLanguageOpen(!isLanguageOpen)}
               >
-                <Globe size={20} />
+                {t.language}
               </button>
               
               {isLanguageOpen && (

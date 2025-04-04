@@ -10,7 +10,6 @@ import TitleSection from "../components/TitleSection";
 import CityGrid from "../components/CityGrid";
 import PageFooter from "../components/PageFooter";
 import { getOrderedCities } from "../utils/cityUtils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -32,14 +31,19 @@ const Index = () => {
     en: {
       title: "Your Night, Your Way",
       selectCity: "Select Your City",
-      language: "Language"
+      language: "English"
     },
     es: {
       title: "Tu Noche, A Tu Manera",
       selectCity: "Elige Tu Ciudad",
-      language: "Idioma"
+      language: "Español"
     }
   };
+  
+  const languageOptions = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Español' }
+  ];
   
   const t = translations[state.language];
   
@@ -47,20 +51,36 @@ const Index = () => {
   console.log("Cities from API:", cities);
   console.log("Ordered Cities:", orderedCities);
   
+  const [isLanguageOpen, setIsLanguageOpen] = React.useState(false);
+  
   return (
     <AuroraBackground className="p-0 justify-start">
       <div className="relative z-10 container mx-auto px-4 py-6 flex flex-col items-center min-h-screen">
         {/* Language Selector */}
-        <div className="self-end mb-4">
-          <Select value={state.language} onValueChange={(value: 'en' | 'es') => setLanguage(value)}>
-            <SelectTrigger className="w-[140px] bg-white/80 backdrop-blur-sm border-none">
-              <SelectValue placeholder={state.language === 'en' ? 'English' : 'Español'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="es">Español</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="self-end mb-4 relative">
+          <button 
+            className="px-3 py-1 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors text-sm font-medium"
+            onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+          >
+            {t.language}
+          </button>
+          
+          {isLanguageOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 py-1">
+              {languageOptions.map(lang => (
+                <button
+                  key={lang.code}
+                  className={`block w-full text-left px-4 py-2 text-sm ${state.language === lang.code ? 'bg-tango-secondary text-tango-primary' : 'hover:bg-gray-100'}`}
+                  onClick={() => {
+                    setLanguage(lang.code as 'en' | 'es');
+                    setIsLanguageOpen(false);
+                  }}
+                >
+                  {lang.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Logo and Tagline */}
