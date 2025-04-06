@@ -26,6 +26,9 @@ const CheckoutPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCardDialog, setShowCardDialog] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [cvc, setCvc] = useState('');
 
   const checkoutData = location.state || null;
 
@@ -174,15 +177,21 @@ const CheckoutPage: React.FC = () => {
 
   const t = translations[state.language];
 
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCardNumber(e.target.value);
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExpiryDate(e.target.value);
+  };
+
+  const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCvc(e.target.value);
+  };
+
   const CardPaymentDialog = () => (
     <Dialog open={showCardDialog} onOpenChange={setShowCardDialog}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-[#9d92d8]">
-        <div className="flex justify-end p-2">
-          <Button variant="ghost" size="icon" onClick={() => setShowCardDialog(false)}>
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-        
         <div className="p-4 sm:p-6 bg-white mt-2 rounded-t-xl">
           <div className="mb-6">
             <button className="w-full py-3 bg-black text-white rounded-lg flex items-center justify-center">
@@ -206,6 +215,9 @@ const CheckoutPage: React.FC = () => {
                 type="text"
                 placeholder={t.cardNumber}
                 className="w-full p-3 border border-gray-300 rounded"
+                maxLength={19}
+                value={cardNumber}
+                onChange={handleCardNumberChange}
               />
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6" />
@@ -215,16 +227,24 @@ const CheckoutPage: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <input
-                type="text"
-                placeholder={t.expiryDate}
-                className="p-3 border border-gray-300 rounded"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={t.expiryDate}
+                  className="w-full p-3 border border-gray-300 rounded"
+                  maxLength={5}
+                  value={expiryDate}
+                  onChange={handleExpiryDateChange}
+                />
+              </div>
               <div className="relative">
                 <input
                   type="text"
                   placeholder={t.cvc}
                   className="w-full p-3 border border-gray-300 rounded"
+                  maxLength={4}
+                  value={cvc}
+                  onChange={handleCvcChange}
                 />
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
