@@ -51,7 +51,7 @@ const CheckoutPage: React.FC = () => {
     const stripePercentage = 1 - 1.5 / 100;
     const priceWithTax = (subtotal * tangoPercentage + 0.25) / stripePercentage;
     const serviceFee = priceWithTax - subtotal;
-    return Math.round(serviceFee * 100) / 100;
+    return Math.ceil(serviceFee * 100) / 100;
   };
 
   const handleSubmit = async () => {
@@ -255,7 +255,7 @@ const CheckoutPage: React.FC = () => {
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
                       <rect width="24" height="24" rx="4" fill="#3b7bbf" />
                       <path d="M18.2 7.2H5.8c-.44 0-.8.36-.8.8v8c0 .44.36.8.8.8h12.4c.44 0 .8-.36.8-.8V8c0-.44-.36-.8-.8-.8zm-.4 8.4H6.2V8.4h11.6v7.2z" fill="white" />
-                      <path d="M9.8 10.8c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2zm4.4 0c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2z" fill="white" />
+                      <path d="M9.8 10.8c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2z" fill="white" />
                       <path d="M9.8 15.6c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2z" fill="white" />
                     </svg>
                     {t.payWith} PayPal

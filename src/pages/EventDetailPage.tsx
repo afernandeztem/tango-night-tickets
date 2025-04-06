@@ -107,7 +107,7 @@ const EventDetailPage: React.FC = () => {
     const stripePercentage = 1 - 1.5 / 100;
     const priceWithTax = (subtotal * tangoPercentage + 0.25) / stripePercentage;
     const serviceFee = priceWithTax - subtotal;
-    return Math.round(serviceFee * 100) / 100;
+    return Math.ceil(serviceFee * 100) / 100;
   };
   
   const calculateSubtotal = () => {
