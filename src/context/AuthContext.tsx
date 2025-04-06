@@ -3,6 +3,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, AuthState } from '../types';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
+import { signInWithGoogle, signInWithApple, signOut as firebaseSignOut } from '../firebase/firebase';
+import { mapFirebaseUserToAppUser } from '../firebase/authUtils';
 
 // Create context with default values
 const AuthContext = createContext<{
@@ -11,6 +13,8 @@ const AuthContext = createContext<{
   register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
   logout: () => void;
   toggleFavorite: (type: 'local' | 'event', id: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithApple: () => Promise<void>;
 }>({
   state: {
     isAuthenticated: false,
@@ -20,7 +24,9 @@ const AuthContext = createContext<{
   login: async () => {},
   register: async () => {},
   logout: () => {},
-  toggleFavorite: async () => {}
+  toggleFavorite: async () => {},
+  loginWithGoogle: async () => {},
+  loginWithApple: async () => {}
 });
 
 // Custom hook to use auth context
@@ -135,6 +141,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    // Also sign out from Firebase if needed
+    firebaseSignOut().catch(error => {
+      console.error('Firebase sign out error:', error);
+    });
+    
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     
@@ -148,6 +159,74 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      // Sign in with Google
+      const userCredential = await signInWithGoogle();
+      const firebaseUser = userCredential.user;
+      
+      // Convert Firebase user to our app user
+      const user = await mapFirebaseUserToAppUser(firebaseUser);
+      
+      // Set token from Firebase user
+      const token = await firebaseUser.getIdToken();
+      localStorage.setItem('token', token);
+      
+      setState({
+        isAuthenticated: true,
+        user,
+        token
+      });
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome, ${user.name}!`,
+      });
+    } catch (error) {
+      console.error('Google login error:', error);
+      toast({
+        title: "Login failed",
+        description: "Could not sign in with Google. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const loginWithApple = async () => {
+    try {
+      // Sign in with Apple
+      const userCredential = await signInWithApple();
+      const firebaseUser = userCredential.user;
+      
+      // Convert Firebase user to our app user
+      const user = await mapFirebaseUserToAppUser(firebaseUser);
+      
+      // Set token from Firebase user
+      const token = await firebaseUser.getIdToken();
+      localStorage.setItem('token', token);
+      
+      setState({
+        isAuthenticated: true,
+        user,
+        token
+      });
+      
+      toast({
+        title: "Login successful",
+        description: `Welcome, ${user.name}!`,
+      });
+    } catch (error) {
+      console.error('Apple login error:', error);
+      toast({
+        title: "Login failed",
+        description: "Could not sign in with Apple. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
   };
 
   const toggleFavorite = async (type: 'local' | 'event', id: string) => {
@@ -198,7 +277,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
-        toggleFavorite
+        toggleFavorite,
+        loginWithGoogle,
+        loginWithApple
       }}
     >
       {children}

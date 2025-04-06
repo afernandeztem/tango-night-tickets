@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -17,7 +16,7 @@ const AuthPage: React.FC = () => {
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
-  const { login, register: registerUser } = useAuth();
+  const { login, register: registerUser, loginWithGoogle, loginWithApple } = useAuth();
   const { state } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -73,13 +72,11 @@ const AuthPage: React.FC = () => {
   
   const t = translations[state.language];
   
-  // Login form schema
   const loginSchema = z.object({
     email: z.string().email(t.invalidEmail).min(1, t.emailRequired),
     password: z.string().min(1, t.passwordRequired),
   });
   
-  // Register form schema
   const registerSchema = z.object({
     name: z.string().min(1, t.nameRequired),
     email: z.string().email(t.invalidEmail).min(1, t.emailRequired),
@@ -90,7 +87,6 @@ const AuthPage: React.FC = () => {
     path: ["confirmPassword"],
   });
   
-  // Login form
   const {
     register: registerLoginField,
     handleSubmit: handleLoginSubmit,
@@ -99,7 +95,6 @@ const AuthPage: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
   
-  // Register form
   const {
     register: registerRegisterField,
     handleSubmit: handleRegisterSubmit,
@@ -144,11 +139,17 @@ const AuthPage: React.FC = () => {
     }
   };
   
-  const handleSocialLogin = (provider: 'apple' | 'google') => {
-    toast({
-      title: "Info",
-      description: t.socialLoginNotImplemented,
-    });
+  const handleSocialLogin = async (provider: 'apple' | 'google') => {
+    try {
+      if (provider === 'google') {
+        await loginWithGoogle();
+      } else {
+        await loginWithApple();
+      }
+      navigate('/home');
+    } catch (error) {
+      console.error(`${provider} login error:`, error);
+    }
   };
   
   return (
