@@ -1,12 +1,12 @@
-
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { NavigateFunction } from 'react-router-dom';
-import TokenManager from './TokenManager';
 import { DEFAULT_HEADERS, AUTH_ENDPOINTS, REQUEST_CONFIG } from '../constants/services';
 import { ErrorResponseWithDescription } from '../models/Api';
 import { ERROR_AUTH_SERVICE_MESSAGES } from '../constants/messages';
+import { encrypt, decrypt } from '../utils/encrypt';
 
-// Interface definitions
+export const LAST_REFRESH_KEY = 'last_refresh';
+
 interface JWTPayload {
   exp: number;
   iat: number;
@@ -19,14 +19,10 @@ interface TokenResponse {
   refresh_token: string;
 }
 
-// Custom Axios request config
 interface CustomRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-export const LAST_REFRESH_KEY = 'last_refresh';
-
-// Interface for AuthService
 export interface IAuthService {
   getInstance(): AxiosInstance;
   setNavigate(navigate: NavigateFunction): void;
@@ -34,6 +30,8 @@ export interface IAuthService {
   logout(): Promise<void>;
   initialize(): Promise<void>;
 }
+
+import TokenManager from './TokenManager';
 
 class AuthService implements IAuthService {
   private static readonly TOKEN_CHECK_INTERVAL = 300000;
@@ -165,7 +163,6 @@ class AuthService implements IAuthService {
     }
   }
 
-  // Token management methods
   private async waitForRefresh(originalRequest: CustomRequestConfig): Promise<unknown> {
     try {
       const token = await new Promise<string>((resolve) => {
@@ -195,7 +192,6 @@ class AuthService implements IAuthService {
     this.logout();
   }
 
-  // Public API methods
   public setNavigate(navigate: NavigateFunction): void {
     this.navigate = navigate;
   }
@@ -395,5 +391,4 @@ class AuthService implements IAuthService {
   }
 }
 
-// Export singleton instance
 export default new AuthService() as IAuthService;

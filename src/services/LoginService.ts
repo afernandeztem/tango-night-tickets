@@ -40,6 +40,10 @@ class LoginService {
       });
       
       if ('access_token' in response.data && 'refresh_token' in response.data) {
+        // Clear any existing tokens before setting new ones
+        TokenManager.clearTokens();
+        
+        // Set the new tokens
         TokenManager.setTokens(
           response.data.access_token,
           response.data.refresh_token,
