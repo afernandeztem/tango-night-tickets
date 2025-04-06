@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -25,17 +24,14 @@ const CheckoutPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get checkout data from location state
   const checkoutData = location.state || null;
 
-  // Redirect to events page if no checkout data is present
   useEffect(() => {
     if (!checkoutData) {
       navigate('/events');
     }
   }, [checkoutData, navigate]);
 
-  // Initialize form with user data if logged in
   useEffect(() => {
     if (authState.isAuthenticated && authState.user) {
       setFormData({
@@ -51,45 +47,37 @@ const CheckoutPage: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number): number => {
-    // Based on the formula provided:
-    // tangoPercentage = 1 + 5/100 = 1.05
-    // stripePercentage = 1 - 1.5/100 = 0.985
-    // fee = (subtotal * 1.05 + 0.25) / 0.985 - subtotal
     const tangoPercentage = 1 + 5 / 100;
     const stripePercentage = 1 - 1.5 / 100;
     const priceWithTax = (subtotal * tangoPercentage + 0.25) / stripePercentage;
     const serviceFee = priceWithTax - subtotal;
-    return parseFloat(serviceFee.toFixed(2));
+    return Math.round(serviceFee * 100) / 100;
   };
 
   const handleSubmit = async () => {
     if (!checkoutData) {
-      return; // Safety check
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Calculate total quantity
       const totalQuantity = checkoutData.ticketDetails.reduce(
         (sum: number, ticket: any) => sum + ticket.quantity, 
         0
       );
 
-      // Call API to create ticket
       await createTicket(
         checkoutData.eventId,
         totalQuantity,
         formData
       );
 
-      // Show success message
       toast({
         title: "Purchase successful!",
         description: "Your tickets have been purchased successfully.",
       });
 
-      // Redirect to profile page (tickets section)
       navigate('/profile?tab=tickets');
     } catch (error) {
       console.error('Error creating ticket:', error);
@@ -103,7 +91,6 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  // Recalculate serviceFee using the new formula
   const recalculateCheckoutData = () => {
     if (!checkoutData) return null;
 
@@ -118,7 +105,6 @@ const CheckoutPage: React.FC = () => {
     };
   };
 
-  // Get the updated checkout data with the correct service fee
   const updatedCheckoutData = recalculateCheckoutData();
 
   const translations = {
@@ -164,7 +150,6 @@ const CheckoutPage: React.FC = () => {
 
   const t = translations[state.language];
 
-  // Loading state while we wait for checkout data
   if (!updatedCheckoutData) {
     return (
       <div className="min-h-screen bg-white">
@@ -189,9 +174,7 @@ const CheckoutPage: React.FC = () => {
           <h1 className="text-3xl md:text-4xl font-bold mb-6 text-center">{t.title}</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left column: Event details and ticket summary */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Event Details */}
               <div className="bg-gray-50 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">{t.eventDetails}</h2>
                 <div className="flex flex-col md:flex-row">
@@ -210,7 +193,6 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Ticket Summary */}
               <div className="bg-gray-50 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">{t.ticketSummary}</h2>
                 <div className="divide-y">
@@ -241,9 +223,7 @@ const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right column: Personal info and payment */}
             <div className="lg:col-span-1 space-y-6">
-              {/* Personal Information */}
               <div className="bg-gray-50 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">{t.personalInfo}</h2>
                 
@@ -260,7 +240,6 @@ const CheckoutPage: React.FC = () => {
                 />
               </div>
 
-              {/* Payment Section */}
               <div className="bg-gray-50 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">{t.payment}</h2>
                 
@@ -277,7 +256,7 @@ const CheckoutPage: React.FC = () => {
                       <rect width="24" height="24" rx="4" fill="#3b7bbf" />
                       <path d="M18.2 7.2H5.8c-.44 0-.8.36-.8.8v8c0 .44.36.8.8.8h12.4c.44 0 .8-.36.8-.8V8c0-.44-.36-.8-.8-.8zm-.4 8.4H6.2V8.4h11.6v7.2z" fill="white" />
                       <path d="M9.8 10.8c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2zm4.4 0c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2z" fill="white" />
-                      <path d="M9.8 15.6c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2zm4.4 0c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2z" fill="white" />
+                      <path d="M9.8 15.6c.66 0 1.2-.54 1.2-1.2 0-.66-.54-1.2-1.2-1.2-.66 0-1.2.54-1.2 1.2 0 .66.54 1.2 1.2 1.2z" fill="white" />
                     </svg>
                     {t.payWith} PayPal
                   </button>
@@ -288,7 +267,6 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* Action buttons */}
               <div className="flex flex-col space-y-3">
                 <button
                   onClick={handleSubmit}
