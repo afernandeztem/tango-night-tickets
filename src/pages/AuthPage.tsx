@@ -5,18 +5,20 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User, Mail, Lock, Eye, EyeOff, Apple, LogIn } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useApp } from '../context/AppContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useToast } from '../hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 const AuthPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login, register: registerUser } = useAuth();
   const { state } = useApp();
   const navigate = useNavigate();
@@ -41,10 +43,7 @@ const AuthPage: React.FC = () => {
       passwordMinLength: 'Password must be at least 6 characters',
       passwordsDontMatch: 'Passwords don\'t match',
       nameRequired: 'Name is required',
-      orContinueWith: 'Or continue with',
-      signInWithApple: 'Sign in with Apple',
-      signInWithGoogle: 'Sign in with Google',
-      socialLoginNotImplemented: 'Social login is not fully implemented yet'
+      rememberMe: 'Remember me',
     },
     es: {
       login: 'Iniciar sesión',
@@ -64,10 +63,7 @@ const AuthPage: React.FC = () => {
       passwordMinLength: 'La contraseña debe tener al menos 6 caracteres',
       passwordsDontMatch: 'Las contraseñas no coinciden',
       nameRequired: 'El nombre es obligatorio',
-      orContinueWith: 'O continuar con',
-      signInWithApple: 'Iniciar sesión con Apple',
-      signInWithGoogle: 'Iniciar sesión con Google',
-      socialLoginNotImplemented: 'El inicio de sesión social aún no está completamente implementado'
+      rememberMe: 'Recordarme',
     }
   };
   
@@ -110,17 +106,14 @@ const AuthPage: React.FC = () => {
   
   const onLoginSubmit = async (data: any) => {
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, rememberMe);
       toast({
         title: t.loginSuccess,
       });
       navigate('/home');
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
+      // Error is already handled in the login function
+      console.error("Login form submission error:", error);
     }
   };
   
@@ -136,19 +129,9 @@ const AuthPage: React.FC = () => {
       });
       navigate('/home');
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Registration failed",
-        variant: "destructive",
-      });
+      // Error is already handled in the register function
+      console.error("Register form submission error:", error);
     }
-  };
-  
-  const handleSocialLogin = (provider: 'apple' | 'google') => {
-    toast({
-      title: "Info",
-      description: t.socialLoginNotImplemented,
-    });
   };
   
   return (
@@ -221,43 +204,26 @@ const AuthPage: React.FC = () => {
                   )}
                 </div>
                 
-                <button
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 text-tango-primary border-gray-300 rounded"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    {t.rememberMe}
+                  </label>
+                </div>
+                
+                <Button
                   type="submit"
                   disabled={isLoginSubmitting}
-                  className="w-full py-2 px-4 bg-tango-primary text-white rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tango-primary disabled:opacity-50"
+                  className="w-full"
                 >
                   {isLoginSubmitting ? t.processing : t.login}
-                </button>
-                
-                <div className="relative flex items-center my-6">
-                  <div className="flex-grow border-t border-gray-300"></div>
-                  <span className="flex-shrink mx-4 text-gray-600">{t.orContinueWith}</span>
-                  <div className="flex-grow border-t border-gray-300"></div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('apple')}
-                    className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    <Apple size={20} className="mr-2" />
-                    Apple
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('google')}
-                    className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"
-                      />
-                    </svg>
-                    Google
-                  </button>
-                </div>
+                </Button>
                 
                 <div className="text-center mt-4">
                   <button
@@ -362,43 +328,13 @@ const AuthPage: React.FC = () => {
                   )}
                 </div>
                 
-                <button
+                <Button
                   type="submit"
                   disabled={isRegisterSubmitting}
-                  className="w-full py-2 px-4 bg-tango-primary text-white rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tango-primary disabled:opacity-50"
+                  className="w-full"
                 >
                   {isRegisterSubmitting ? t.processing : t.register}
-                </button>
-                
-                <div className="relative flex items-center my-6">
-                  <div className="flex-grow border-t border-gray-300"></div>
-                  <span className="flex-shrink mx-4 text-gray-600">{t.orContinueWith}</span>
-                  <div className="flex-grow border-t border-gray-300"></div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('apple')}
-                    className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    <Apple size={20} className="mr-2" />
-                    Apple
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('google')}
-                    className="flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"
-                      />
-                    </svg>
-                    Google
-                  </button>
-                </div>
+                </Button>
                 
                 <div className="text-center mt-4">
                   <button

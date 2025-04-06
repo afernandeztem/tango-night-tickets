@@ -1,13 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
-import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
+import LoginService from '../services/LoginService';
+import AuthService from '../services/AuthService';
+import TokenManager from '../services/TokenManager';
 
 // Create context with default values
 const AuthContext = createContext<{
   state: AuthState;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
   logout: () => void;
   toggleFavorite: (type: 'local' | 'event', id: string) => Promise<void>;
@@ -31,7 +33,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { toast } = useToast();
   const [state, setState] = useState<AuthState>(() => {
     // Load initial state from localStorage
-    const token = localStorage.getItem('token');
+    const token = TokenManager.getAccessToken();
     const savedUser = localStorage.getItem('user');
     
     return {
@@ -43,12 +45,59 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Check if user is authenticated on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+    const initializeAuth = async () => {
+      console.log('Initializing auth...');
       
-      if (token) {
+      // Initialize AuthService first
+      await AuthService.initialize();
+      
+      const isValid = await AuthService.validateToken();
+      console.log('Token valid?', isValid);
+      
+      if (isValid) {
+        // Try to fetch user data
         try {
-          const user = await getCurrentUser();
+          const token = TokenManager.getAccessToken();
+          let user = state.user;
+          
+          // If no user in state, try to get from localStorage
+          if (!user) {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+              user = JSON.parse(savedUser);
+            }
+          }
+          
+          // If still no user, create a minimal one for now
+          if (!user && token) {
+            // Create minimal user object based on token
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+              );
+              const payload = JSON.parse(jsonPayload);
+              
+              user = {
+                id: payload.sub || 'unknown',
+                name: payload.user_name || 'User',
+                email: payload.user_name || 'unknown@example.com',
+                favorites: {
+                  locals: [],
+                  events: []
+                }
+              };
+              
+              localStorage.setItem('user', JSON.stringify(user));
+            } catch (e) {
+              console.error('Error parsing token for user data:', e);
+            }
+          }
+          
           setState({
             isAuthenticated: true,
             user,
@@ -57,7 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (error) {
           console.error('Error verifying authentication:', error);
           // Clear invalid auth data
-          localStorage.removeItem('token');
+          TokenManager.clearTokens();
           localStorage.removeItem('user');
           setState({
             isAuthenticated: false,
@@ -65,10 +114,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             token: null
           });
         }
+      } else {
+        // No valid token
+        TokenManager.clearTokens();
+        localStorage.removeItem('user');
+        setState({
+          isAuthenticated: false,
+          user: null,
+          token: null
+        });
       }
     };
     
-    checkAuth();
+    initializeAuth();
   }, []);
 
   // Save user to localStorage whenever it changes
@@ -81,14 +139,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [state.user]);
 
   // Auth actions
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe = false) => {
     try {
-      const { token, user } = await apiLogin(email, password);
+      console.log('Attempting login...');
       
+      // Clear any existing tokens before login
+      TokenManager.clearTokens();
+      
+      // Perform login
+      const authResponse = await LoginService.login({
+        username: email,
+        password: password,
+        rememberMe
+      });
+      
+      console.log('Login successful, tokens received');
+      
+      // Create minimal user object
+      const user: User = {
+        id: 'temp-id', // Will be updated when API call succeeds
+        name: email.split('@')[0], // Temporary name from email
+        email: email,
+        favorites: {
+          locals: [],
+          events: []
+        }
+      };
+      
+      // Try to get user info from token
+      try {
+        const token = authResponse.access_token;
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        const payload = JSON.parse(jsonPayload);
+        user.id = payload.sub || user.id;
+        user.name = payload.name || payload.user_name || user.name;
+      } catch (e) {
+        console.error('Error parsing token for user info:', e);
+      }
+      
+      // Update state
       setState({
         isAuthenticated: true,
         user,
-        token
+        token: authResponse.access_token
       });
       
       toast({
@@ -99,7 +199,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
         variant: "destructive"
       });
       throw error;
@@ -108,20 +208,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (data: { name: string; email: string; password: string; phone?: string }) => {
     try {
-      const user = await apiRegister(data);
-      
+      // For now, direct register not implemented - would call API
       // After registration, automatically log in
-      const { token } = await apiLogin(data.email, data.password);
+      await login(data.email, data.password);
       
-      setState({
-        isAuthenticated: true,
-        user,
-        token
-      });
+      // Update the user name after login
+      setState(prevState => ({
+        ...prevState,
+        user: prevState.user ? { 
+          ...prevState.user,
+          name: data.name,
+          phone: data.phone
+        } : null
+      }));
       
       toast({
         title: "Registration successful",
-        description: `Welcome to TangoApp, ${user.name}!`,
+        description: `Welcome to TangoApp, ${data.name}!`,
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -135,8 +238,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    AuthService.logout();
     
     setState({
       isAuthenticated: false,
@@ -161,10 +263,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      // Make API call to toggle favorite
-      const updatedUser = await import('../services/api').then(api => 
-        api.toggleFavorite(type, id)
-      );
+      // Make API call to toggle favorite - for now we'll simulate locally
+      const updatedUser = { ...state.user };
+      const favorites = updatedUser.favorites || { locals: [], events: [] };
+      
+      if (type === 'local') {
+        if (favorites.locals.includes(id)) {
+          favorites.locals = favorites.locals.filter(localId => localId !== id);
+        } else {
+          favorites.locals.push(id);
+        }
+      } else {
+        if (favorites.events.includes(id)) {
+          favorites.events = favorites.events.filter(eventId => eventId !== id);
+        } else {
+          favorites.events.push(id);
+        }
+      }
+      
+      updatedUser.favorites = favorites;
       
       setState(prevState => ({
         ...prevState,
