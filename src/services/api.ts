@@ -3,6 +3,8 @@ import { City, Event, Local, Drink, User, PaginatedResponse, Ticket } from '../t
 
 // Base URL for API
 const API_BASE_URL = 'https://api.grupotangoapp.com';
+// Fixed password from environment
+const API_PASSWORD = 'DamxxKUqILNgS5zuSBejMt8Kyd4hu6CLmNLWgosotwQdoncOE2';
 
 // Create axios instance with common config
 const api = axios.create({
@@ -489,7 +491,7 @@ export interface CheckoutFormData {
 
 export const login = async (email: string, password: string): Promise<{ token: string; user: User }> => {
   try {
-    // OAuth2 login
+    // Use the OAuth endpoint with the fixed password
     const formData = new URLSearchParams();
     formData.append('username', email);
     formData.append('password', password);
@@ -497,7 +499,8 @@ export const login = async (email: string, password: string): Promise<{ token: s
     
     const response = await axios.post(`${API_BASE_URL}/oauth/token`, formData, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${btoa(`client:${API_PASSWORD}`)}`,
       }
     });
     
@@ -523,7 +526,7 @@ export const register = async (userData: {
   phone?: string;
 }): Promise<User> => {
   try {
-    // Format the data according to API requirements
+    // Format the data according to API documentation
     const apiData = {
       name: userData.name,
       surnames: "", // Default empty surname
