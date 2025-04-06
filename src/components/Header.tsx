@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../contexts/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { useApp } from '../context/AppContext';
 import { Heart, User, Menu, X, LogIn, LogOut } from 'lucide-react';
 import TangoLogo from './TangoLogo';
 

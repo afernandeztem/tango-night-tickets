@@ -1,6 +1,8 @@
 
-import { City } from '../models/types';
-import { ORDERED_CITY_KEYS } from '../constants/cities';
+import { City } from '../types';
+
+// Cities in the specific order requested: Mallorca, Madrid, Málaga
+export const ORDERED_CITY_KEYS = ["Mallorca", "Madrid", "Málaga"];
 
 export const getOrderedCities = (cities: City[]): City[] => {
   if (!cities || cities.length === 0) return [];

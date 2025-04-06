@@ -1,13 +1,11 @@
 
-import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppProvider } from "./contexts/AppContext";
-import { AuthProvider } from "./contexts/AuthContext";
-import MainLayout from "./layouts/MainLayout";
+import { AppProvider } from "./context/AppContext";
+import { AuthProvider } from "./context/AuthContext";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
@@ -20,11 +18,10 @@ import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import FavoritesPage from "./pages/FavoritesPage";
 import NotFound from "./pages/NotFound";
-import { ROUTES } from "./config/routes";
 
 const queryClient = new QueryClient();
 
-const App: React.FC = () => (
+const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <AppProvider>
@@ -33,24 +30,18 @@ const App: React.FC = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path={ROUTES.INDEX} element={<Index />} />
-              <Route path={ROUTES.LANDING} element={<LandingPage />} />
-              
-              {/* Routes that use MainLayout (with header) */}
-              <Route element={<MainLayout />}>
-                <Route path={ROUTES.HOME} element={<HomePage />} />
-                <Route path={ROUTES.LOCALS} element={<LocalsPage />} />
-                <Route path={ROUTES.LOCAL_DETAIL} element={<LocalDetailPage />} />
-                <Route path={ROUTES.EVENTS} element={<EventsPage />} />
-                <Route path={ROUTES.EVENT_DETAIL} element={<EventDetailPage />} />
-                <Route path={ROUTES.CHECKOUT} element={<CheckoutPage />} />
-                <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
-                <Route path={ROUTES.FAVORITES} element={<FavoritesPage />} />
-              </Route>
-              
-              <Route path={ROUTES.AUTH} element={<AuthPage />} />
-              
-              {/* Catch all routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/locals" element={<LocalsPage />} />
+              <Route path="/locals/:localSlug" element={<LocalDetailPage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/:eventId" element={<EventDetailPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

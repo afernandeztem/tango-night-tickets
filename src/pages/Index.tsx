@@ -1,19 +1,18 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getCities } from '@/services/api';
-import { useApp } from '../contexts/AppContext';
+import { useApp } from '../context/AppContext';
 import { useQuery } from '@tanstack/react-query';
 import { AuroraBackground } from "@/components/ui/aurora-background";
-import TangoHero from "@/components/TangoHero";
-import TitleSection from "@/components/TitleSection";
-import CityGrid from "@/components/CityGrid";
-import PageFooter from "@/components/PageFooter";
-import { getOrderedCities } from "@/utils/cityUtils";
-import { City } from "@/models/types";
+import TangoHero from "../components/TangoHero";
+import TitleSection from "../components/TitleSection";
+import CityGrid from "../components/CityGrid";
+import PageFooter from "../components/PageFooter";
+import { getOrderedCities } from "../utils/cityUtils";
 
-const Index: React.FC = () => {
+const Index = () => {
   const navigate = useNavigate();
   const { setSelectedCity, state, setLanguage } = useApp();
   
@@ -22,7 +21,7 @@ const Index: React.FC = () => {
     queryFn: getCities,
   });
 
-  const handleCitySelect = (city: City) => {
+  const handleCitySelect = (city: any) => {
     setSelectedCity(city);
     navigate('/home');
   };
@@ -53,7 +52,7 @@ const Index: React.FC = () => {
   console.log("Cities from API:", cities);
   console.log("Ordered Cities:", orderedCities);
   
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = React.useState(false);
   
   return (
     <AuroraBackground className="p-0 justify-start">
