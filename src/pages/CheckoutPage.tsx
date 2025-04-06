@@ -26,6 +26,7 @@ const CheckoutPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCardDialog, setShowCardDialog] = useState(false);
+  const [expiryDate, setExpiryDate] = useState('');
 
   const checkoutData = location.state || null;
 
@@ -47,6 +48,18 @@ const CheckoutPage: React.FC = () => {
 
   const handleFormChange = (newData: Partial<CheckoutFormData>) => {
     setFormData(prev => ({ ...prev, ...newData }));
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    
+    if (value.length <= 4) {
+      let formatted = value;
+      if (value.length > 2) {
+        formatted = value.slice(0, 2) + '/' + value.slice(2);
+      }
+      setExpiryDate(formatted);
+    }
   };
 
   const calculateServiceFee = (subtotal: number): number => {
@@ -217,14 +230,18 @@ const CheckoutPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <input
                 type="text"
-                placeholder={t.expiryDate}
+                value={expiryDate}
+                onChange={handleExpiryDateChange}
+                placeholder="03/30"
                 className="p-3 border border-gray-300 rounded"
+                maxLength={5}
               />
               <div className="relative">
                 <input
                   type="text"
                   placeholder={t.cvc}
                   className="w-full p-3 border border-gray-300 rounded"
+                  maxLength={4}
                 />
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
