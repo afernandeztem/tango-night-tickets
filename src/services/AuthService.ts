@@ -1,9 +1,8 @@
-
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { NavigateFunction } from 'react-router-dom';
 import TokenManager from '@/services/TokenManager';
 import { DEFAULT_HEADERS, AUTH_ENDPOINTS, REQUEST_CONFIG } from '@/constants/services';
-import { ErrorResponseWithDescription } from '@/models/Api';
+import { ErrorResponseWithDescription, AuthMessage } from '@/models/Api';
 import { ERROR_AUTH_SERVICE_MESSAGES } from '@/constants/messages';
 
 // Better names for interfaces
@@ -166,7 +165,6 @@ class AuthService implements IAuthService {
         }
     }
 
-    // Token management methods
     private async waitForRefresh(originalRequest: CustomRequestConfig): Promise<unknown> {
         try {
             const token = await new Promise<string>((resolve) => {
@@ -196,7 +194,6 @@ class AuthService implements IAuthService {
         this.logout();
     }
 
-    // Public API methods
     public setNavigate(navigate: NavigateFunction): void {
         this.navigate = navigate;
     }
@@ -336,8 +333,10 @@ class AuthService implements IAuthService {
 
     private async refreshToken(refreshToken: string): Promise<boolean> {
         try {
-            // Get client credentials for basic auth - fallback to empty string if not available
+            // Get client credentials for basic auth - fallback to default value
             const clientCredentials = import.meta.env.VITE_CLIENT_CREDENTIALS || 'Y2xpZW50OkRhbXh4S1VxSUxOZ1M1enVTQmVqTXQ4S3lkNGh1NkNMbU5MV2dvc290d1Fkb25jT0Uy';
+            
+            console.log('Refreshing token with clientCredentials...');
             
             const response = await this.instance.post<TokenResponse>(
                 AUTH_ENDPOINTS.TOKEN,
@@ -363,6 +362,10 @@ class AuthService implements IAuthService {
                 return true;
             }
             return false;
+        } catch (error) {
+            console.error('Error in refreshToken:', error);
+            this.isRefreshing = false;
+            throw error;
         } finally {
             this.isRefreshing = false;
         }
@@ -391,5 +394,4 @@ class AuthService implements IAuthService {
     }
 }
 
-// Export typed instance
 export default new AuthService() as IAuthService;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -122,6 +123,8 @@ const AuthPage: React.FC = () => {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
+      email: '',
+      password: '',
       rememberMe: false
     }
   });

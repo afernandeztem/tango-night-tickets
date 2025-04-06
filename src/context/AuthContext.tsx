@@ -1,10 +1,18 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthState } from '../types';
+import { User } from '../models/Api';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import TokenManager from '../services/TokenManager';
+
+// Define AuthState interface
+interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  token: string | null;
+}
 
 const AuthContext = createContext<{
   state: AuthState;
@@ -101,7 +109,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
       console.log('Login attempt for:', email, 'with rememberMe:', rememberMe);
-      const { token, user } = await apiLogin(email, password);
+      const { token, user } = await apiLogin(email, password, rememberMe);
       
       console.log('Login successful, token received:', token ? token.substring(0, 10) + '...' : 'No token');
       console.log('User data received:', user ? user.name : 'No user data');
@@ -222,9 +230,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         state,
         login,
-        register: async () => {},
-        logout: () => {},
-        toggleFavorite: async () => {}
+        register,
+        logout,
+        toggleFavorite
       }}
     >
       {children}

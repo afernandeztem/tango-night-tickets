@@ -29,7 +29,7 @@ export interface TokenResponseDto {
   jti: string;
 }
 
-// Add the AuthMessage interface that was referenced in login service
+// AuthMessage interface that was referenced in login service
 export interface AuthMessage extends TokenResponseDto {
   // All properties are inherited from TokenResponseDto
 }

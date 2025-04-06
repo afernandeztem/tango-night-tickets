@@ -1,6 +1,3 @@
-
-import { LAST_REFRESH_KEY } from './AuthService';
-
 // Simple encryption/decryption functions
 // Note: In a production app, you should use a proper encryption library
 const encrypt = (text: string): string => {
@@ -18,6 +15,8 @@ const decrypt = (text: string): string => {
     return text;
   }
 };
+
+export const LAST_REFRESH_KEY = 'last_refresh';
 
 class TokenManager {
     private static instance: TokenManager;
