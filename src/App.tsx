@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Toaster } from "@/components/ui/toast";
+import { Toaster as RadixToaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppProvider } from "./contexts/AppContext";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AppProvider } from "@/contexts/AppContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import MainLayout from "./layouts/MainLayout";
 import Index from "./pages/Index";
 import LandingPage from "./pages/LandingPage";
@@ -29,7 +29,7 @@ const App: React.FC = () => (
     <AuthProvider>
       <AppProvider>
         <TooltipProvider>
-          <Toaster />
+          <RadixToaster />
           <Sonner />
           <BrowserRouter>
             <Routes>
