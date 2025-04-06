@@ -11,6 +11,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useToast } from '../hooks/use-toast';
 import AuthService from '../services/AuthService';
+import TokenManager from '../services/TokenManager';
 
 const AuthPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -18,6 +19,7 @@ const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login, register: registerUser } = useAuth();
   const { state } = useApp();
   const navigate = useNavigate();
@@ -29,9 +31,25 @@ const AuthPage: React.FC = () => {
     
     // Check if already authenticated
     const checkAuth = async () => {
-      const isValid = await AuthService.validateToken();
-      if (isValid) {
-        navigate('/home');
+      try {
+        console.log('Checking authentication on AuthPage...');
+        const token = TokenManager.getAccessToken();
+        
+        if (token) {
+          console.log('Token found, validating...');
+          const isValid = await AuthService.validateToken();
+          
+          if (isValid) {
+            console.log('Token is valid, redirecting to home');
+            navigate('/home');
+          } else {
+            console.log('Token is invalid, staying on auth page');
+          }
+        } else {
+          console.log('No token found, staying on auth page');
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
       }
     };
     
@@ -82,8 +100,9 @@ const AuthPage: React.FC = () => {
   const t = translations[state.language];
   
   const loginSchema = z.object({
-    email: z.string().email(t.invalidEmail).min(1, t.emailRequired),
-    password: z.string().min(1, t.passwordRequired),
+    email: z.string().email(state.language === 'es' ? 'Por favor, introduce un correo electrónico válido' : 'Please enter a valid email').min(1, state.language === 'es' ? 'El correo electrónico es obligatorio' : 'Email is required'),
+    password: z.string().min(1, state.language === 'es' ? 'La contraseña es obligatoria' : 'Password is required'),
+    rememberMe: z.boolean().optional()
   });
   
   const registerSchema = z.object({
@@ -102,6 +121,9 @@ const AuthPage: React.FC = () => {
     formState: { errors: loginErrors, isSubmitting: isLoginSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      rememberMe: false
+    }
   });
   
   const {
@@ -115,10 +137,10 @@ const AuthPage: React.FC = () => {
   const onLoginSubmit = async (data: any) => {
     try {
       setIsLoading(true);
-      console.log('Login form submitted with:', data.email);
-      await login(data.email, data.password);
+      console.log('Login form submitted with:', data.email, 'remember me:', data.rememberMe);
+      await login(data.email, data.password, data.rememberMe);
       
-      // The navigate is handled in the login function now
+      // Navigation is handled in login function
     } catch (error) {
       console.error('Login submission error:', error);
       toast({
@@ -140,7 +162,7 @@ const AuthPage: React.FC = () => {
         password: data.password
       });
       
-      // The navigate is handled in the register function
+      // Navigation is handled in register function
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -167,14 +189,14 @@ const AuthPage: React.FC = () => {
             className="bg-white rounded-lg border p-8"
           >
             <h1 className="text-2xl font-bold mb-6 text-center">
-              {mode === 'login' ? t.login : t.register}
+              {mode === 'login' ? (state.language === 'es' ? 'Iniciar sesión' : 'Login') : (state.language === 'es' ? 'Registrarse' : 'Register')}
             </h1>
             
             {mode === 'login' ? (
               <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="space-y-4">
                 <div>
                   <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t.email}
+                    {state.language === 'es' ? 'Correo electrónico' : 'Email'}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -194,7 +216,7 @@ const AuthPage: React.FC = () => {
                 
                 <div>
                   <label htmlFor="login-password" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t.password}
+                    {state.language === 'es' ? 'Contraseña' : 'Password'}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -223,12 +245,24 @@ const AuthPage: React.FC = () => {
                   )}
                 </div>
                 
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    type="checkbox"
+                    {...registerLoginField('rememberMe')}
+                    className="h-4 w-4 text-tango-primary focus:ring-tango-primary border-gray-300 rounded"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    {state.language === 'es' ? 'Recuérdame' : 'Remember me'}
+                  </label>
+                </div>
+                
                 <button
                   type="submit"
                   disabled={isLoginSubmitting}
                   className="w-full py-2 px-4 bg-tango-primary text-white rounded-md hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tango-primary disabled:opacity-50"
                 >
-                  {isLoginSubmitting ? t.processing : t.login}
+                  {isLoginSubmitting ? (state.language === 'es' ? 'Procesando...' : 'Processing...') : (state.language === 'es' ? 'Iniciar sesión' : 'Login')}
                 </button>
                 
                 <div className="text-center mt-4">
@@ -237,7 +271,7 @@ const AuthPage: React.FC = () => {
                     onClick={() => setMode('register')}
                     className="text-sm text-tango-primary hover:underline"
                   >
-                    {t.switchToRegister}
+                    {state.language === 'es' ? '¿No tienes una cuenta? Regístrate' : "Don't have an account? Register"}
                   </button>
                 </div>
               </form>

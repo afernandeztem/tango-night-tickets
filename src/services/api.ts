@@ -491,6 +491,9 @@ export interface CheckoutFormData {
 
 export const login = async (email: string, password: string): Promise<{ token: string; user: User }> => {
   try {
+    console.log('Login attempt for:', email);
+    
+    // Get the auth service instance
     const authService = await import('./AuthService').then(module => module.default);
     const instance = authService.getInstance();
     
@@ -502,7 +505,6 @@ export const login = async (email: string, password: string): Promise<{ token: s
     formData.append('password', password);
     formData.append('grant_type', 'password');
     
-    console.log('Attempting login with:', email);
     console.log('Using client credentials:', clientCredentials.substring(0, 10) + '...');
     
     const response = await instance.post('/oauth/token', formData, {
@@ -512,24 +514,24 @@ export const login = async (email: string, password: string): Promise<{ token: s
       }
     });
     
-    console.log('Token response:', JSON.stringify(response.data, null, 2));
+    console.log('Token response received:', JSON.stringify(response.data, null, 2));
     
     // Extract tokens from response
-    const token = response.data.access_token;
-    const refreshToken = response.data.refresh_token;
+    const tokenResponse = response.data;
+    const token = tokenResponse.access_token;
+    const refreshToken = tokenResponse.refresh_token;
     
     if (!token || !refreshToken) {
-      console.error('Invalid token response:', response.data);
+      console.error('Invalid token response:', tokenResponse);
       throw new Error('Invalid token response from server');
     }
     
     // Store tokens using TokenManager
     const TokenManager = await import('./TokenManager').then(module => module.default);
-    TokenManager.setTokens(token, refreshToken);
+    TokenManager.setTokens(token, refreshToken, true); // Set rememberMe to true
     
     // Set the token for future API calls
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    localStorage.setItem('token', token);
     
     try {
       // Get user info with the token

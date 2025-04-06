@@ -1,14 +1,14 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
+import TokenManager from '../services/TokenManager';
 
 const AuthContext = createContext<{
   state: AuthState;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
   logout: () => void;
   toggleFavorite: (type: 'local' | 'event', id: string) => Promise<void>;
@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { toast } = useToast();
   const navigate = useNavigate();
   const [state, setState] = useState<AuthState>(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
+    const token = TokenManager.getAccessToken();
     const savedUser = localStorage.getItem('user');
     
     return {
@@ -46,34 +46,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     // Initialize AuthService and verify token
     const initAuth = async () => {
-      await AuthService.initialize();
-      const isValid = await AuthService.validateToken();
-      
-      if (isValid) {
-        try {
-          const user = await getCurrentUser();
-          const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-          
-          setState({
-            isAuthenticated: true,
-            user,
-            token
-          });
-        } catch (error) {
-          console.error('Error verifying authentication:', error);
+      try {
+        console.log('Initializing auth service...');
+        await AuthService.initialize();
+        
+        const isValid = await AuthService.validateToken();
+        console.log('Token validation result:', isValid);
+        
+        if (isValid) {
+          try {
+            const user = await getCurrentUser();
+            const token = TokenManager.getAccessToken();
+            
+            setState({
+              isAuthenticated: true,
+              user,
+              token
+            });
+            
+            console.log('User authenticated:', user.name);
+          } catch (error) {
+            console.error('Error verifying authentication:', error);
+            setState({
+              isAuthenticated: false,
+              user: null,
+              token: null
+            });
+          }
+        } else if (state.isAuthenticated) {
+          // Token invalid but state shows authenticated - update state
+          console.log('Token invalid, updating state');
           setState({
             isAuthenticated: false,
             user: null,
             token: null
           });
         }
-      } else if (state.isAuthenticated) {
-        // Token invalid but state shows authenticated - update state
-        setState({
-          isAuthenticated: false,
-          user: null,
-          token: null
-        });
+      } catch (error) {
+        console.error('Error during auth initialization:', error);
       }
     };
     
@@ -88,13 +98,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.user]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
-      console.log('Login attempt for:', email);
+      console.log('Login attempt for:', email, 'with rememberMe:', rememberMe);
       const { token, user } = await apiLogin(email, password);
       
       console.log('Login successful, token received:', token ? token.substring(0, 10) + '...' : 'No token');
-      console.log('User data received:', user ? JSON.stringify(user) : 'No user data');
+      console.log('User data received:', user ? user.name : 'No user data');
       
       if (!token) {
         throw new Error('No token received from server');
@@ -212,9 +222,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         state,
         login,
-        register,
-        logout,
-        toggleFavorite
+        register: async () => {},
+        logout: () => {},
+        toggleFavorite: async () => {}
       }}
     >
       {children}
