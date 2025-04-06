@@ -1,5 +1,8 @@
+
 import { encrypt, decrypt } from '../utils/encrypt';
-import { LAST_REFRESH_KEY } from './AuthService';
+
+// Define this constant here instead of importing it
+export const LAST_REFRESH_KEY = 'last_refresh';
 
 class TokenManager {
   private static instance: TokenManager;

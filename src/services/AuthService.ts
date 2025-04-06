@@ -4,8 +4,7 @@ import { DEFAULT_HEADERS, AUTH_ENDPOINTS, REQUEST_CONFIG } from '../constants/se
 import { ErrorResponseWithDescription } from '../models/Api';
 import { ERROR_AUTH_SERVICE_MESSAGES } from '../constants/messages';
 import { encrypt, decrypt } from '../utils/encrypt';
-
-export const LAST_REFRESH_KEY = 'last_refresh';
+import TokenManager, { LAST_REFRESH_KEY } from './TokenManager';
 
 interface JWTPayload {
   exp: number;
@@ -30,8 +29,6 @@ export interface IAuthService {
   logout(): Promise<void>;
   initialize(): Promise<void>;
 }
-
-import TokenManager from './TokenManager';
 
 class AuthService implements IAuthService {
   private static readonly TOKEN_CHECK_INTERVAL = 300000;
