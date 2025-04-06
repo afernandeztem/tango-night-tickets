@@ -1,9 +1,13 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
-import { signInWithGoogle, signInWithApple, signOut as firebaseSignOut } from '../firebase/firebase';
+import { 
+  signInWithGoogle, 
+  signInWithApple, 
+  signOut as firebaseSignOut,
+  getCurrentFirebaseUser
+} from '../firebase/firebase';
 import { mapFirebaseUserToAppUser } from '../firebase/authUtils';
 
 // Create context with default values
