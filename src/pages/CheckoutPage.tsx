@@ -26,6 +26,11 @@ const CheckoutPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCardDialog, setShowCardDialog] = useState(false);
+  const [cardInfo, setCardInfo] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvc: ''
+  });
 
   const checkoutData = location.state || null;
 
@@ -47,6 +52,20 @@ const CheckoutPage: React.FC = () => {
 
   const handleFormChange = (newData: Partial<CheckoutFormData>) => {
     setFormData(prev => ({ ...prev, ...newData }));
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    
+    value = value.replace(/\D/g, '');
+    
+    if (value.length > 2) {
+      value = value.slice(0, 2) + '/' + value.slice(2);
+    }
+    
+    value = value.slice(0, 5);
+    
+    setCardInfo({...cardInfo, expiryDate: value});
   };
 
   const calculateServiceFee = (subtotal: number): number => {
@@ -206,6 +225,8 @@ const CheckoutPage: React.FC = () => {
                 type="text"
                 placeholder={t.cardNumber}
                 className="w-full p-3 border border-gray-300 rounded"
+                value={cardInfo.cardNumber}
+                onChange={(e) => setCardInfo({...cardInfo, cardNumber: e.target.value})}
               />
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6" />
@@ -217,14 +238,18 @@ const CheckoutPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <input
                 type="text"
-                placeholder={t.expiryDate}
+                placeholder="MM/YY"
                 className="p-3 border border-gray-300 rounded"
+                value={cardInfo.expiryDate}
+                onChange={handleExpiryDateChange}
               />
               <div className="relative">
                 <input
                   type="text"
                   placeholder={t.cvc}
                   className="w-full p-3 border border-gray-300 rounded"
+                  value={cardInfo.cvc}
+                  onChange={(e) => setCardInfo({...cardInfo, cvc: e.target.value})}
                 />
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
