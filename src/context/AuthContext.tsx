@@ -3,13 +3,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User, AuthState } from '../types';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  signInWithGoogle, 
-  signInWithApple, 
-  signOut as firebaseSignOut,
-  getCurrentFirebaseUser
-} from '../firebase/firebase';
-import { mapFirebaseUserToAppUser } from '../firebase/authUtils';
+import { useNavigate } from 'react-router-dom';
+import AuthService from '../services/AuthService';
 
 const AuthContext = createContext<{
   state: AuthState;
@@ -17,8 +12,6 @@ const AuthContext = createContext<{
   register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
   logout: () => void;
   toggleFavorite: (type: 'local' | 'event', id: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
-  loginWithApple: () => Promise<void>;
 }>({
   state: {
     isAuthenticated: false,
@@ -28,17 +21,16 @@ const AuthContext = createContext<{
   login: async () => {},
   register: async () => {},
   logout: () => {},
-  toggleFavorite: async () => {},
-  loginWithGoogle: async () => {},
-  loginWithApple: async () => {}
+  toggleFavorite: async () => {}
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [state, setState] = useState<AuthState>(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     const savedUser = localStorage.getItem('user');
     
     return {
@@ -49,12 +41,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
+    // Set navigate function in AuthService
+    AuthService.setNavigate(navigate);
+    
+    // Initialize AuthService and verify token
+    const initAuth = async () => {
+      await AuthService.initialize();
+      const isValid = await AuthService.validateToken();
       
-      if (token) {
+      if (isValid) {
         try {
           const user = await getCurrentUser();
+          const token = localStorage.getItem('access_token');
+          
           setState({
             isAuthenticated: true,
             user,
@@ -62,19 +61,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           });
         } catch (error) {
           console.error('Error verifying authentication:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
           setState({
             isAuthenticated: false,
             user: null,
             token: null
           });
         }
+      } else if (state.isAuthenticated) {
+        // Token invalid but state shows authenticated - update state
+        setState({
+          isAuthenticated: false,
+          user: null,
+          token: null
+        });
       }
     };
     
-    checkAuth();
-  }, []);
+    initAuth();
+  }, [navigate]);
 
   useEffect(() => {
     if (state.user) {
@@ -137,12 +141,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    firebaseSignOut().catch(error => {
-      console.error('Firebase sign out error:', error);
+    AuthService.logout().catch(error => {
+      console.error('Logout error:', error);
     });
-    
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
     
     setState({
       isAuthenticated: false,
@@ -154,80 +155,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
-  };
-
-  const loginWithGoogle = async () => {
-    try {
-      const userCredential = await signInWithGoogle();
-      const firebaseUser = userCredential.user;
-      
-      const user = await mapFirebaseUserToAppUser(firebaseUser);
-      
-      const token = await firebaseUser.getIdToken();
-      localStorage.setItem('token', token);
-      
-      setState({
-        isAuthenticated: true,
-        user,
-        token
-      });
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome, ${user.name}!`,
-      });
-    } catch (error: any) {
-      console.error('Google login error:', error);
-      
-      let errorMessage = "Could not sign in with Google. Please try again.";
-      if (error.message && error.message.includes('unauthorized-domain')) {
-        errorMessage = "This domain (lovableproject.com) is not authorized in Firebase. You need to add it to your Firebase authorized domains.";
-      }
-      
-      toast({
-        title: "Login failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      throw error;
-    }
-  };
-
-  const loginWithApple = async () => {
-    try {
-      const userCredential = await signInWithApple();
-      const firebaseUser = userCredential.user;
-      
-      const user = await mapFirebaseUserToAppUser(firebaseUser);
-      
-      const token = await firebaseUser.getIdToken();
-      localStorage.setItem('token', token);
-      
-      setState({
-        isAuthenticated: true,
-        user,
-        token
-      });
-      
-      toast({
-        title: "Login successful",
-        description: `Welcome, ${user.name}!`,
-      });
-    } catch (error: any) {
-      console.error('Apple login error:', error);
-      
-      let errorMessage = "Could not sign in with Apple. Please try again.";
-      if (error.message && error.message.includes('unauthorized-domain')) {
-        errorMessage = "This domain (lovableproject.com) is not authorized in Firebase. You need to add it to your Firebase authorized domains.";
-      }
-      
-      toast({
-        title: "Login failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      throw error;
-    }
   };
 
   const toggleFavorite = async (type: 'local' | 'event', id: string) => {
@@ -277,9 +204,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         login,
         register,
         logout,
-        toggleFavorite,
-        loginWithGoogle,
-        loginWithApple
+        toggleFavorite
       }}
     >
       {children}

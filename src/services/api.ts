@@ -491,23 +491,30 @@ export interface CheckoutFormData {
 
 export const login = async (email: string, password: string): Promise<{ token: string; user: User }> => {
   try {
-    // Use the OAuth endpoint with the fixed password
+    const authService = await import('./AuthService').then(module => module.default);
+    const instance = authService.getInstance();
+    
+    // Use the OAuth endpoint with client credentials
+    const clientCredentials = import.meta.env.VITE_CLIENT_CREDENTIALS || 'Y2xpZW50OkRhbXh4S1VxSUxOZ1M1enVTQmVqTXQ4S3lkNGh1NkNMbU5MV2dvc290d1Fkb25jT0Uy';
+    
     const formData = new URLSearchParams();
     formData.append('username', email);
     formData.append('password', password);
     formData.append('grant_type', 'password');
     
-    const response = await axios.post(`${API_BASE_URL}/oauth/token`, formData, {
+    const response = await instance.post('/oauth/token', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`client:${API_PASSWORD}`)}`,
+        'Authorization': `Basic ${clientCredentials}`,
       }
     });
     
     const token = response.data.access_token;
+    const refreshToken = response.data.refresh_token;
     
-    // Store token in localStorage
-    localStorage.setItem('token', token);
+    // Store tokens using TokenManager
+    const TokenManager = await import('./TokenManager').then(module => module.default);
+    TokenManager.setTokens(token, refreshToken);
     
     // Get user info with the token
     const userInfo = await getCurrentUser();
