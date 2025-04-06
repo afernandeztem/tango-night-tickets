@@ -31,6 +31,9 @@ export async function login(email: string, password: string, rememberMe: boolean
   try {
     console.log('Login attempt with:', email);
     
+    // Ensure we don't have stale tokens before login
+    TokenManager.clearTokens();
+    
     // Create form data for OAuth token request
     const formData = new URLSearchParams();
     formData.append('username', email);
@@ -41,6 +44,8 @@ export async function login(email: string, password: string, rememberMe: boolean
     const maskedCredentials = CLIENT_CREDENTIALS.substring(0, 8) + '...' + CLIENT_CREDENTIALS.substring(CLIENT_CREDENTIALS.length - 8);
     console.log('Using client credentials:', maskedCredentials);
     
+    // Make direct API call to token endpoint without using the api instance
+    // This ensures we don't have token interceptor interference
     const response = await axios.post<TokenResponseDto>(
       `${API_URL}/oauth/token`,
       formData,
@@ -55,6 +60,8 @@ export async function login(email: string, password: string, rememberMe: boolean
     console.log('OAuth token response received:', response.status);
     
     if (response.data && response.data.access_token) {
+      console.log('Token received, length:', response.data.access_token.length);
+      
       // Store tokens
       TokenManager.setTokens(response.data.access_token, response.data.refresh_token, rememberMe);
       
@@ -66,6 +73,7 @@ export async function login(email: string, password: string, rememberMe: boolean
       });
       
       const user: User = userResponse.data;
+      console.log('User data fetched successfully:', user.name);
       
       return {
         token: response.data.access_token,
@@ -78,7 +86,11 @@ export async function login(email: string, password: string, rememberMe: boolean
     console.error('Login error:', error);
     if (axios.isAxiosError(error) && error.response) {
       console.error('Server response:', error.response.data);
-      throw new Error(error.response.data.error_description || 'Authentication failed');
+      if (error.response.status === 401) {
+        throw new Error('Invalid username or password');
+      } else {
+        throw new Error(error.response.data.error_description || 'Authentication failed');
+      }
     }
     throw error;
   }
@@ -120,6 +132,7 @@ export async function toggleFavorite(type: 'local' | 'event', id: string): Promi
 }
 
 // Additional functions needed for other components
+
 // Cities
 export async function getCities() {
   try {

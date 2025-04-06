@@ -1,3 +1,4 @@
+
 // Simple encryption/decryption functions
 // Note: In a production app, you should use a proper encryption library
 const encrypt = (text: string): string => {
@@ -41,6 +42,7 @@ class TokenManager {
     }
 
     setTokens(accessToken: string, refreshToken: string, rememberMe: boolean = false): void {
+        console.log(`Setting tokens: accessToken length: ${accessToken.length}, rememberMe: ${rememberMe}`);
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
 
@@ -59,12 +61,12 @@ class TokenManager {
             document.cookie = `${this.REFRESH_TOKEN_KEY}=${encryptedRefreshToken}; path=/; ${
                 secure ? 'secure;' : ''
             } samesite=strict; max-age=${this.REMEMBER_ME_DURATION}`;
+            console.log(`Cookie set with refresh token. Secure: ${secure}`);
         } else {
             // If not rememberMe, store in sessionStorage (encrypted)
             sessionStorage.setItem(this.REFRESH_TOKEN_KEY, encryptedRefreshToken);
+            console.log(`Session storage set with refresh token`);
         }
-        
-        console.log('Tokens stored successfully. Access token length:', accessToken.length);
     }
 
     private getAccessTokenFromStorage(): string | null {
@@ -144,6 +146,7 @@ class TokenManager {
     }
 
     clearTokens(): void {
+        console.log('Clearing all tokens from storage and cookies');
         this.accessToken = null;
         this.refreshToken = null;
         sessionStorage.removeItem(this.ACCESS_TOKEN_KEY);

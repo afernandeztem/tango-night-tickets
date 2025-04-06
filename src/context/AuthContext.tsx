@@ -109,6 +109,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
       console.log('Login attempt for:', email, 'with rememberMe:', rememberMe);
+      
+      // Clear any existing tokens before login attempt
+      TokenManager.clearTokens();
+      
       const { token, user } = await apiLogin(email, password, rememberMe);
       
       console.log('Login successful, token received:', token ? token.substring(0, 10) + '...' : 'No token');
@@ -134,7 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
         variant: "destructive"
       });
       throw error;
@@ -144,6 +148,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (data: { name: string; email: string; password: string; phone?: string }) => {
     try {
       const user = await apiRegister(data);
+      
+      // Clear any existing tokens before login
+      TokenManager.clearTokens();
       
       const { token } = await apiLogin(data.email, data.password);
       
@@ -157,6 +164,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title: "Registration successful",
         description: `Welcome to TangoApp, ${user.name}!`,
       });
+      
+      navigate('/home');
     } catch (error) {
       console.error('Registration error:', error);
       toast({

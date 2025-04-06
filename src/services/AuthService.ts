@@ -1,3 +1,4 @@
+
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { NavigateFunction } from 'react-router-dom';
 import TokenManager from '@/services/TokenManager';
@@ -77,6 +78,7 @@ class AuthService implements IAuthService {
     private setupRequestInterceptor(): void {
         this.instance.interceptors.request.use(
             async (config: InternalAxiosRequestConfig) => {
+                // Skip token for token endpoint to avoid recursion
                 if (config.url?.includes('/oauth/token')) {
                     return config;
                 }
@@ -338,8 +340,9 @@ class AuthService implements IAuthService {
             
             console.log('Refreshing token with clientCredentials...');
             
-            const response = await this.instance.post<TokenResponse>(
-                AUTH_ENDPOINTS.TOKEN,
+            // Important: Use axios directly to avoid interceptor loop
+            const response = await axios.post<TokenResponse>(
+                `${this.instance.defaults.baseURL}${AUTH_ENDPOINTS.TOKEN}`,
                 new URLSearchParams({
                     refresh_token: refreshToken,
                     grant_type: 'refresh_token',
@@ -349,8 +352,7 @@ class AuthService implements IAuthService {
                         Authorization: `Basic ${clientCredentials}`,
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    _retry: true,
-                } as CustomRequestConfig
+                }
             );
 
             const { access_token, refresh_token } = response.data;

@@ -20,7 +20,6 @@ const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const { login, register: registerUser } = useAuth();
   const { state } = useApp();
   const navigate = useNavigate();
@@ -44,7 +43,8 @@ const AuthPage: React.FC = () => {
             console.log('Token is valid, redirecting to home');
             navigate('/home');
           } else {
-            console.log('Token is invalid, staying on auth page');
+            console.log('Token is invalid, clearing tokens and staying on auth page');
+            TokenManager.clearTokens();
           }
         } else {
           console.log('No token found, staying on auth page');
@@ -141,6 +141,10 @@ const AuthPage: React.FC = () => {
     try {
       setIsLoading(true);
       console.log('Login form submitted with:', data.email, 'remember me:', data.rememberMe);
+      
+      // Clear any existing tokens before attempting to login
+      TokenManager.clearTokens();
+      
       await login(data.email, data.password, data.rememberMe);
       
       // Navigation is handled in login function
@@ -148,7 +152,7 @@ const AuthPage: React.FC = () => {
       console.error('Login submission error:', error);
       toast({
         title: "Error",
-        description: "Could not log in. Please check your credentials and try again.",
+        description: error instanceof Error ? error.message : "Could not log in. Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
