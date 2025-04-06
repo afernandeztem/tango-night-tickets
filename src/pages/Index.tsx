@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getCities } from '@/services/api';
-import { useApp } from '@/contexts/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { useQuery } from '@tanstack/react-query';
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import TangoHero from "@/components/TangoHero";

@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { motion } from "framer-motion";
-import TangoLogo from "@/components/TangoLogo";
-import { useApp } from '../context/AppContext';
+import TangoLogo from "./TangoLogo";
+import { useApp } from '../contexts/AppContext';
 
 const TangoHero: React.FC = () => {
   const { state } = useApp();
