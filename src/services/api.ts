@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { User, AuthResponse, TokenResponseDto } from '@/models/Api';
 import TokenManager from './TokenManager';
@@ -115,5 +116,178 @@ export async function toggleFavorite(type: 'local' | 'event', id: string): Promi
   } catch (error) {
     console.error(`Error toggling ${type} favorite:`, error);
     throw error;
+  }
+}
+
+// Additional functions needed for other components
+// Cities
+export async function getCities() {
+  try {
+    const response = await api.get('/api/cities');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cities:', error);
+    return [];
+  }
+}
+
+// Events
+export async function getEvents(params: { 
+  city?: string; 
+  startDate?: string; 
+  endDate?: string; 
+  search?: string;
+  relevant?: boolean;
+  size?: number;
+  page?: number;
+}) {
+  try {
+    const response = await api.get('/api/events', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return { content: [] };
+  }
+}
+
+export async function getEventById(id: string) {
+  try {
+    const response = await api.get(`/api/events/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching event details:', error);
+    throw error;
+  }
+}
+
+export async function getEventTicketOffers(eventId: string) {
+  try {
+    const response = await api.get(`/api/events/${eventId}/tickets`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching event ticket offers:', error);
+    return [];
+  }
+}
+
+export async function getEventsByLocalId(localId: string) {
+  try {
+    const response = await api.get(`/api/locals/${localId}/events`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching events by local:', error);
+    return { content: [] };
+  }
+}
+
+// Locals
+export async function getLocals(params: { 
+  city?: string; 
+  search?: string;
+  relevant?: boolean;
+  page?: number;
+  size?: number;
+}) {
+  try {
+    const response = await api.get('/api/locals', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching locals:', error);
+    return { content: [] };
+  }
+}
+
+export async function getLocalById(id: string) {
+  try {
+    const response = await api.get(`/api/locals/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching local details:', error);
+    throw error;
+  }
+}
+
+export async function getFavoriteEvents() {
+  try {
+    const response = await api.get('/api/users/self/favorites/events');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching favorite events:', error);
+    return [];
+  }
+}
+
+export async function getFavoriteLocals() {
+  try {
+    const response = await api.get('/api/users/self/favorites/locals');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching favorite locals:', error);
+    return [];
+  }
+}
+
+// Local related endpoints
+export async function getDrinksByLocalId(localId: string) {
+  try {
+    const response = await api.get(`/api/locals/${localId}/drinks`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching drinks for local:', error);
+    return [];
+  }
+}
+
+export async function getLocalOffers(localId: string) {
+  try {
+    const response = await api.get(`/api/locals/${localId}/offers`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching offers for local:', error);
+    return [];
+  }
+}
+
+export async function getLocalReviews(localId: string) {
+  try {
+    const response = await api.get(`/api/locals/${localId}/reviews`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching reviews for local:', error);
+    return { content: [] };
+  }
+}
+
+// Tickets
+export interface CheckoutFormData {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
+export async function createTicket(
+  eventId: string,
+  quantity: number,
+  userData: CheckoutFormData
+) {
+  try {
+    const response = await api.post(`/api/events/${eventId}/tickets`, {
+      ...userData,
+      quantity
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating ticket:', error);
+    throw error;
+  }
+}
+
+export async function getUserTickets() {
+  try {
+    const response = await api.get('/api/users/self/tickets');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user tickets:', error);
+    return [];
   }
 }
