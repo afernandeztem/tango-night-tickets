@@ -10,7 +10,6 @@ import {
 } from '../firebase/firebase';
 import { mapFirebaseUserToAppUser } from '../firebase/authUtils';
 
-// Create context with default values
 const AuthContext = createContext<{
   state: AuthState;
   login: (email: string, password: string) => Promise<void>;
@@ -33,14 +32,11 @@ const AuthContext = createContext<{
   loginWithApple: async () => {}
 });
 
-// Custom hook to use auth context
 export const useAuth = () => useContext(AuthContext);
 
-// Provider component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { toast } = useToast();
   const [state, setState] = useState<AuthState>(() => {
-    // Load initial state from localStorage
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
@@ -51,7 +47,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   });
 
-  // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
@@ -66,7 +61,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           });
         } catch (error) {
           console.error('Error verifying authentication:', error);
-          // Clear invalid auth data
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setState({
@@ -81,7 +75,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     checkAuth();
   }, []);
 
-  // Save user to localStorage whenever it changes
   useEffect(() => {
     if (state.user) {
       localStorage.setItem('user', JSON.stringify(state.user));
@@ -90,7 +83,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.user]);
 
-  // Auth actions
   const login = async (email: string, password: string) => {
     try {
       const { token, user } = await apiLogin(email, password);
@@ -120,7 +112,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const user = await apiRegister(data);
       
-      // After registration, automatically log in
       const { token } = await apiLogin(data.email, data.password);
       
       setState({
@@ -145,7 +136,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    // Also sign out from Firebase if needed
     firebaseSignOut().catch(error => {
       console.error('Firebase sign out error:', error);
     });
@@ -167,14 +157,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const loginWithGoogle = async () => {
     try {
-      // Sign in with Google
       const userCredential = await signInWithGoogle();
       const firebaseUser = userCredential.user;
       
-      // Convert Firebase user to our app user
       const user = await mapFirebaseUserToAppUser(firebaseUser);
       
-      // Set token from Firebase user
       const token = await firebaseUser.getIdToken();
       localStorage.setItem('token', token);
       
@@ -188,11 +175,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title: "Login successful",
         description: `Welcome, ${user.name}!`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google login error:', error);
+      
+      let errorMessage = "Could not sign in with Google. Please try again.";
+      if (error.message && error.message.includes('unauthorized-domain')) {
+        errorMessage = "This website domain is not authorized in Firebase. Please contact support.";
+      }
+      
       toast({
         title: "Login failed",
-        description: "Could not sign in with Google. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;
@@ -201,14 +194,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const loginWithApple = async () => {
     try {
-      // Sign in with Apple
       const userCredential = await signInWithApple();
       const firebaseUser = userCredential.user;
       
-      // Convert Firebase user to our app user
       const user = await mapFirebaseUserToAppUser(firebaseUser);
       
-      // Set token from Firebase user
       const token = await firebaseUser.getIdToken();
       localStorage.setItem('token', token);
       
@@ -222,11 +212,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title: "Login successful",
         description: `Welcome, ${user.name}!`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Apple login error:', error);
+      
+      let errorMessage = "Could not sign in with Apple. Please try again.";
+      if (error.message && error.message.includes('unauthorized-domain')) {
+        errorMessage = "This website domain is not authorized in Firebase. Please contact support.";
+      }
+      
       toast({
         title: "Login failed",
-        description: "Could not sign in with Apple. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;
@@ -244,7 +240,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      // Make API call to toggle favorite
       const updatedUser = await import('../services/api').then(api => 
         api.toggleFavorite(type, id)
       );

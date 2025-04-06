@@ -147,7 +147,7 @@ const AuthPage: React.FC = () => {
         await loginWithApple();
       }
       navigate('/home');
-    } catch (error) {
+    } catch (error: any) {
       console.error(`${provider} login error:`, error);
     }
   };

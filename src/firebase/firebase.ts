@@ -7,7 +7,9 @@ import {
   OAuthProvider,
   signOut as firebaseSignOut,
   User as FirebaseUser,
-  UserCredential
+  UserCredential,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { firebaseConfig } from './config';
 
@@ -26,12 +28,34 @@ appleProvider.addScope('name');
 
 // Sign in with Google
 export const signInWithGoogle = async (): Promise<UserCredential> => {
-  return signInWithPopup(auth, googleProvider);
+  try {
+    return signInWithPopup(auth, googleProvider);
+  } catch (error: any) {
+    console.error('Google login error:', error);
+    
+    // Check for unauthorized domain error
+    if (error.code === 'auth/unauthorized-domain') {
+      throw new Error('This domain is not authorized for Firebase authentication. Please add it to your Firebase console under Authentication > Sign-in method > Authorized domains.');
+    }
+    
+    throw error;
+  }
 };
 
 // Sign in with Apple
 export const signInWithApple = async (): Promise<UserCredential> => {
-  return signInWithPopup(auth, appleProvider);
+  try {
+    return signInWithPopup(auth, appleProvider);
+  } catch (error: any) {
+    console.error('Apple login error:', error);
+    
+    // Check for unauthorized domain error
+    if (error.code === 'auth/unauthorized-domain') {
+      throw new Error('This domain is not authorized for Firebase authentication. Please add it to your Firebase console under Authentication > Sign-in method > Authorized domains.');
+    }
+    
+    throw error;
+  }
 };
 
 // Sign out
@@ -42,6 +66,16 @@ export const signOut = async (): Promise<void> => {
 // Get current user
 export const getCurrentFirebaseUser = (): FirebaseUser | null => {
   return auth.currentUser;
+};
+
+// Email/password sign in
+export const signInWithEmail = async (email: string, password: string): Promise<UserCredential> => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+// Email/password registration
+export const createUserWithEmail = async (email: string, password: string): Promise<UserCredential> => {
+  return createUserWithEmailAndPassword(auth, email, password);
 };
 
 // Export auth instance
