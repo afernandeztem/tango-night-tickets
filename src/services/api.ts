@@ -502,6 +502,9 @@ export const login = async (email: string, password: string): Promise<{ token: s
     formData.append('password', password);
     formData.append('grant_type', 'password');
     
+    console.log('Attempting login with:', email);
+    console.log('Using client credentials:', clientCredentials.substring(0, 10) + '...');
+    
     const response = await instance.post('/oauth/token', formData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -509,17 +512,46 @@ export const login = async (email: string, password: string): Promise<{ token: s
       }
     });
     
+    console.log('Token response:', JSON.stringify(response.data, null, 2));
+    
+    // Extract tokens from response
     const token = response.data.access_token;
     const refreshToken = response.data.refresh_token;
+    
+    if (!token || !refreshToken) {
+      console.error('Invalid token response:', response.data);
+      throw new Error('Invalid token response from server');
+    }
     
     // Store tokens using TokenManager
     const TokenManager = await import('./TokenManager').then(module => module.default);
     TokenManager.setTokens(token, refreshToken);
     
-    // Get user info with the token
-    const userInfo = await getCurrentUser();
+    // Set the token for future API calls
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    localStorage.setItem('token', token);
     
-    return { token, user: userInfo };
+    try {
+      // Get user info with the token
+      const userInfo = await getCurrentUser();
+      return { token, user: userInfo };
+    } catch (userError) {
+      console.error('Error fetching user info after login:', userError);
+      
+      // Create a minimal user object to prevent login failure
+      // Frontend can refresh user data later
+      const minimalUser: User = {
+        id: email, // Use email as temporary ID
+        name: email.split('@')[0], // Use part before @ as name
+        email: email,
+        favorites: {
+          locals: [],
+          events: []
+        }
+      };
+      
+      return { token, user: minimalUser };
+    }
   } catch (error) {
     console.error('Login error:', error);
     throw error;
@@ -569,17 +601,20 @@ export const register = async (userData: {
 
 export const getCurrentUser = async (): Promise<User> => {
   try {
+    console.log('Fetching current user with token:', localStorage.getItem('token')?.substring(0, 10) + '...');
+    
     const response = await api.get('/api/users/self');
+    console.log('User response data:', JSON.stringify(response.data, null, 2));
     
     // Transform API response to match our User type
     const user: User = {
-      id: response.data.userTango.userId.toString(),
-      name: response.data.userTango.name,
-      email: response.data.userTango.email,
-      phone: response.data.userTango.phone,
+      id: response.data.userTango?.userId?.toString() || 'temp-id',
+      name: response.data.userTango?.name || 'User',
+      email: response.data.userTango?.email || '',
+      phone: response.data.userTango?.phone || '',
       favorites: {
-        locals: response.data.favoriteList.filter((item: any) => item.favoriteType === 'LOCAL').map((item: any) => item.entityId.toString()),
-        events: response.data.favoriteList.filter((item: any) => item.favoriteType === 'EVENT').map((item: any) => item.entityId.toString())
+        locals: response.data.favoriteList?.filter((item: any) => item.favoriteType === 'LOCAL').map((item: any) => item.entityId.toString()) || [],
+        events: response.data.favoriteList?.filter((item: any) => item.favoriteType === 'EVENT').map((item: any) => item.entityId.toString()) || []
       }
     };
     

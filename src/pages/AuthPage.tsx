@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -18,6 +17,7 @@ const AuthPage: React.FC = () => {
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { login, register: registerUser } = useAuth();
   const { state } = useApp();
   const navigate = useNavigate();
@@ -114,37 +114,42 @@ const AuthPage: React.FC = () => {
   
   const onLoginSubmit = async (data: any) => {
     try {
+      setIsLoading(true);
+      console.log('Login form submitted with:', data.email);
       await login(data.email, data.password);
-      toast({
-        title: t.loginSuccess,
-      });
-      navigate('/home');
+      
+      // The navigate is handled in the login function now
     } catch (error) {
+      console.error('Login submission error:', error);
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: "Could not log in. Please check your credentials and try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const onRegisterSubmit = async (data: any) => {
     try {
+      setIsLoading(true);
       await registerUser({
         name: data.name,
         email: data.email,
         password: data.password
       });
-      toast({
-        title: t.registerSuccess,
-      });
-      navigate('/home');
+      
+      // The navigate is handled in the register function
     } catch (error) {
+      console.error('Registration error:', error);
       toast({
         title: "Error",
-        description: "Registration failed",
+        description: "Registration failed. Please try again later.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
   

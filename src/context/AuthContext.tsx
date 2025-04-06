@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { toast } = useToast();
   const navigate = useNavigate();
   const [state, setState] = useState<AuthState>(() => {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
     const savedUser = localStorage.getItem('user');
     
     return {
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (isValid) {
         try {
           const user = await getCurrentUser();
-          const token = localStorage.getItem('access_token');
+          const token = localStorage.getItem('token') || localStorage.getItem('access_token');
           
           setState({
             isAuthenticated: true,
@@ -90,7 +90,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Login attempt for:', email);
       const { token, user } = await apiLogin(email, password);
+      
+      console.log('Login successful, token received:', token ? token.substring(0, 10) + '...' : 'No token');
+      console.log('User data received:', user ? JSON.stringify(user) : 'No user data');
+      
+      if (!token) {
+        throw new Error('No token received from server');
+      }
       
       setState({
         isAuthenticated: true,
@@ -102,6 +110,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title: "Login successful",
         description: `Welcome back, ${user.name}!`,
       });
+      
+      navigate('/home');
     } catch (error) {
       console.error('Login error:', error);
       toast({

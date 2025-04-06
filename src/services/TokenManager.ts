@@ -2,9 +2,12 @@
 class TokenManager {
   private static readonly ACCESS_TOKEN_KEY = 'access_token';
   private static readonly REFRESH_TOKEN_KEY = 'refresh_token';
+  private static readonly LEGACY_TOKEN_KEY = 'token'; // For backward compatibility
 
   public getAccessToken(): string | null {
-    return localStorage.getItem(TokenManager.ACCESS_TOKEN_KEY);
+    // Try getting the token from both possible storage keys for compatibility
+    return localStorage.getItem(TokenManager.ACCESS_TOKEN_KEY) || 
+           localStorage.getItem(TokenManager.LEGACY_TOKEN_KEY);
   }
 
   public getRefreshToken(): string | null {
@@ -13,7 +16,10 @@ class TokenManager {
 
   public setTokens(accessToken: string, refreshToken: string, rememberMe: boolean = false): void {
     localStorage.setItem(TokenManager.ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(TokenManager.LEGACY_TOKEN_KEY, accessToken); // For backward compatibility
     localStorage.setItem(TokenManager.REFRESH_TOKEN_KEY, refreshToken);
+
+    console.log('Tokens stored in localStorage. Access token length:', accessToken.length);
 
     if (rememberMe) {
       // Set refresh token as cookie with 30 days expiry
@@ -26,6 +32,8 @@ class TokenManager {
   public clearTokens(): void {
     localStorage.removeItem(TokenManager.ACCESS_TOKEN_KEY);
     localStorage.removeItem(TokenManager.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(TokenManager.LEGACY_TOKEN_KEY);
+    localStorage.removeItem('user');
     
     // Clear cookie if exists
     document.cookie = `app_rt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict; Secure`;
