@@ -50,6 +50,18 @@ const CheckoutPage: React.FC = () => {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
+  const calculateServiceFee = (subtotal: number): number => {
+    // Based on the formula provided:
+    // tangoPercentage = 1 + 5/100 = 1.05
+    // stripePercentage = 1 - 1.5/100 = 0.985
+    // fee = (subtotal * 1.05 + 0.25) / 0.985 - subtotal
+    const tangoPercentage = 1 + 5 / 100;
+    const stripePercentage = 1 - 1.5 / 100;
+    const priceWithTax = (subtotal * tangoPercentage + 0.25) / stripePercentage;
+    const serviceFee = priceWithTax - subtotal;
+    return parseFloat(serviceFee.toFixed(2));
+  };
+
   const handleSubmit = async () => {
     if (!checkoutData) {
       return; // Safety check
@@ -90,6 +102,24 @@ const CheckoutPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Recalculate serviceFee using the new formula
+  const recalculateCheckoutData = () => {
+    if (!checkoutData) return null;
+
+    const subtotal = checkoutData.subtotal;
+    const serviceFee = calculateServiceFee(subtotal);
+    const total = subtotal + serviceFee;
+
+    return {
+      ...checkoutData,
+      serviceFee,
+      total
+    };
+  };
+
+  // Get the updated checkout data with the correct service fee
+  const updatedCheckoutData = recalculateCheckoutData();
 
   const translations = {
     en: {
@@ -135,7 +165,7 @@ const CheckoutPage: React.FC = () => {
   const t = translations[state.language];
 
   // Loading state while we wait for checkout data
-  if (!checkoutData) {
+  if (!updatedCheckoutData) {
     return (
       <div className="min-h-screen bg-white">
         <Header />
@@ -167,15 +197,15 @@ const CheckoutPage: React.FC = () => {
                 <div className="flex flex-col md:flex-row">
                   <div className="w-full md:w-1/3 mb-4 md:mb-0">
                     <img 
-                      src={checkoutData.eventImage || "https://source.unsplash.com/random/600x400/?concert"} 
-                      alt={checkoutData.eventTitle} 
+                      src={updatedCheckoutData.eventImage || "https://source.unsplash.com/random/600x400/?concert"} 
+                      alt={updatedCheckoutData.eventTitle} 
                       className="w-full h-32 object-cover rounded-lg"
                     />
                   </div>
                   <div className="w-full md:w-2/3 md:pl-4">
-                    <h3 className="text-lg font-medium">{checkoutData.eventTitle}</h3>
-                    <p className="text-gray-600 mb-2">{formatDate(checkoutData.eventDate || new Date().toISOString())}</p>
-                    <p className="text-gray-600">{checkoutData.localName}</p>
+                    <h3 className="text-lg font-medium">{updatedCheckoutData.eventTitle}</h3>
+                    <p className="text-gray-600 mb-2">{formatDate(updatedCheckoutData.eventDate || new Date().toISOString())}</p>
+                    <p className="text-gray-600">{updatedCheckoutData.localName}</p>
                   </div>
                 </div>
               </div>
@@ -184,7 +214,7 @@ const CheckoutPage: React.FC = () => {
               <div className="bg-gray-50 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">{t.ticketSummary}</h2>
                 <div className="divide-y">
-                  {checkoutData.ticketDetails.map((ticket: any, index: number) => (
+                  {updatedCheckoutData.ticketDetails.map((ticket: any, index: number) => (
                     <div key={index} className="py-3 flex justify-between">
                       <div>
                         <p className="font-medium">{ticket.name || 'Regular Ticket'}</p>
@@ -197,15 +227,15 @@ const CheckoutPage: React.FC = () => {
                 <div className="pt-4 mt-4 border-t">
                   <div className="flex justify-between mb-2">
                     <span>{t.subtotal}</span>
-                    <span>{checkoutData.subtotal.toFixed(2)} €</span>
+                    <span>{updatedCheckoutData.subtotal.toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between mb-2">
                     <span>{t.serviceFee}</span>
-                    <span>{checkoutData.serviceFee.toFixed(2)} €</span>
+                    <span>{updatedCheckoutData.serviceFee.toFixed(2)} €</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg mt-3">
                     <span>{t.total}</span>
-                    <span className="text-tango-primary">{checkoutData.total.toFixed(2)} €</span>
+                    <span className="text-tango-primary">{updatedCheckoutData.total.toFixed(2)} €</span>
                   </div>
                 </div>
               </div>

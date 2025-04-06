@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -103,6 +102,14 @@ const EventDetailPage: React.FC = () => {
     });
   };
   
+  const calculateServiceFee = (subtotal: number): number => {
+    const tangoPercentage = 1 + 5 / 100;
+    const stripePercentage = 1 - 1.5 / 100;
+    const priceWithTax = (subtotal * tangoPercentage + 0.25) / stripePercentage;
+    const serviceFee = priceWithTax - subtotal;
+    return parseFloat(serviceFee.toFixed(2));
+  };
+  
   const calculateSubtotal = () => {
     return Object.entries(selectedTickets).reduce((total, [ticketId, quantity]) => {
       const ticket = ticketTypes.find(t => t.id === ticketId);
@@ -110,18 +117,14 @@ const EventDetailPage: React.FC = () => {
     }, 0);
   };
   
-  const calculateServiceFee = () => {
-    // Example: 10% service fee
-    return calculateSubtotal() * 0.1;
-  };
-  
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateServiceFee();
+    const subtotal = calculateSubtotal();
+    const serviceFee = calculateServiceFee(subtotal);
+    return subtotal + serviceFee;
   };
   
   const handleCheckout = () => {
     if (Object.keys(selectedTickets).length === 0) {
-      // Show a toast or alert that no tickets are selected
       return;
     }
     
@@ -135,14 +138,20 @@ const EventDetailPage: React.FC = () => {
       };
     });
     
+    const subtotal = calculateSubtotal();
+    const serviceFee = calculateServiceFee(subtotal);
+    
     navigate('/checkout', { 
       state: { 
         eventId: event?.id,
         eventTitle: event?.title,
+        eventImage: event?.image,
+        eventDate: event?.date,
+        localName: event?.localName,
         ticketDetails,
-        subtotal: calculateSubtotal(),
-        serviceFee: calculateServiceFee(),
-        total: calculateTotal()
+        subtotal,
+        serviceFee,
+        total: subtotal + serviceFee
       } 
     });
   };
@@ -344,7 +353,7 @@ const EventDetailPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between mb-2">
                           <span>{t.serviceFee}</span>
-                          <span>{calculateServiceFee().toFixed(2)} €</span>
+                          <span>{calculateServiceFee(calculateSubtotal()).toFixed(2)} €</span>
                         </div>
                         <div className="flex justify-between font-bold text-lg mt-3">
                           <span>{t.total}</span>
