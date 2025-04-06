@@ -12,6 +12,9 @@ import { toast } from '../hooks/use-toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import CheckoutForm from '../components/CheckoutForm';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { CreditCard, X } from 'lucide-react';
 
 const CheckoutPage: React.FC = () => {
   const location = useLocation();
@@ -24,6 +27,7 @@ const CheckoutPage: React.FC = () => {
     phone: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCardDialog, setShowCardDialog] = useState(false);
 
   const checkoutData = location.state || null;
 
@@ -131,7 +135,16 @@ const CheckoutPage: React.FC = () => {
       goBack: 'Go Back',
       completePayment: 'Complete Payment',
       loginForFaster: 'Login for faster checkout',
-      paymentNote: 'All transactions are secure and encrypted.'
+      paymentNote: 'All transactions are secure and encrypted.',
+      payWithCard: 'Or pay with a card',
+      cardInfo: 'Card information',
+      cardNumber: 'Card number',
+      expiryDate: 'MM / YY',
+      cvc: 'CVC',
+      scanCard: 'Scan card',
+      billingAddress: 'Billing address',
+      country: 'Country or region',
+      pay: 'Pay'
     },
     es: {
       title: 'Pago',
@@ -150,11 +163,121 @@ const CheckoutPage: React.FC = () => {
       goBack: 'Volver',
       completePayment: 'Completar Pago',
       loginForFaster: 'Inicia sesión para un pago más rápido',
-      paymentNote: 'Todas las transacciones son seguras y encriptadas.'
+      paymentNote: 'Todas las transacciones son seguras y encriptadas.',
+      payWithCard: 'O pagar con tarjeta',
+      cardInfo: 'Información de tarjeta',
+      cardNumber: 'Número de tarjeta',
+      expiryDate: 'MM / AA',
+      cvc: 'CVC',
+      scanCard: 'Escanear tarjeta',
+      billingAddress: 'Dirección de facturación',
+      country: 'País o región',
+      pay: 'Pagar'
     }
   };
 
   const t = translations[state.language];
+
+  const CardPaymentDialog = () => (
+    <Dialog open={showCardDialog} onOpenChange={setShowCardDialog}>
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-[#9d92d8]">
+        <div className="flex justify-end p-2">
+          <Button variant="ghost" size="icon" onClick={() => setShowCardDialog(false)}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        
+        <div className="p-4 sm:p-6 bg-white mt-2 rounded-t-xl">
+          <div className="mb-6">
+            <button className="w-full py-3 bg-black text-white rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 mr-2" fill="white" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+              </svg>
+              Apple Pay
+            </button>
+          </div>
+          
+          <div className="relative flex py-3 items-center">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="flex-shrink mx-3 text-gray-500">{t.payWithCard}</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+          
+          <div className="mt-4">
+            <p className="text-gray-600 mb-2">{t.cardInfo}</p>
+            <div className="relative mb-4">
+              <input
+                type="text"
+                placeholder={t.cardNumber}
+                className="w-full p-3 border border-gray-300 rounded"
+              />
+              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" alt="Amex" className="h-6" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <input
+                type="text"
+                placeholder={t.expiryDate}
+                className="p-3 border border-gray-300 rounded"
+              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={t.cvc}
+                  className="w-full p-3 border border-gray-300 rounded"
+                />
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <p className="text-gray-600 mb-2">{t.billingAddress}</p>
+              <div className="relative">
+                <select className="w-full p-3 border border-gray-300 rounded appearance-none">
+                  <option>Spain</option>
+                  <option>United States</option>
+                  <option>United Kingdom</option>
+                  <option>France</option>
+                  <option>Germany</option>
+                </select>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full py-3 mt-4 bg-[#d63384] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                `${t.pay} ${updatedCheckoutData?.total.toFixed(2)} €`
+              )}
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 
   if (!updatedCheckoutData) {
     return (
@@ -250,14 +373,20 @@ const CheckoutPage: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-4">{t.payment}</h2>
                 
                 <div className="space-y-3">
-                  <button className="w-full py-3 bg-black text-white rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
-                      <path d="M17.64 9.2c-.6-.46-1.06-.8-1.06-1.62 0-.85.74-1.45 1.36-1.45.36 0 .66.14.9.42l.1.1 1.16-1.14-.16-.18c-.62-.7-1.36-1.08-2.3-1.08-1.54 0-2.8 1.26-2.8 2.8 0 1.36.76 2.04 1.92 2.84.58.4 1.16.8 1.16 1.46 0 .66-.54 1.54-1.68 1.54-.86 0-1.5-.37-1.92-.95l-.12-.16-1.18 1.16.1.16c.76 1.1 1.7 1.54 2.9 1.54 2.98 0 3.48-1.86 3.48-2.76 0-1.36-.74-2.02-1.86-2.68zm-9.76 7.98l7.12-15.2-1.54-.72-7.1 15.18 1.52.74zm-3.22-6.76c.45.58 1.1.9 1.9.9 1.14 0 2.26-.76 2.26-2.5s-1.12-2.5-2.26-2.5c-.8 0-1.45.3-1.9.87l-.1.14V6.78h-1.85v8.7h1.86v-4.9l.1-.16z" fill="#fff" />
+                  <button 
+                    onClick={() => setShowCardDialog(true)}
+                    className="w-full py-3 bg-black text-white rounded-lg flex items-center justify-center"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="white" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
                     </svg>
-                    Pay
+                    Apple Pay
                   </button>
                   
-                  <button className="w-full py-3 bg-[#3b7bbf] text-white rounded-lg flex items-center justify-center">
+                  <button 
+                    onClick={() => setShowCardDialog(true)}
+                    className="w-full py-3 bg-[#3b7bbf] text-white rounded-lg flex items-center justify-center"
+                  >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none">
                       <rect width="24" height="24" rx="4" fill="#3b7bbf" />
                       <path d="M18.2 7.2H5.8c-.44 0-.8.36-.8.8v8c0 .44.36.8.8.8h12.4c.44 0 .8-.36.8-.8V8c0-.44-.36-.8-.8-.8zm-.4 8.4H6.2V8.4h11.6v7.2z" fill="white" />
@@ -273,36 +402,24 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex flex-col space-y-3">
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="w-full py-3 bg-tango-primary text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center"
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Processing...
-                    </span>
-                  ) : (
-                    t.completePayment
-                  )}
-                </button>
-                
-                <button
-                  onClick={() => navigate(-1)}
-                  className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  {t.goBack}
-                </button>
-              </div>
+              <button
+                onClick={() => setShowCardDialog(true)}
+                className="w-full py-3 bg-[#d63384] text-white rounded-lg hover:opacity-90 transition-opacity"
+              >
+                {t.completePayment}
+              </button>
+              
+              <button
+                onClick={() => navigate(-1)}
+                className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {t.goBack}
+              </button>
             </div>
           </div>
         </motion.div>
       </div>
+      <CardPaymentDialog />
       <Footer />
     </div>
   );
