@@ -27,6 +27,8 @@ const CheckoutPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCardDialog, setShowCardDialog] = useState(false);
   const [expiryDate, setExpiryDate] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cvc, setCvc] = useState('');
 
   const checkoutData = location.state || null;
 
@@ -51,15 +53,27 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
+    e.preventDefault();
+    const input = e.target.value;
     
-    if (value.length <= 4) {
-      let formatted = value;
-      if (value.length > 2) {
-        formatted = value.slice(0, 2) + '/' + value.slice(2);
-      }
-      setExpiryDate(formatted);
+    const cleaned = input.replace(/\D/g, '');
+    
+    let formatted = cleaned;
+    if (cleaned.length > 2) {
+      formatted = cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
     }
+    
+    setExpiryDate(formatted);
+  };
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setCardNumber(value);
+  };
+
+  const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setCvc(value);
   };
 
   const calculateServiceFee = (subtotal: number): number => {
@@ -218,7 +232,10 @@ const CheckoutPage: React.FC = () => {
               <input
                 type="text"
                 placeholder={t.cardNumber}
+                value={cardNumber}
+                onChange={handleCardNumberChange}
                 className="w-full p-3 border border-gray-300 rounded"
+                maxLength={16}
               />
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-6" />
@@ -239,6 +256,8 @@ const CheckoutPage: React.FC = () => {
               <div className="relative">
                 <input
                   type="text"
+                  value={cvc}
+                  onChange={handleCvcChange}
                   placeholder={t.cvc}
                   className="w-full p-3 border border-gray-300 rounded"
                   maxLength={4}
