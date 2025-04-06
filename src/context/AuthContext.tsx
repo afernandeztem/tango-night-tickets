@@ -1,22 +1,13 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../models/Api';
+import { User, AuthState } from '../types';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import AuthService from '../services/AuthService';
-import TokenManager from '../services/TokenManager';
 
-// Define AuthState interface
-interface AuthState {
-  isAuthenticated: boolean;
-  user: User | null;
-  token: string | null;
-}
-
+// Create context with default values
 const AuthContext = createContext<{
   state: AuthState;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; phone?: string }) => Promise<void>;
   logout: () => void;
   toggleFavorite: (type: 'local' | 'event', id: string) => Promise<void>;
@@ -32,13 +23,15 @@ const AuthContext = createContext<{
   toggleFavorite: async () => {}
 });
 
+// Custom hook to use auth context
 export const useAuth = () => useContext(AuthContext);
 
+// Provider component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [state, setState] = useState<AuthState>(() => {
-    const token = TokenManager.getAccessToken();
+    // Load initial state from localStorage
+    const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
     return {
@@ -48,56 +41,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   });
 
+  // Check if user is authenticated on mount
   useEffect(() => {
-    // Set navigate function in AuthService
-    AuthService.setNavigate(navigate);
-    
-    // Initialize AuthService and verify token
-    const initAuth = async () => {
-      try {
-        console.log('Initializing auth service...');
-        await AuthService.initialize();
-        
-        const isValid = await AuthService.validateToken();
-        console.log('Token validation result:', isValid);
-        
-        if (isValid) {
-          try {
-            const user = await getCurrentUser();
-            const token = TokenManager.getAccessToken();
-            
-            setState({
-              isAuthenticated: true,
-              user,
-              token
-            });
-            
-            console.log('User authenticated:', user.name);
-          } catch (error) {
-            console.error('Error verifying authentication:', error);
-            setState({
-              isAuthenticated: false,
-              user: null,
-              token: null
-            });
-          }
-        } else if (state.isAuthenticated) {
-          // Token invalid but state shows authenticated - update state
-          console.log('Token invalid, updating state');
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token');
+      
+      if (token) {
+        try {
+          const user = await getCurrentUser();
+          setState({
+            isAuthenticated: true,
+            user,
+            token
+          });
+        } catch (error) {
+          console.error('Error verifying authentication:', error);
+          // Clear invalid auth data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
           setState({
             isAuthenticated: false,
             user: null,
             token: null
           });
         }
-      } catch (error) {
-        console.error('Error during auth initialization:', error);
       }
     };
     
-    initAuth();
-  }, [navigate]);
+    checkAuth();
+  }, []);
 
+  // Save user to localStorage whenever it changes
   useEffect(() => {
     if (state.user) {
       localStorage.setItem('user', JSON.stringify(state.user));
@@ -106,21 +80,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.user]);
 
-  const login = async (email: string, password: string, rememberMe: boolean = false) => {
+  // Auth actions
+  const login = async (email: string, password: string) => {
     try {
-      console.log('Login attempt for:', email, 'with rememberMe:', rememberMe);
-      
-      // Clear any existing tokens before login attempt
-      TokenManager.clearTokens();
-      
-      const { token, user } = await apiLogin(email, password, rememberMe);
-      
-      console.log('Login successful, token received:', token ? token.substring(0, 10) + '...' : 'No token');
-      console.log('User data received:', user ? user.name : 'No user data');
-      
-      if (!token) {
-        throw new Error('No token received from server');
-      }
+      const { token, user } = await apiLogin(email, password);
       
       setState({
         isAuthenticated: true,
@@ -132,13 +95,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title: "Login successful",
         description: `Welcome back, ${user.name}!`,
       });
-      
-      navigate('/home');
     } catch (error) {
       console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
+        description: "Invalid email or password. Please try again.",
         variant: "destructive"
       });
       throw error;
@@ -149,9 +110,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const user = await apiRegister(data);
       
-      // Clear any existing tokens before login
-      TokenManager.clearTokens();
-      
+      // After registration, automatically log in
       const { token } = await apiLogin(data.email, data.password);
       
       setState({
@@ -164,8 +123,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         title: "Registration successful",
         description: `Welcome to TangoApp, ${user.name}!`,
       });
-      
-      navigate('/home');
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -178,9 +135,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    AuthService.logout().catch(error => {
-      console.error('Logout error:', error);
-    });
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     
     setState({
       isAuthenticated: false,
@@ -205,6 +161,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
+      // Make API call to toggle favorite
       const updatedUser = await import('../services/api').then(api => 
         api.toggleFavorite(type, id)
       );
