@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,13 +12,13 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import CheckoutForm from '../components/CheckoutForm';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 
 const CheckoutPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { state } = useApp();
+  const { state, clearCart } = useApp();
   const { state: authState } = useAuth();
   const [formData, setFormData] = useState<CheckoutFormData>({
     name: '',
@@ -82,12 +83,21 @@ const CheckoutPage: React.FC = () => {
         formData
       );
 
+      // Clear the cart after successful purchase
+      clearCart();
+      
       toast({
         title: "Purchase successful!",
         description: "Your tickets have been purchased successfully.",
       });
 
-      navigate('/profile?tab=tickets');
+      // Close the dialog before navigating
+      setShowCardDialog(false);
+      
+      // Add a small delay before navigating to ensure toast is shown
+      setTimeout(() => {
+        navigate('/profile?tab=tickets', { replace: true });
+      }, 500);
     } catch (error) {
       console.error('Error creating ticket:', error);
       toast({
@@ -178,20 +188,34 @@ const CheckoutPage: React.FC = () => {
   const t = translations[state.language];
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardNumber(e.target.value);
+    const value = e.target.value.replace(/\D/g, '');
+    // Format with spaces every 4 digits
+    const formattedValue = value
+      .replace(/(\d{4})/g, '$1 ')
+      .trim();
+    setCardNumber(formattedValue);
   };
 
   const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setExpiryDate(e.target.value);
+    const value = e.target.value.replace(/\D/g, '');
+    
+    if (value.length <= 2) {
+      setExpiryDate(value);
+    } else {
+      // Format as MM / YY
+      setExpiryDate(value.substring(0, 2) + ' / ' + value.substring(2, 4));
+    }
   };
 
   const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCvc(e.target.value);
+    const value = e.target.value.replace(/\D/g, '');
+    setCvc(value);
   };
 
   const CardPaymentDialog = () => (
     <Dialog open={showCardDialog} onOpenChange={setShowCardDialog}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-[#9d92d8]">
+        <DialogTitle className="sr-only">Card Payment</DialogTitle>
         <div className="p-4 sm:p-6 bg-white mt-2 rounded-t-xl">
           <div className="mb-6">
             <button className="w-full py-3 bg-black text-white rounded-lg flex items-center justify-center">
@@ -204,16 +228,16 @@ const CheckoutPage: React.FC = () => {
           
           <div className="relative flex py-3 items-center">
             <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-3 text-gray-500">{t.payWithCard}</span>
+            <span className="flex-shrink mx-3 text-gray-500">{state.language === 'en' ? 'Or pay with a card' : 'O pagar con tarjeta'}</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
           
           <div className="mt-4">
-            <p className="text-gray-600 mb-2">{t.cardInfo}</p>
+            <p className="text-gray-600 mb-2">{state.language === 'en' ? 'Card information' : 'Información de tarjeta'}</p>
             <div className="relative mb-4">
               <input
                 type="text"
-                placeholder={t.cardNumber}
+                placeholder={state.language === 'en' ? 'Card number' : 'Número de tarjeta'}
                 className="w-full p-3 border border-gray-300 rounded"
                 maxLength={19}
                 value={cardNumber}
@@ -230,9 +254,9 @@ const CheckoutPage: React.FC = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder={t.expiryDate}
+                  placeholder={state.language === 'en' ? 'MM / YY' : 'MM / AA'}
                   className="w-full p-3 border border-gray-300 rounded"
-                  maxLength={5}
+                  maxLength={7}
                   value={expiryDate}
                   onChange={handleExpiryDateChange}
                 />
@@ -240,7 +264,7 @@ const CheckoutPage: React.FC = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder={t.cvc}
+                  placeholder="CVC"
                   className="w-full p-3 border border-gray-300 rounded"
                   maxLength={4}
                   value={cvc}
@@ -255,7 +279,7 @@ const CheckoutPage: React.FC = () => {
             </div>
             
             <div className="mb-4">
-              <p className="text-gray-600 mb-2">{t.billingAddress}</p>
+              <p className="text-gray-600 mb-2">{state.language === 'en' ? 'Billing address' : 'Dirección de facturación'}</p>
               <div className="relative">
                 <select className="w-full p-3 border border-gray-300 rounded appearance-none">
                   <option>Spain</option>
@@ -286,7 +310,7 @@ const CheckoutPage: React.FC = () => {
                   Processing...
                 </span>
               ) : (
-                `${t.pay} ${updatedCheckoutData?.total.toFixed(2)} €`
+                `${state.language === 'en' ? 'Pay' : 'Pagar'} ${updatedCheckoutData?.total.toFixed(2)} €`
               )}
             </button>
           </div>
