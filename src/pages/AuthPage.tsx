@@ -149,6 +149,14 @@ const AuthPage: React.FC = () => {
       navigate('/home');
     } catch (error: any) {
       console.error(`${provider} login error:`, error);
+      
+      if (error.message && error.message.includes('unauthorized-domain')) {
+        toast({
+          title: "Domain Not Authorized",
+          description: "To fix this, go to your Firebase console > Authentication > Sign-in method > Authorized domains and add: lovableproject.com",
+          variant: "destructive"
+        });
+      }
     }
   };
   

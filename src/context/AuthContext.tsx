@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
 import { login as apiLogin, register as apiRegister, getCurrentUser } from '../services/api';
@@ -180,7 +181,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       let errorMessage = "Could not sign in with Google. Please try again.";
       if (error.message && error.message.includes('unauthorized-domain')) {
-        errorMessage = "This website domain is not authorized in Firebase. Please contact support.";
+        errorMessage = "This domain (lovableproject.com) is not authorized in Firebase. You need to add it to your Firebase authorized domains.";
       }
       
       toast({
@@ -217,7 +218,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       let errorMessage = "Could not sign in with Apple. Please try again.";
       if (error.message && error.message.includes('unauthorized-domain')) {
-        errorMessage = "This website domain is not authorized in Firebase. Please contact support.";
+        errorMessage = "This domain (lovableproject.com) is not authorized in Firebase. You need to add it to your Firebase authorized domains.";
       }
       
       toast({
