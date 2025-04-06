@@ -50,8 +50,7 @@ const CheckoutPage: React.FC = () => {
     const tangoPercentage = 1 + 5 / 100;
     const stripePercentage = 1 - 1.5 / 100;
     const priceWithTax = (subtotal * tangoPercentage + 0.25) / stripePercentage;
-    const serviceFee = priceWithTax - subtotal;
-    return Math.ceil(serviceFee * 100) / 100;
+    return parseFloat((priceWithTax - subtotal).toFixed(2));
   };
 
   const handleSubmit = async () => {
