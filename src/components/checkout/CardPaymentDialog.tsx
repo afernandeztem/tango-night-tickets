@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
+import './CardPaymentDialog.scss';
 
 interface CardPaymentDialogProps {
   open: boolean;
@@ -76,7 +77,7 @@ const CardPaymentDialog: React.FC<CardPaymentDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-[#9d92d8]">
+      <DialogContent className="card-payment-dialog__content sm:max-w-md p-0 overflow-hidden bg-[#9d92d8]">
         <DialogTitle className="sr-only">Card Payment</DialogTitle>
         <div className="p-4 sm:p-6 bg-white mt-2 rounded-t-xl">
           <div className="mb-6">
@@ -94,13 +95,13 @@ const CardPaymentDialog: React.FC<CardPaymentDialogProps> = ({
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
           
-          <div className="mt-4">
+          <div className="card-payment-dialog__form mt-4">
             <p className="text-gray-600 mb-2">{t[language].cardInfo}</p>
             <div className="relative mb-4">
               <input
                 type="text"
                 placeholder={t[language].cardNumber}
-                className="w-full p-3 border border-gray-300 rounded"
+                className="card-payment-dialog__form-input w-full p-3 border border-gray-300 rounded"
                 maxLength={19}
                 value={cardNumber}
                 onChange={handleCardNumberChange}
@@ -117,7 +118,7 @@ const CardPaymentDialog: React.FC<CardPaymentDialogProps> = ({
                 <input
                   type="text"
                   placeholder={t[language].expiryDate}
-                  className="w-full p-3 border border-gray-300 rounded"
+                  className="card-payment-dialog__form-input w-full p-3 border border-gray-300 rounded"
                   maxLength={7}
                   value={expiryDate}
                   onChange={handleExpiryDateChange}
@@ -127,7 +128,7 @@ const CardPaymentDialog: React.FC<CardPaymentDialogProps> = ({
                 <input
                   type="text"
                   placeholder="CVC"
-                  className="w-full p-3 border border-gray-300 rounded"
+                  className="card-payment-dialog__form-input w-full p-3 border border-gray-300 rounded"
                   maxLength={4}
                   value={cvc}
                   onChange={handleCvcChange}
@@ -143,7 +144,7 @@ const CardPaymentDialog: React.FC<CardPaymentDialogProps> = ({
             <div className="mb-4">
               <p className="text-gray-600 mb-2">{t[language].billingAddress}</p>
               <div className="relative">
-                <select className="w-full p-3 border border-gray-300 rounded appearance-none">
+                <select className="card-payment-dialog__form-input w-full p-3 border border-gray-300 rounded appearance-none">
                   <option>Spain</option>
                   <option>United States</option>
                   <option>United Kingdom</option>
@@ -161,11 +162,11 @@ const CardPaymentDialog: React.FC<CardPaymentDialogProps> = ({
             <button 
               onClick={onSubmit}
               disabled={isSubmitting}
-              className="w-full py-3 mt-4 bg-[#d63384] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"
+              className="card-payment-dialog__form-submit w-full py-3 mt-4 bg-[#d63384] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"
             >
               {isSubmitting ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="spinner -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

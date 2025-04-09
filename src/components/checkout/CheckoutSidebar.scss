@@ -1,0 +1,40 @@
+
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.checkout-sidebar {
+  @include transition;
+  
+  &__section {
+    @include transition;
+    border-radius: $radius;
+    
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+  }
+  
+  &__button {
+    @include transition;
+    border-radius: $radius;
+    
+    &--primary {
+      background-color: $tango-primary;
+      
+      &:hover:not(:disabled) {
+        background-color: darken($tango-primary, 5%);
+      }
+    }
+    
+    &--secondary {
+      &:hover:not(:disabled) {
+        background-color: darken($accent, 5%);
+      }
+    }
+  }
+  
+  &__info-box {
+    border-radius: $radius;
+    @include transition;
+  }
+}

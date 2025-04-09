@@ -2,6 +2,7 @@
 import React from 'react';
 import CheckoutForm from '../CheckoutForm';
 import { CheckoutFormData } from '../../types';
+import './CheckoutSidebar.scss';
 
 interface CheckoutSidebarProps {
   isAuthenticated: boolean;
@@ -31,12 +32,12 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
   translations: t
 }) => {
   return (
-    <div className="lg:col-span-1 space-y-6">
-      <div className="bg-gray-50 rounded-lg p-6">
+    <div className="checkout-sidebar lg:col-span-1 space-y-6">
+      <div className="checkout-sidebar__section bg-gray-50 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">{t.personalInfo}</h2>
         
         {!isAuthenticated && (
-          <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+          <div className="checkout-sidebar__info-box mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
             <a href="/auth?mode=login" className="font-medium underline">{t.loginForFaster}</a>
           </div>
         )}
@@ -48,7 +49,7 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
         />
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-6">
+      <div className="checkout-sidebar__section bg-gray-50 rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">{t.payment}</h2>
         
         <div className="space-y-3">
@@ -70,14 +71,14 @@ const CheckoutSidebar: React.FC<CheckoutSidebarProps> = ({
       
       <button
         onClick={openPaymentDialog}
-        className="w-full py-3 bg-[#d63384] text-white rounded-lg hover:opacity-90 transition-opacity"
+        className="checkout-sidebar__button--primary w-full py-3 bg-[#d63384] text-white rounded-lg hover:opacity-90 transition-opacity"
       >
         {t.completePayment}
       </button>
       
       <button
         onClick={goBack}
-        className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+        className="checkout-sidebar__button--secondary w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
       >
         {t.goBack}
       </button>

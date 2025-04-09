@@ -1,0 +1,51 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+
+.card-payment-dialog {
+  // Enhance the dialog styling while keeping Tailwind classes
+  &__content {
+    @include transition;
+    overflow: hidden;
+    
+    // These styles enhance the existing Tailwind styles
+    &[data-state='open'] {
+      animation: dialogOpen 0.3s ease-out forwards;
+    }
+    
+    &[data-state='closed'] {
+      animation: dialogClose 0.3s ease-in forwards;
+    }
+  }
+  
+  &__header {
+    position: relative;
+  }
+  
+  &__form {
+    &-input {
+      @include transition;
+      
+      &:focus {
+        border-color: $tango-primary;
+      }
+    }
+    
+    &-submit {
+      @include transition;
+      
+      &:hover:not(:disabled) {
+        background-color: darken($tango-primary, 5%);
+      }
+    }
+  }
+}
+
+// Adding a loading spinner animation
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}

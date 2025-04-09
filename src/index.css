@@ -5,3 +5,8 @@
 
 /* Import our SCSS styles */
 @import './styles/main.scss';
+
+/* Import component-specific styles */
+@import './components/CheckoutForm.scss';
+@import './components/checkout/CardPaymentDialog.scss';
+@import './components/checkout/CheckoutSidebar.scss';

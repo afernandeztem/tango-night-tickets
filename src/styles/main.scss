@@ -69,6 +69,28 @@ body {
   }
 }
 
+@keyframes dialogOpen {
+  from { 
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialogClose {
+  from { 
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to { 
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95);
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-in-out;
 }

@@ -1,0 +1,50 @@
+
+@import '../styles/variables';
+@import '../styles/mixins';
+
+.checkout-form {
+  &__group {
+    margin-bottom: $spacing-4;
+  }
+  
+  &__label {
+    font-weight: 500;
+    margin-bottom: $spacing-1;
+    color: $tango-text;
+  }
+  
+  &__input {
+    @include transition;
+    border-radius: $radius;
+    
+    &:focus {
+      border-color: $tango-primary;
+      box-shadow: 0 0 0 2px rgba($tango-primary, 0.1);
+    }
+    
+    &--error {
+      border-color: $destructive;
+    }
+  }
+  
+  &__error {
+    margin-top: $spacing-1;
+    color: $destructive;
+    font-size: 0.875rem;
+  }
+  
+  &__button {
+    @include transition;
+    background-color: $tango-primary;
+    color: white;
+    border-radius: $radius;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($tango-primary, 5%);
+    }
+    
+    &:disabled {
+      opacity: 0.7;
+    }
+  }
+}
