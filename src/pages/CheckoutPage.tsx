@@ -21,6 +21,7 @@ const CheckoutPage: React.FC = () => {
   const { state: authState } = useAuth();
   const [formData, setFormData] = useState<CheckoutFormData>({
     name: '',
+    surname: '',
     email: '',
     phone: '',
   });
@@ -41,6 +42,7 @@ const CheckoutPage: React.FC = () => {
     if (authState.isAuthenticated && authState.user) {
       setFormData({
         name: authState.user.name || '',
+        surname: '', // Add default empty surname
         email: authState.user.email || '',
         phone: authState.user.phone || '',
       });

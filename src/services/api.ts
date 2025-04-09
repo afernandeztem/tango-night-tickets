@@ -482,6 +482,7 @@ export const createReview = async (reviewData: { localId: string, score: number,
 
 export interface CheckoutFormData {
   name: string;
+  surname: string;
   email: string;
   phone: string;
   gender?: string;
