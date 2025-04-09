@@ -1,13 +1,9 @@
 
-@import '../variables.scss';
-@import '../mixins.scss';
+@import '../variables';
+@import '../mixins';
 
-.dialog-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background-color: rgba(0, 0, 0, 0.8);
-  
+// These styles enhance the dialog without overriding Tailwind classes
+.dialog-enhanced {
   &[data-state='open'] {
     animation: fadeIn 0.2s ease-in;
   }
@@ -17,113 +13,7 @@
   }
 }
 
-.dialog-content {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  z-index: 50;
-  display: grid;
-  width: 100%;
-  max-width: 32rem;
-  transform: translate(-50%, -50%);
-  gap: 1rem;
-  border: 1px solid $border;
-  background-color: $background;
-  padding: 1.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
-  @include responsive(sm) {
-    border-radius: $radius-lg;
-  }
-  
-  &[data-state='open'] {
-    animation: dialogOpen 0.2s ease-in;
-  }
-  
-  &[data-state='closed'] {
-    animation: dialogClose 0.2s ease-out;
-  }
-  
-  .dialog-close {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-    border-radius: $radius-sm;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    
-    &:hover {
-      opacity: 1;
-    }
-    
-    &:focus {
-      outline: none;
-      ring: 2px solid $ring;
-      ring-offset: 2px;
-    }
-    
-    &:disabled {
-      pointer-events: none;
-    }
-    
-    .close-icon {
-      height: 1rem;
-      width: 1rem;
-    }
-    
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-  }
-}
-
-.dialog-header {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  space-y: 1.5;
-  
-  @include responsive(sm) {
-    text-align: left;
-  }
-}
-
-.dialog-footer {
-  display: flex;
-  flex-direction: column-reverse;
-  
-  @include responsive(sm) {
-    flex-direction: row;
-    justify-content: flex-end;
-    space-x: 0.5rem;
-  }
-}
-
-.dialog-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.025em;
-}
-
-.dialog-description {
-  font-size: 0.875rem;
-  color: $muted-foreground;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
+// Custom animations for dialog components
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }

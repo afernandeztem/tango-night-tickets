@@ -1,3 +1,7 @@
 
-/* This file is kept for compatibility but main styles are now in sass */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import our SCSS styles */
 @import './styles/main.scss';

@@ -5,27 +5,20 @@
 // Import component styles
 @import 'components/dialog';
 
-// Base styles
+// Base styles that enhance Tailwind without overriding it
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  border-color: $border;
 }
 
 body {
-  background-color: $background;
-  color: $foreground;
   font-family: $font-sans;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: $font-darker;
-}
-
-// Utility classes
+// Utility classes that work alongside Tailwind
 .text-gradient {
   @include text-gradient($tango-primary, $tango-secondary);
 }
@@ -33,17 +26,6 @@ h1, h2, h3, h4, h5, h6 {
 .font-darker {
   font-family: $font-darker;
   letter-spacing: -0.025em;
-}
-
-.nav-link {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: $tango-text;
-  transition: color 0.3s;
-  
-  &:hover {
-    color: $tango-primary;
-  }
 }
 
 .tango-button {
@@ -59,31 +41,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// Scrollbar hide
-.scrollbar-hide {
-  @include hide-scrollbar;
-}
-
-// Calendar styles
-.rdp-day_selected, 
-.rdp-day_selected:focus,
-.rdp-day_selected:hover {
-  background-color: $tango-primary;
-  color: white;
-  font-weight: 500;
-}
-
-.rdp-day_range_middle,
-.rdp-day_range_middle:hover {
-  background-opacity: 0.2;
-  color: $foreground;
-}
-
-.rdp-day_today {
-  font-weight: 600;
-}
-
-// Animations
+// Animations to supplement Tailwind
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -111,11 +69,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -126,8 +79,4 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-slideInLeft {
   animation: slideInLeft 0.5s ease-out;
-}
-
-.animate-pulse {
-  animation: pulse 2s ease-in-out infinite;
 }
